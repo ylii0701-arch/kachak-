@@ -126,8 +126,14 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Kachak', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppColors.accent)),
-                Text('Malaysian Wildlife Explorer', style: TextStyle(color: Colors.grey.shade700, fontSize: 16)),
+                Text(
+                  'Kachak',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppColors.accent),
+                ),
+                Text(
+                  'Malaysian Wildlife Explorer',
+                  style: TextStyle(color: Colors.grey.shade700, fontSize: 16),
+                ),
                 const SizedBox(height: 20),
                 TextField(
                   decoration: InputDecoration(
@@ -257,7 +263,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                childAspectRatio: 0.72,
+                // Taller cells than width/0.72 so title + chips + Save fit without overflow.
+                childAspectRatio: 0.58,
               ),
               delegate: SliverChildBuilderDelegate(
                 (context, index) => _speciesCard(displayed[index], saved, compact: true),
@@ -540,16 +547,106 @@ class _HomeScreenState extends State<HomeScreen> {
     final fg = statusForegroundColor(s.conservationStatus);
     final statusText = compact ? statusAbbreviation(s.conservationStatus) : s.conservationStatus;
 
+    final infoPadding = EdgeInsets.all(compact ? 10 : 16);
+    final infoColumn = Padding(
+      padding: infoPadding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            s.commonName,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: compact ? 16 : 20, fontWeight: FontWeight.w600),
+          ),
+          Text(
+            s.scientificName,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey.shade600, fontSize: compact ? 11 : 13),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              Chip(
+                label: Text(s.category, style: TextStyle(fontSize: compact ? 10 : 12)),
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+                child: Text(statusText, style: TextStyle(color: fg, fontSize: compact ? 10 : 12, fontWeight: FontWeight.w600)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Text('Difficulty:', style: TextStyle(fontSize: compact ? 10 : 12, color: Colors.grey.shade600)),
+              const SizedBox(width: 6),
+              DifficultyStars(level: s.difficultyLevel, size: compact ? 12 : 16),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    final saveButton = Padding(
+      padding: EdgeInsets.fromLTRB(compact ? 10 : 16, 0, compact ? 10 : 16, compact ? 10 : 16),
+      child: FilledButton.icon(
+        onPressed: () => saved.toggleSaved(s.id),
+        icon: Icon(saved.isSaved(s.id) ? Icons.favorite : Icons.favorite_border),
+        label: Text(saved.isSaved(s.id) ? 'Saved' : 'Save'),
+        style: FilledButton.styleFrom(
+          backgroundColor: saved.isSaved(s.id) ? AppColors.primary : Colors.grey.shade200,
+          foregroundColor: saved.isSaved(s.id) ? Colors.white : Colors.black87,
+        ),
+      ),
+    );
+
+    void openDetail() {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => SpeciesDetailScreen(speciesId: s.id)),
+      );
+    }
+
+    if (compact) {
+      return Card(
+        clipBehavior: Clip.antiAlias,
+        margin: EdgeInsets.zero,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: InkWell(
+                onTap: openDetail,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: SpeciesNetworkImage(url: s.imageUrl, fit: BoxFit.cover),
+                    ),
+                    infoColumn,
+                  ],
+                ),
+              ),
+            ),
+            saveButton,
+          ],
+        ),
+      );
+    }
+
     return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           InkWell(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => SpeciesDetailScreen(speciesId: s.id)),
-              );
-            },
+            onTap: openDetail,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -557,66 +654,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: imgH,
                   child: SpeciesNetworkImage(url: s.imageUrl, fit: BoxFit.cover),
                 ),
-                Padding(
-                  padding: EdgeInsets.all(compact ? 10 : 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        s.commonName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: compact ? 16 : 20, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        s.scientificName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey.shade600, fontSize: compact ? 11 : 13),
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        children: [
-                          Chip(
-                            label: Text(s.category, style: TextStyle(fontSize: compact ? 10 : 12)),
-                            visualDensity: VisualDensity.compact,
-                            padding: EdgeInsets.zero,
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
-                            child: Text(statusText, style: TextStyle(color: fg, fontSize: compact ? 10 : 12, fontWeight: FontWeight.w600)),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          Text('Difficulty:', style: TextStyle(fontSize: compact ? 10 : 12, color: Colors.grey.shade600)),
-                          const SizedBox(width: 6),
-                          DifficultyStars(level: s.difficultyLevel, size: compact ? 12 : 16),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+                infoColumn,
               ],
             ),
           ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(compact ? 10 : 16, 0, compact ? 10 : 16, compact ? 10 : 16),
-            child: FilledButton.icon(
-              onPressed: () => saved.toggleSaved(s.id),
-              icon: Icon(saved.isSaved(s.id) ? Icons.favorite : Icons.favorite_border),
-              label: Text(saved.isSaved(s.id) ? 'Saved' : 'Save'),
-              style: FilledButton.styleFrom(
-                backgroundColor: saved.isSaved(s.id) ? AppColors.primary : Colors.grey.shade200,
-                foregroundColor: saved.isSaved(s.id) ? Colors.white : Colors.black87,
-              ),
-            ),
-          ),
+          saveButton,
         ],
       ),
     );
