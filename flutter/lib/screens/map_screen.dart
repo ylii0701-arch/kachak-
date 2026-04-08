@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
 
 import '../data/map_data.dart';
 import '../data/species_data.dart';
 import '../models/species.dart';
+import '../providers/app_shell_controller.dart';
 import '../theme/app_theme.dart';
 import '../widgets/species_network_image.dart';
 import 'species_detail_screen.dart';
@@ -18,16 +20,93 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  static const LatLng _kDefaultCenter = LatLng(3.1390, 101.6869);
+
+  /// All observation data is in Peninsular Malaysia; the map must frame this
+  /// region. Auto-panning to the device's GPS (e.g. North America) would move
+  /// the viewport away from every marker (they are culled when off-screen).
+  static LatLngBounds get _wildlifeBounds {
+    final points = <LatLng>[
+      for (final loc in speciesLocations) LatLng(loc.lat, loc.lng),
+      for (final spot in photographySpots) LatLng(spot.lat, spot.lng),
+    ];
+    return LatLngBounds.fromPoints(points);
+  }
+
   final MapController _mapController = MapController();
-  LatLng _center = const LatLng(3.1390, 101.6869);
+  late final MapOptions _mapOptions;
+  AppShellController? _shell;
+
   LatLng? _user;
   String? _locationToast;
   bool _loadingLocation = true;
 
+  static const double _minZoom = 3;
+  static const double _maxZoom = 18;
+
   @override
   void initState() {
     super.initState();
+    _mapOptions = MapOptions(
+      initialCenter: _kDefaultCenter,
+      initialZoom: 12,
+      minZoom: _minZoom,
+      maxZoom: _maxZoom,
+      keepAlive: true,
+      initialCameraFit: CameraFit.bounds(
+        bounds: _wildlifeBounds,
+        padding: const EdgeInsets.fromLTRB(32, 88, 32, 120),
+        maxZoom: 13,
+        minZoom: _minZoom,
+      ),
+    );
     _initLocation();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _shell = context.read<AppShellController>();
+      _shell!.addListener(_applyShellMapJump);
+      _applyShellMapJump();
+    });
+  }
+
+  void _applyShellMapJump() {
+    if (!mounted) return;
+    final shell = _shell ?? context.read<AppShellController>();
+    if (shell.index != 2) return;
+    final jump = shell.consumeMapJump();
+    if (jump != null) {
+      _mapController.move(jump.point, jump.zoom);
+    }
+  }
+
+  @override
+  void dispose() {
+    _shell?.removeListener(_applyShellMapJump);
+    _mapController.dispose();
+    super.dispose();
+  }
+
+  void _zoomBy(double delta) {
+    final cam = _mapController.camera;
+    final z = (cam.zoom + delta).clamp(_minZoom, _maxZoom);
+    _mapController.move(cam.center, z);
+  }
+
+  void _fitWildlifeHotspots() {
+    _mapController.fitCamera(
+      CameraFit.bounds(
+        bounds: _wildlifeBounds,
+        padding: const EdgeInsets.fromLTRB(32, 88, 32, 120),
+        maxZoom: 13,
+        minZoom: _minZoom,
+      ),
+    );
+  }
+
+  void _goToMyLocation() {
+    final u = _user;
+    if (u == null) return;
+    _mapController.move(u, 12);
   }
 
   Future<void> _initLocation() async {
@@ -50,12 +129,11 @@ class _MapScreenState extends State<MapScreen> {
       }
       final pos = await Geolocator.getCurrentPosition();
       if (mounted) {
+        final here = LatLng(pos.latitude, pos.longitude);
         setState(() {
-          _user = LatLng(pos.latitude, pos.longitude);
-          _center = _user!;
+          _user = here;
           _loadingLocation = false;
         });
-        _mapController.move(_center, 12);
       }
     } catch (e) {
       if (mounted) {
@@ -72,6 +150,34 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final photographyMarkers = <Marker>[];
+    for (final spot in photographySpots) {
+      photographyMarkers.add(
+        Marker(
+          point: LatLng(spot.lat, spot.lng),
+          width: 36,
+          height: 36,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => _showPhotographySpotSheet(context, spot),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.amber.shade400, Colors.orange.shade600],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.white, width: 2),
+                boxShadow: const [BoxShadow(blurRadius: 6, color: Colors.black26)],
+              ),
+              child: const Center(child: Text('📷', style: TextStyle(fontSize: 16))),
+            ),
+          ),
+        ),
+      );
+    }
+
     final speciesMarkers = <Marker>[];
     for (final loc in speciesLocations) {
       final species = speciesById(loc.speciesId);
@@ -87,6 +193,7 @@ class _MapScreenState extends State<MapScreen> {
           width: 44,
           height: 44,
           child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: () => _showSpeciesSheet(context, species, loc, weather, spot, protected, danger),
             child: Container(
               decoration: BoxDecoration(
@@ -109,12 +216,14 @@ class _MapScreenState extends State<MapScreen> {
           point: _user!,
           width: 28,
           height: 28,
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF6FCF97),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 3),
-              boxShadow: const [BoxShadow(blurRadius: 8, color: Color(0x992F855A))],
+          child: IgnorePointer(
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF6FCF97),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 3),
+                boxShadow: const [BoxShadow(blurRadius: 8, color: Color(0x992F855A))],
+              ),
             ),
           ),
         ),
@@ -161,35 +270,46 @@ class _MapScreenState extends State<MapScreen> {
       children: [
         FlutterMap(
           mapController: _mapController,
-          options: MapOptions(
-            initialCenter: _center,
-            initialZoom: 12,
-            minZoom: 3,
-            maxZoom: 18,
-            onPositionChanged: (pos, _) {
-              _center = pos.center;
-            },
-          ),
+          options: _mapOptions,
           children: [
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               userAgentPackageName: 'com.kachak.kachak_tracker',
             ),
-            PolygonLayer(polygons: polygons),
-            CircleLayer(circles: circles),
-            MarkerLayer(markers: [...speciesMarkers, ...userMarkers]),
+            IgnorePointer(
+              child: PolygonLayer(polygons: polygons),
+            ),
+            IgnorePointer(
+              child: CircleLayer(circles: circles),
+            ),
+            MarkerLayer(
+              markers: [
+                ...photographyMarkers,
+                ...speciesMarkers,
+                ...userMarkers,
+              ],
+            ),
           ],
         ),
         SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Text(
-              'Wildlife Map',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                shadows: [Shadow(blurRadius: 8, color: Colors.black.withValues(alpha: 0.5))],
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.45),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                child: Text(
+                  'Wildlife Map',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    shadows: [Shadow(blurRadius: 6, color: Colors.black.withValues(alpha: 0.4))],
+                  ),
+                ),
               ),
             ),
           ),
@@ -224,7 +344,102 @@ class _MapScreenState extends State<MapScreen> {
               child: Center(child: CircularProgressIndicator()),
             ),
           ),
+        Positioned(
+          right: 12,
+          bottom: 12,
+          child: SafeArea(
+            child: Material(
+              elevation: 6,
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    tooltip: 'Show species & photo spots',
+                    onPressed: _fitWildlifeHotspots,
+                    icon: const Icon(Icons.filter_center_focus, color: AppColors.primary),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  if (_user != null)
+                    IconButton(
+                      tooltip: 'My location',
+                      onPressed: _goToMyLocation,
+                      icon: const Icon(Icons.my_location, color: AppColors.primary),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
+                  IconButton(
+                    tooltip: 'Zoom in',
+                    onPressed: () => _zoomBy(1),
+                    icon: const Icon(Icons.add, color: AppColors.primary),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
+                  IconButton(
+                    tooltip: 'Zoom out',
+                    onPressed: () => _zoomBy(-1),
+                    icon: const Icon(Icons.remove, color: AppColors.primary),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ],
+    );
+  }
+
+  void _showPhotographySpotSheet(BuildContext context, PhotographySpot place) {
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('📷', style: TextStyle(fontSize: 28)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        place.name,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  '${place.habitatType} · ${place.accessibility}${place.publicAccess ? '' : ' · Restricted'}',
+                  style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                ),
+                const SizedBox(height: 12),
+                Text(place.description, style: TextStyle(color: Colors.grey.shade800, height: 1.45)),
+                const SizedBox(height: 18),
+                FilledButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Close'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

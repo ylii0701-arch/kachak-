@@ -308,6 +308,12 @@ final List<ProtectedArea> protectedAreas = [
   ),
 ];
 
+List<SpeciesLocation> speciesLocationsForSpecies(String speciesId) =>
+    speciesLocations.where((l) => l.speciesId == speciesId).toList();
+
+List<PhotographySpot> photographySpotsForSpeciesId(String speciesId) =>
+    photographySpots.where((s) => s.speciesIds.contains(speciesId)).toList();
+
 const List<WeatherData> mockWeatherData = [
   WeatherData(lat: 3.1390, lng: 101.6869, temperature: 32, humidity: 75, condition: 'Partly Cloudy'),
   WeatherData(lat: 3.2050, lng: 101.7290, temperature: 28, humidity: 85, condition: 'Cloudy'),

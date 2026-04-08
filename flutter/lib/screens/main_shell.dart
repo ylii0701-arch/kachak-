@@ -1,36 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/app_shell_controller.dart';
 import '../theme/app_theme.dart';
 import 'home_screen.dart';
 import 'map_screen.dart';
 import 'prediction_screen.dart';
 import 'saved_screen.dart';
 
-class MainShell extends StatefulWidget {
+class MainShell extends StatelessWidget {
   const MainShell({super.key});
 
   @override
-  State<MainShell> createState() => _MainShellState();
-}
-
-class _MainShellState extends State<MainShell> {
-  int _index = 0;
-
-  @override
   Widget build(BuildContext context) {
+    final shell = context.watch<AppShellController>();
     return Scaffold(
       body: IndexedStack(
-        index: _index,
+        index: shell.index,
         children: [
           const HomeScreen(),
           const PredictionScreen(),
           const MapScreen(),
-          SavedScreen(onExplore: () => setState(() => _index = 0)),
+          SavedScreen(
+            onExplore: () => context.read<AppShellController>().selectTab(0),
+          ),
         ],
       ),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
+        selectedIndex: shell.index,
+        onDestinationSelected: (i) => context.read<AppShellController>().selectTab(i),
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
           NavigationDestination(

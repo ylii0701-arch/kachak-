@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/malaysia_cities.dart';
 import '../data/predictions_data.dart';
 import '../data/species_data.dart';
 import '../theme/app_theme.dart';
@@ -14,9 +15,10 @@ class PredictionScreen extends StatefulWidget {
 }
 
 class _PredictionScreenState extends State<PredictionScreen> {
-  Region _region = 'Kuala Lumpur';
+  /// Selected Malaysian city (display name).
+  String _selectedCity = 'Kuala Lumpur';
 
-  static const _regions = ['Kuala Lumpur', 'Sabah & Sarawak', 'Penang', 'Johor'];
+  Region get _predictionRegion => predictionRegionForCityName(_selectedCity);
 
   Color _probabilityColors(String p) {
     switch (p) {
@@ -59,9 +61,27 @@ class _PredictionScreenState extends State<PredictionScreen> {
     }
   }
 
+  Future<void> _openCityPicker() async {
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+        child: _CitySearchSheet(initialCity: _selectedCity),
+      ),
+    );
+    if (picked != null && mounted) {
+      setState(() => _selectedCity = picked);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final predictions = locationPredictions[_region] ?? [];
+    final predictions = locationPredictions[_predictionRegion] ?? [];
 
     return CustomScrollView(
       slivers: [
@@ -110,29 +130,45 @@ class _PredictionScreenState extends State<PredictionScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                    childAspectRatio: 2.4,
-                  ),
-                  itemCount: _regions.length,
-                  itemBuilder: (_, i) {
-                    final r = _regions[i];
-                    final sel = _region == r;
-                    return OutlinedButton(
-                      onPressed: () => setState(() => _region = r),
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: sel ? AppColors.primary : null,
-                        foregroundColor: sel ? Colors.white : null,
-                        side: BorderSide(color: sel ? AppColors.primary : Colors.grey.shade300, width: 2),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _openCityPicker,
+                    borderRadius: BorderRadius.circular(12),
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        suffixIcon: const Icon(Icons.arrow_drop_down_rounded, size: 28),
                       ),
-                      child: Text(r, textAlign: TextAlign.center, style: const TextStyle(fontSize: 13)),
-                    );
-                  },
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _selectedCity,
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  'Tap to search all cities',
+                                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -152,7 +188,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Top Predictions for $_region',
+                            'Top Predictions for $_selectedCity',
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                           ),
                         ),
@@ -254,6 +290,107 @@ class _PredictionScreenState extends State<PredictionScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _CitySearchSheet extends StatefulWidget {
+  const _CitySearchSheet({required this.initialCity});
+
+  final String initialCity;
+
+  @override
+  State<_CitySearchSheet> createState() => _CitySearchSheetState();
+}
+
+class _CitySearchSheetState extends State<_CitySearchSheet> {
+  final TextEditingController _search = TextEditingController();
+  late List<MalaysianCity> _sorted;
+  List<MalaysianCity> _visible = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _sorted = List<MalaysianCity>.from(kMalaysianCities)
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    _visible = List<MalaysianCity>.of(_sorted);
+    _search.addListener(_filter);
+  }
+
+  void _filter() {
+    final q = _search.text;
+    setState(() {
+      _visible = _sorted.where((c) => cityMatchesQuery(c, q)).toList();
+    });
+  }
+
+  @override
+  void dispose() {
+    _search.removeListener(_filter);
+    _search.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final h = MediaQuery.sizeOf(context).height * 0.88;
+    return SizedBox(
+      height: h,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 4, 4, 4),
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 8),
+                    child: Text('Select city', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: TextField(
+              controller: _search,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: 'Search city or state…',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+          Expanded(
+            child: _visible.isEmpty
+                ? Center(
+                    child: Text(
+                      'No cities match your search',
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: _visible.length,
+                    itemBuilder: (_, i) {
+                      final c = _visible[i];
+                      final sel = c.name == widget.initialCity;
+                      return ListTile(
+                        selected: sel,
+                        selectedTileColor: AppColors.primary.withValues(alpha: 0.12),
+                        title: Text(c.name),
+                        subtitle: Text(c.state),
+                        trailing: sel ? const Icon(Icons.check, color: AppColors.primary) : null,
+                        onTap: () => Navigator.pop(context, c.name),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }
