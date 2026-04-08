@@ -1,0 +1,45 @@
+# Builds flutter/ and publishes to GitHub Pages.
+# After first run: Repo → Settings → Pages → Build & deployment → Source: GitHub Actions.
+
+name: Deploy Flutter Web to GitHub Pages
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Build web
+        working-directory: flutter
+        run: |
+          flutter pub get
+          flutter build web --release --base-href "/${{ github.event.repository.name }}/"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: flutter/build/web
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
