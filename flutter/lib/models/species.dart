@@ -46,6 +46,7 @@ class Species {
   static const String birds = 'Birds';
   static const String reptiles = 'Reptiles';
   static const String amphibians = 'Amphibians';
+  static const String insects = 'Insects';
 }
 
 Color statusBackgroundColor(String status) {
