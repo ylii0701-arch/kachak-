@@ -21,6 +21,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _category = 'All';
   String _status = 'All';
@@ -37,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _gridView = false;
   bool _showAll = false;
 
-  static const _categories = ['All', Species.mammals, Species.birds, Species.reptiles, Species.amphibians];
+  static const _categories = ['All', Species.mammals, Species.birds, Species.reptiles, Species.amphibians, Species.insects];
   static const _statuses = [
     'All',
     Species.leastConcern,
@@ -47,6 +48,12 @@ class _HomeScreenState extends State<HomeScreen> {
     Species.criticallyEndangered,
   ];
   static const _difficulties = <Object>['All', 1, 2, 3, 4, 5];
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   List<Species> get _filtered {
     var list = speciesData.where((s) {
@@ -104,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final filtered = _filtered;
-    final initialCount = (filtered.length * 0.25).ceil().clamp(1, filtered.length);
+    final initialCount = filtered.isEmpty ? 0 : (filtered.length * 0.25).ceil().clamp(1, filtered.length);
     final displayed = _showAll ? filtered : filtered.take(initialCount).toList();
     final hasMore = filtered.length > initialCount && !_showAll;
     final saved = context.watch<SavedSpeciesProvider>();
@@ -112,206 +119,207 @@ class _HomeScreenState extends State<HomeScreen> {
     return Material(
       color: Theme.of(context).colorScheme.surface,
       child: CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0x1A2F855A), Colors.transparent],
+        slivers: [
+          SliverToBoxAdapter(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0x1A2F855A), Colors.transparent],
+                ),
               ),
-            ),
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Kachak',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppColors.accent),
-                ),
-                Text(
-                  'Malaysian Wildlife Explorer',
-                  style: TextStyle(color: Colors.grey.shade700, fontSize: 16),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search species name',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(icon: const Icon(Icons.close), onPressed: () => setState(() => _searchQuery = ''))
-                        : null,
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Kachak',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppColors.accent),
                   ),
-                  onChanged: (v) => setState(() => _searchQuery = v),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _chipButton(
-                            label: 'Filter',
-                            icon: Icons.filter_list,
-                            selected: _showFilters || _activeFilterCount > 0,
-                            primary: true,
-                            badge: _activeFilterCount > 0 ? '$_activeFilterCount' : null,
-                            onTap: () {
-                              setState(() {
-                                if (_showFilters) {
-                                  _showFilters = false;
-                                } else {
-                                  _tempCategory = _category;
-                                  _tempStatus = _status;
-                                  _tempDifficulty = _difficulty;
-                                  _showFilters = true;
-                                  _showSort = false;
-                                }
-                              });
-                            },
-                          ),
-                          _chipButton(
-                            label: 'Sort',
-                            icon: Icons.swap_vert,
-                            selected: _showSort || _sortBy != _SortBy.none,
-                            primary: false,
-                            badge: _sortBy != _SortBy.none ? '✓' : null,
-                            onTap: () {
-                              setState(() {
-                                if (_showSort) {
-                                  _showSort = false;
-                                } else {
-                                  _tempSortBy = _sortBy;
-                                  _tempSortOrder = _sortOrder;
-                                  _showSort = true;
-                                  _showFilters = false;
-                                }
-                              });
-                            },
-                          ),
-                        ],
-                      ),
+                  Text(
+                    'Malaysian Wildlife Explorer',
+                    style: TextStyle(color: Colors.grey.shade700, fontSize: 16),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search species name',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(icon: const Icon(Icons.close), onPressed: () { _searchController.clear(); setState(() => _searchQuery = ''); })
+                          : null,
                     ),
-                    if (_activeFilterCount > 0 || _sortBy != _SortBy.none)
+                    onChanged: (v) => setState(() => _searchQuery = v),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            _chipButton(
+                              label: 'Filter',
+                              icon: Icons.filter_list,
+                              selected: _showFilters || _activeFilterCount > 0,
+                              primary: true,
+                              badge: _activeFilterCount > 0 ? '$_activeFilterCount' : null,
+                              onTap: () {
+                                setState(() {
+                                  if (_showFilters) {
+                                    _showFilters = false;
+                                  } else {
+                                    _tempCategory = _category;
+                                    _tempStatus = _status;
+                                    _tempDifficulty = _difficulty;
+                                    _showFilters = true;
+                                    _showSort = false;
+                                  }
+                                });
+                              },
+                            ),
+                            _chipButton(
+                              label: 'Sort',
+                              icon: Icons.swap_vert,
+                              selected: _showSort || _sortBy != _SortBy.none,
+                              primary: false,
+                              badge: _sortBy != _SortBy.none ? '✓' : null,
+                              onTap: () {
+                                setState(() {
+                                  if (_showSort) {
+                                    _showSort = false;
+                                  } else {
+                                    _tempSortBy = _sortBy;
+                                    _tempSortOrder = _sortOrder;
+                                    _showSort = true;
+                                    _showFilters = false;
+                                  }
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (_activeFilterCount > 0 || _sortBy != _SortBy.none)
+                        IconButton(
+                          onPressed: () {
+                            _resetFilters();
+                            _resetSort();
+                          },
+                          icon: const Icon(Icons.cleaning_services_outlined),
+                          color: Colors.red.shade700,
+                          tooltip: 'Clear all',
+                        ),
                       IconButton(
-                        onPressed: () {
-                          _resetFilters();
-                          _resetSort();
-                        },
-                        icon: const Icon(Icons.cleaning_services_outlined),
-                        color: Colors.red.shade700,
-                        tooltip: 'Clear all',
+                        onPressed: () => setState(() => _gridView = !_gridView),
+                        icon: Icon(_gridView ? Icons.view_list : Icons.grid_view),
                       ),
-                    IconButton(
-                      onPressed: () => setState(() => _gridView = !_gridView),
-                      icon: Icon(_gridView ? Icons.view_list : Icons.grid_view),
-                    ),
-                  ],
-                ),
-                if (_showFilters) _filterPanel(),
-                if (_showSort) _sortPanel(),
-              ],
-            ),
-          ),
-        ),
-        if (filtered.isEmpty && _searchQuery.isNotEmpty)
-          SliverFillRemaining(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.info_outline, size: 64, color: Colors.grey.shade400),
-                    const SizedBox(height: 12),
-                    const Text('No species found', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
-                    Text('No species matching "$_searchQuery"'),
-                    const SizedBox(height: 16),
-                    FilledButton(onPressed: () => setState(() => _searchQuery = ''), child: const Text('Clear search')),
-                  ],
-                ),
-              ),
-            ),
-          )
-        else if (filtered.isEmpty)
-          SliverFillRemaining(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.filter_alt_off, size: 64, color: Colors.grey.shade400),
-                    const SizedBox(height: 12),
-                    const Text('No results match your filters'),
-                    const SizedBox(height: 16),
-                    FilledButton(onPressed: _resetFilters, child: const Text('Reset filters')),
-                  ],
-                ),
-              ),
-            ),
-          )
-        else if (_gridView) ...[
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                // Taller cells than width/0.72 so title + chips + Save fit without overflow.
-                childAspectRatio: 0.58,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => _speciesCard(displayed[index], saved, compact: true),
-                childCount: displayed.length,
+                    ],
+                  ),
+                  if (_showFilters) _filterPanel(),
+                  if (_showSort) _sortPanel(),
+                ],
               ),
             ),
           ),
-          if (hasMore)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
-                child: OutlinedButton(
-                  onPressed: () => setState(() => _showAll = true),
-                  child: const Text('View More Species'),
+          if (filtered.isEmpty && _searchQuery.isNotEmpty)
+            SliverFillRemaining(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.search_off, size: 64, color: Colors.grey.shade400),
+                      const SizedBox(height: 12),
+                      Text('No species found matching "$_searchQuery"', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
+                      const SizedBox(height: 8),
+                      Text('Try checking your spelling or using different filters.', style: TextStyle(color: Colors.grey.shade600), textAlign: TextAlign.center),
+                      const SizedBox(height: 16),
+                      FilledButton(onPressed: () { _searchController.clear(); setState(() => _searchQuery = ''); }, child: const Text('Clear search')),
+                    ],
+                  ),
                 ),
               ),
             )
-          else
-            const SliverToBoxAdapter(child: SizedBox(height: 100)),
-        ]
-        else
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index == displayed.length && hasMore) {
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: OutlinedButton(
-                        onPressed: () => setState(() => _showAll = true),
-                        child: const Text('View More Species'),
-                      ),
-                    );
-                  }
-                  if (index >= displayed.length) return null;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _speciesCard(displayed[index], saved, compact: false),
-                  );
-                },
-                childCount: displayed.length + (hasMore ? 1 : 0),
+          else if (filtered.isEmpty)
+            SliverFillRemaining(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.filter_alt_off, size: 64, color: Colors.grey.shade400),
+                      const SizedBox(height: 12),
+                      const Text('No results match your filters'),
+                      const SizedBox(height: 16),
+                      FilledButton(onPressed: _resetFilters, child: const Text('Reset filters')),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-      ],
-    ),
+            )
+          else if (_gridView) ...[
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    // Taller cells than width/0.72 so title + chips + Save fit without overflow.
+                    childAspectRatio: 0.58,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                        (context, index) => _speciesCard(displayed[index], saved, compact: true),
+                    childCount: displayed.length,
+                  ),
+                ),
+              ),
+              if (hasMore)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+                    child: OutlinedButton(
+                      onPressed: () => setState(() => _showAll = true),
+                      child: const Text('View More Species'),
+                    ),
+                  ),
+                )
+              else
+                const SliverToBoxAdapter(child: SizedBox(height: 100)),
+            ]
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                      if (index == displayed.length && hasMore) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: OutlinedButton(
+                            onPressed: () => setState(() => _showAll = true),
+                            child: const Text('View More Species'),
+                          ),
+                        );
+                      }
+                      if (index >= displayed.length) return null;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _speciesCard(displayed[index], saved, compact: false),
+                      );
+                    },
+                    childCount: displayed.length + (hasMore ? 1 : 0),
+                  ),
+                ),
+              ),
+        ],
+      ),
     );
   }
 
@@ -543,9 +551,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _speciesCard(Species s, SavedSpeciesProvider saved, {required bool compact}) {
     final imgH = compact ? 120.0 : 180.0;
-    final bg = statusBackgroundColor(s.conservationStatus);
-    final fg = statusForegroundColor(s.conservationStatus);
-    final statusText = compact ? statusAbbreviation(s.conservationStatus) : s.conservationStatus;
+
+    // --- SAFE STATUS CHECKS ---
+    final hasStatus = s.conservationStatus.trim().isNotEmpty;
+    final bg = hasStatus ? statusBackgroundColor(s.conservationStatus) : Colors.grey.shade300;
+    final fg = hasStatus ? statusForegroundColor(s.conservationStatus) : Colors.black54;
+    final statusText = hasStatus
+        ? (compact ? statusAbbreviation(s.conservationStatus) : s.conservationStatus)
+        : (compact ? 'N/A' : 'Status Unavailable');
 
     final infoPadding = EdgeInsets.all(compact ? 10 : 16);
     final infoColumn = Padding(
@@ -554,14 +567,15 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
+          // --- SAFE NAME CHECKS ---
           Text(
-            s.commonName,
+            s.commonName.trim().isNotEmpty ? s.commonName : 'Unknown Species',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(fontSize: compact ? 16 : 20, fontWeight: FontWeight.w600),
           ),
           Text(
-            s.scientificName,
+            s.scientificName.trim().isNotEmpty ? s.scientificName : 'Scientific name unavailable',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey.shade600, fontSize: compact ? 11 : 13),
@@ -571,8 +585,12 @@ class _HomeScreenState extends State<HomeScreen> {
             spacing: 6,
             runSpacing: 6,
             children: [
+              // --- SAFE CATEGORY CHECK ---
               Chip(
-                label: Text(s.category, style: TextStyle(fontSize: compact ? 10 : 12)),
+                label: Text(
+                    s.category.trim().isNotEmpty ? s.category : 'Category N/A',
+                    style: TextStyle(fontSize: compact ? 10 : 12)
+                ),
                 visualDensity: VisualDensity.compact,
                 padding: EdgeInsets.zero,
               ),
