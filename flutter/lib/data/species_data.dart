@@ -316,7 +316,7 @@ const List<Species> speciesData = [
       'Local ranger/guide (Mandatory)',
     ],
     activityPattern: 'Nocturnal (Night-active)',
-    bestSeasons: ['Year-round (Subject to camera trap triggers)'],
+    bestSeasons: ['Year-round'],
     difficultyLevel: 5,
   ),
   Species(
@@ -341,7 +341,7 @@ const List<Species> speciesData = [
       'Silent shutter mode',
     ],
     activityPattern: 'Crepuscular / Nocturnal',
-    bestSeasons: ['Dry season (easier tracking)'],
+    bestSeasons: ['March', 'April', 'May', 'June', 'July', 'August'],
     difficultyLevel: 5,
   ),
   Species(
@@ -366,7 +366,7 @@ const List<Species> speciesData = [
       'Rain gear',
     ],
     activityPattern: 'Nocturnal (Active at night)',
-    bestSeasons: ['March to October (Drier months in Borneo)'],
+    bestSeasons: ['March', 'April', 'May', 'June', 'July', 'August', 'September', 'October'],
     difficultyLevel: 5,
   ),
   Species(
@@ -377,7 +377,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.nearThreatened,
     habitat: 'Lowland primary and secondary forests with dense undergrowth',
     imageUrl:
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Malayan_banded_pitta.jpg/800px-Malayan_banded_pitta.jpg',
+    'https://upload.wikimedia.org/wikipedia/commons/e/e1/Hydrornis_irena_-_Sri_Phang_Nga.jpg',
     description:
     'A "holy grail" bird for local photographers. The male features a stunning combination of deep blue, bright yellow, and fiery orange plumage.',
     behaviorNotes:
@@ -391,7 +391,7 @@ const List<Species> speciesData = [
       'Camera with excellent low-light autofocus',
     ],
     activityPattern: 'Diurnal (Early morning)',
-    bestSeasons: ['May to August (Breeding season)'],
+    bestSeasons: ['May', 'June', 'July', 'August'],
     difficultyLevel: 4,
   ),
   Species(
@@ -402,7 +402,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Damp leaf litter on the forest floor near streams',
     imageUrl:
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Megophrys_nasuta_-_Khao_Sok.jpg/800px-Megophrys_nasuta_-_Khao_Sok.jpg',
+    'https://www.nparks.gov.sg/-/media/ffw/migrated/round2/fauna/1236/e63c7d99acf24f6685cf2c8a2d17dacc.jpg',
     description:
     'A macro photographer’s dream. It possesses incredible camouflage that mimics dead leaves, complete with horn-like projections over its eyes.',
     behaviorNotes:
@@ -416,7 +416,7 @@ const List<Species> speciesData = [
       'Knee pads for crawling',
     ],
     activityPattern: 'Nocturnal (Active after rain)',
-    bestSeasons: ['Monsoon transition periods (Higher humidity)'],
+    bestSeasons: ['April', 'May', 'October', 'November'],
     difficultyLevel: 2,
   ),
   Species(
@@ -427,7 +427,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Rainforests near hot springs or mineral-rich riverbanks',
     imageUrl:
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Rajah_Brooke%27s_Birdwing_%28Trogonoptera_brookiana_albescens%29_male.jpg/800px-Rajah_Brooke%27s_Birdwing_%28Trogonoptera_brookiana_albescens%29_male.jpg',
+    'https://www.weather2travel.com/images_blog/rajah-brookes-birdwing.jpg',
     description:
     'The national butterfly of Malaysia. It is massive and striking, featuring jet-black wings with electric green feather-like markings.',
     behaviorNotes:
@@ -440,8 +440,26 @@ const List<Species> speciesData = [
       'Fast shutter speed',
     ],
     activityPattern: 'Diurnal (Mid-morning to early afternoon)',
-    bestSeasons: ['Year-round (Best on sunny days after a rainstorm)'],
+    bestSeasons: ['Year-round'],
     difficultyLevel: 3,
+  ),
+  // --- TEST DUMMY SPECIES (Trigger Fallbacks) ---
+  Species(
+    id: '99',
+    commonName: '', // Tests "Unknown Species"
+    scientificName: '   ', // Tests "Scientific name unavailable" (space trimming)
+    category: '', // Tests "Category N/A"
+    conservationStatus: '', // Tests "Status Unavailable" and Grey Chip
+    habitat: '', // Tests section card empty text fallback
+    imageUrl:
+    'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Blank_square.svg/800px-Blank_square.svg.png', // Blank image so the network widget doesn't crash
+    description: '', // Tests section card empty text fallback
+    behaviorNotes: '   ', // Tests section card empty text fallback
+    photographyConditions: '', // Tests section card empty text fallback
+    recommendedGear: [], // Tests "No recommendations currently available" list fallback
+    activityPattern: '', // Tests "Activity N/A"
+    bestSeasons: [], // Tests hiding the best seasons row
+    difficultyLevel: 0, // Fallback difficulty
   ),
 ];
 
