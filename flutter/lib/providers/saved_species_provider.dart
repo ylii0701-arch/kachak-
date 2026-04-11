@@ -26,19 +26,31 @@ class SavedSpeciesProvider extends ChangeNotifier {
     } catch (_) {}
   }
 
-  Future<void> _persist() async {
-    await _prefs.setString(_storageKey, jsonEncode(_ids.toList()));
-  }
-
   bool isSaved(String speciesId) => _ids.contains(speciesId);
 
   Future<void> toggleSaved(String speciesId) async {
-    if (_ids.contains(speciesId)) {
+    final wasSaved = _ids.contains(speciesId);
+
+    // 1. Optimistically update the list in memory and UI
+    if (wasSaved) {
       _ids.remove(speciesId);
     } else {
       _ids.add(speciesId);
     }
-    await _persist();
     notifyListeners();
+
+    // 2. Try to save to device storage (setString returns false if it fails)
+    final success = await _prefs.setString(_storageKey, jsonEncode(_ids.toList()));
+
+    // 3. If storage fails, revert the memory state and throw an error
+    if (!success) {
+      if (wasSaved) {
+        _ids.add(speciesId); // Put it back
+      } else {
+        _ids.remove(speciesId); // Remove it again
+      }
+      notifyListeners();
+      throw Exception('Storage full or unavailable.');
+    }
   }
 }

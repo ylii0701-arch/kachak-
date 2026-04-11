@@ -439,7 +439,7 @@ const List<Species> speciesData = [
       'Circular polarizer (to remove glare)',
       'Fast shutter speed',
     ],
-    activityPattern: 'Diurnal (Mid-morning to early afternoon)',
+    activityPattern: 'Diurnal (Active mid-day)',
     bestSeasons: ['Year-round'],
     difficultyLevel: 3,
   ),

@@ -86,7 +86,7 @@ class SavedScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
-                (context, index) {
+                    (context, index) {
                   final s = list[index];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
@@ -168,7 +168,20 @@ class SavedScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: FilledButton.icon(
-              onPressed: () => saved.toggleSaved(s.id),
+              onPressed: () async {
+                try {
+                  await saved.toggleSaved(s.id);
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Failed to update saved species. Please try again.'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
               icon: const Icon(Icons.favorite),
               label: const Text('Remove from Saved'),
             ),

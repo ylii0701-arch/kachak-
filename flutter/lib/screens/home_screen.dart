@@ -616,7 +616,20 @@ class _HomeScreenState extends State<HomeScreen> {
     final saveButton = Padding(
       padding: EdgeInsets.fromLTRB(compact ? 10 : 16, 0, compact ? 10 : 16, compact ? 10 : 16),
       child: FilledButton.icon(
-        onPressed: () => saved.toggleSaved(s.id),
+        onPressed: () async {
+          try {
+            await saved.toggleSaved(s.id);
+          } catch (e) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Failed to update saved species. Please try again.'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
+        },
         icon: Icon(saved.isSaved(s.id) ? Icons.favorite : Icons.favorite_border),
         label: Text(saved.isSaved(s.id) ? 'Saved' : 'Save'),
         style: FilledButton.styleFrom(

@@ -119,7 +119,20 @@ class SpeciesDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 FilledButton.icon(
-                  onPressed: () => saved.toggleSaved(species.id),
+                  onPressed: () async {
+                    try {
+                      await saved.toggleSaved(species.id);
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Failed to update saved species. Please try again.'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  },
                   icon: Icon(isFav ? Icons.favorite : Icons.favorite_border),
                   label: Text(isFav ? 'Saved to Favorites' : 'Save to Favorites'),
                   style: FilledButton.styleFrom(
