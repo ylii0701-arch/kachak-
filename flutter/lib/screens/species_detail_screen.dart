@@ -70,9 +70,12 @@ class SpeciesDetailScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(species.commonName, style: Theme.of(context).textTheme.headlineSmall),
                         Text(
-                          species.scientificName,
+                            species.commonName.trim().isNotEmpty ? species.commonName : 'Unknown Species',
+                            style: Theme.of(context).textTheme.headlineSmall
+                        ),
+                        Text(
+                          species.scientificName.trim().isNotEmpty ? species.scientificName : 'Scientific name unavailable',
                           style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey.shade600, fontSize: 16),
                         ),
                         const SizedBox(height: 12),
@@ -80,18 +83,22 @@ class SpeciesDetailScreen extends StatelessWidget {
                           spacing: 8,
                           runSpacing: 8,
                           children: [
-                            Chip(label: Text(species.category)),
-                            Chip(label: Text(species.activityPattern)),
+                            Chip(label: Text(species.category.trim().isNotEmpty ? species.category : 'Category N/A')),
+                            Chip(label: Text(species.activityPattern.trim().isNotEmpty ? species.activityPattern : 'Activity N/A')),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               decoration: BoxDecoration(
-                                color: statusBackgroundColor(species.conservationStatus),
+                                color: species.conservationStatus.trim().isNotEmpty
+                                    ? statusBackgroundColor(species.conservationStatus)
+                                    : Colors.grey.shade300,
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
-                                species.conservationStatus,
+                                species.conservationStatus.trim().isNotEmpty ? species.conservationStatus : 'Status Unavailable',
                                 style: TextStyle(
-                                  color: statusForegroundColor(species.conservationStatus),
+                                  color: species.conservationStatus.trim().isNotEmpty
+                                      ? statusForegroundColor(species.conservationStatus)
+                                      : Colors.black54,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -132,42 +139,47 @@ class SpeciesDetailScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(species.behaviorNotes),
-                      if (species.bestSeasons.isNotEmpty) ...[
-                        const Divider(height: 24),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(Icons.calendar_today, size: 20, color: AppColors.primary),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Best Seasons:', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
-                                  const SizedBox(height: 6),
-                                  Wrap(
-                                    spacing: 6,
-                                    runSpacing: 6,
-                                    children: species.bestSeasons.map((e) {
-                                      return Chip(
-                                        label: Text(e),
-                                        visualDensity: VisualDensity.compact,
-                                        backgroundColor: AppColors.primary.withValues(alpha: 0.12),
-                                        side: BorderSide.none,
-                                        labelStyle: TextStyle(
-                                          color: AppColors.primary,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 13,
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ],
-                              ),
+                      const Divider(height: 24),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.calendar_today, size: 20, color: AppColors.primary),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Best Seasons:', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                                const SizedBox(height: 6),
+
+                                // Check if the list has items, otherwise show the fallback text
+                                species.bestSeasons.isNotEmpty
+                                    ? Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: species.bestSeasons.map((e) {
+                                    return Chip(
+                                      label: Text(e),
+                                      visualDensity: VisualDensity.compact,
+                                      backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+                                      side: BorderSide.none,
+                                      labelStyle: const TextStyle(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13,
+                                      ),
+                                    );
+                                  }).toList(),
+                                )
+                                    : Text(
+                                  'Best seasons currently unknown',
+                                  style: TextStyle(color: Colors.grey.shade500, fontStyle: FontStyle.italic),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -225,7 +237,7 @@ class SpeciesDetailScreen extends StatelessWidget {
           index: n,
           title: 'Recorded observation',
           subtitle:
-              'Last seen ${loc.lastSeen} · ${loc.lat.toStringAsFixed(4)}°, ${loc.lng.toStringAsFixed(4)}°',
+          'Last seen ${loc.lastSeen} · ${loc.lat.toStringAsFixed(4)}°, ${loc.lng.toStringAsFixed(4)}°',
           point: LatLng(loc.lat, loc.lng),
         ),
       );
@@ -279,12 +291,12 @@ class SpeciesDetailScreen extends StatelessWidget {
   }
 
   Widget _locationMapRow(
-    BuildContext context, {
-    required int index,
-    required String title,
-    required String subtitle,
-    required LatLng point,
-  }) {
+      BuildContext context, {
+        required int index,
+        required String title,
+        required String subtitle,
+        required LatLng point,
+      }) {
     return Material(
       color: AppColors.primary.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(12),
@@ -322,13 +334,29 @@ class SpeciesDetailScreen extends StatelessWidget {
       ),
     );
   }
-
   Widget _sectionCard(
-    BuildContext context, {
-    required String title,
-    IconData? icon,
-    required Widget child,
-  }) {
+      BuildContext context, {
+        required String title,
+        IconData? icon,
+        required Widget child,
+      }) {
+    Widget content = child;
+
+    // Intercept empty text descriptions
+    if (child is Text && (child.data == null || child.data!.trim().isEmpty)) {
+      content = Text(
+        'Information currently unavailable',
+        style: TextStyle(color: Colors.grey.shade500, fontStyle: FontStyle.italic),
+      );
+    }
+    // Intercept empty lists (like recommended gear)
+    else if (child is Column && child.children.isEmpty) {
+      content = Text(
+        'No recommendations currently available',
+        style: TextStyle(color: Colors.grey.shade500, fontStyle: FontStyle.italic),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Card(
@@ -349,7 +377,7 @@ class SpeciesDetailScreen extends StatelessWidget {
               const SizedBox(height: 12),
               DefaultTextStyle.merge(
                 style: const TextStyle(height: 1.45),
-                child: child,
+                child: content,
               ),
             ],
           ),
