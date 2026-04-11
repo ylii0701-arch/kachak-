@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -6,8 +7,14 @@ import '../data/predictions_data.dart';
 import '../data/species_data.dart';
 import '../providers/saved_species_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/glass.dart';
 import '../widgets/species_network_image.dart';
 import 'species_detail_screen.dart';
+
+const _predictionHeroShadows = <Shadow>[
+  Shadow(blurRadius: 14, offset: Offset(0, 1), color: Color(0x8C000000)),
+  Shadow(blurRadius: 4, offset: Offset(0, 2), color: Color(0xB3000000)),
+];
 
 class SpeciesPredictionScreen extends StatefulWidget {
   const SpeciesPredictionScreen({super.key, required this.speciesId});
@@ -133,7 +140,8 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
 
     if (species == null || prediction == null) {
       return Scaffold(
-        appBar: AppBar(),
+        backgroundColor: AppColors.detailBackdrop,
+        appBar: AppBar(backgroundColor: Colors.white.withValues(alpha: 0.92), surfaceTintColor: Colors.transparent),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -151,93 +159,150 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
 
     final topInset = MediaQuery.paddingOf(context).top + kToolbarHeight + 6;
 
+    final bottomPad = MediaQuery.paddingOf(context).bottom + 20;
+
     return Scaffold(
-      body: CustomScrollView(
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          const MistBackdrop(backgroundBlurSigma: 5),
+          CustomScrollView(
         slivers: [
           SliverAppBar(
             expandedHeight: topInset + 88,
             pinned: true,
+            backgroundColor: Colors.white.withValues(alpha: 0.88),
+            surfaceTintColor: Colors.transparent,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              padding: EdgeInsets.zero,
               onPressed: () => Navigator.of(context).pop(),
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.38),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+              ),
             ),
             actions: [
-              IconButton(
-                onPressed: () => saved.toggleSaved(species.id),
-                icon: Icon(
-                  saved.isSaved(species.id)
-                      ? Icons.favorite
-                      : Icons.favorite_border,
-                  color: saved.isSaved(species.id)
-                      ? Colors.red.shade300
-                      : Colors.white,
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => saved.toggleSaved(species.id),
+                  icon: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.38),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      saved.isSaved(species.id) ? Icons.favorite : Icons.favorite_border,
+                      color: saved.isSaved(species.id) ? Colors.red.shade200 : Colors.white,
+                      size: 20,
+                    ),
+                  ),
                 ),
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppColors.primary, Color(0xFF276749)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                padding: EdgeInsets.fromLTRB(16, topInset, 16, 12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: SizedBox(
-                        width: 72,
-                        height: 72,
-                        child: SpeciesNetworkImage(
-                          url: species.imageUrl,
-                          fit: BoxFit.cover,
+              collapseMode: CollapseMode.parallax,
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  SpeciesNetworkImage(url: species.imageUrl, fit: BoxFit.cover),
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          stops: const [0.0, 0.4, 1.0],
+                          colors: [
+                            Colors.black.withValues(alpha: 0.52),
+                            Colors.black.withValues(alpha: 0.18),
+                            Colors.black.withValues(alpha: 0.62),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
+                  ),
+                  Padding(
+                      padding: EdgeInsets.fromLTRB(16, topInset, 16, 18),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            species.commonName,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            species.scientificName,
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.85),
-                              fontStyle: FontStyle.italic,
-                              fontSize: 13,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
+                          const Spacer(),
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              const Icon(
-                                Icons.place,
-                                color: Colors.white70,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  '${prediction.locationName} • ${prediction.distance}km away',
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 13,
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: SizedBox(
+                                  width: 68,
+                                  height: 68,
+                                  child: SpeciesNetworkImage(
+                                    url: species.imageUrl,
+                                    fit: BoxFit.cover,
                                   ),
-                                  maxLines: 2,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      species.commonName,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w700,
+                                        height: 1.15,
+                                        shadows: _predictionHeroShadows,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      species.scientificName,
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(alpha: 0.94),
+                                        fontStyle: FontStyle.italic,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        height: 1.25,
+                                        shadows: _predictionHeroShadows,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.place_rounded,
+                                          color: Colors.white.withValues(alpha: 0.92),
+                                          size: 17,
+                                          shadows: _predictionHeroShadows,
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Expanded(
+                                          child: Text(
+                                            '${prediction.locationName} • ${prediction.distance}km away',
+                                            style: TextStyle(
+                                              color: Colors.white.withValues(alpha: 0.92),
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w500,
+                                              height: 1.35,
+                                              shadows: _predictionHeroShadows,
+                                            ),
+                                            maxLines: 2,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -247,19 +312,22 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                     ),
                   ],
                 ),
-              ),
             ),
           ),
           SliverToBoxAdapter(
             child: Padding(
-              // Space below green header — avoid overlapping the app bar.
+              // Space below hero — avoid overlapping the app bar.
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Card(
-                    elevation: 4,
+                  GlassPanel(
+                    padding: EdgeInsets.zero,
+                    borderRadius: 18,
+                    blurSigma: 14,
+                    fillAlpha: 0.58,
+                    verticalFrostGradient: true,
                     child: IntrinsicHeight(
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -270,10 +338,13 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     '🌿 Key Factors',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 17,
+                                      color: AppColors.textBodyOnFrost,
+                                      letterSpacing: -0.1,
                                     ),
                                   ),
                                   const SizedBox(height: 10),
@@ -302,9 +373,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                                     decoration: BoxDecoration(
                                                       color: primary
                                                           ? AppColors.primary
-                                                          : Colors
-                                                                .grey
-                                                                .shade200,
+                                                          : Colors.white.withValues(alpha: 0.38),
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                             10,
@@ -315,7 +384,10 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                                                   .primary,
                                                               width: 2,
                                                             )
-                                                          : null,
+                                                          : Border.all(
+                                                              color: Colors.white.withValues(alpha: 0.55),
+                                                              width: 1,
+                                                            ),
                                                     ),
                                                     child: Icon(
                                                       factor == 'Time'
@@ -327,11 +399,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                                                 .water_drop_outlined
                                                           : Icons.thermostat,
                                                       size: 18,
-                                                      color: primary
-                                                          ? Colors.white
-                                                          : Colors
-                                                                .grey
-                                                                .shade700,
+                                                      color: primary ? Colors.white : AppColors.textSubtitleOnFrost,
                                                     ),
                                                   ),
                                                   if (primary)
@@ -351,7 +419,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                               ),
                             ),
                           ),
-                          Container(width: 1, color: Colors.grey.shade200),
+                          Container(width: 1, color: Colors.white.withValues(alpha: 0.45)),
                           SizedBox(
                             width: 100,
                             child: Column(
@@ -371,17 +439,19 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                   style: IconButton.styleFrom(
                                     backgroundColor: _notificationOn
                                         ? AppColors.primary
-                                        : Colors.grey.shade300,
+                                        : Colors.white.withValues(alpha: 0.4),
                                     foregroundColor: _notificationOn
                                         ? Colors.white
-                                        : Colors.grey.shade700,
+                                        : AppColors.textBodyOnFrost,
                                   ),
                                 ),
                                 Text(
                                   _notificationOn ? 'Alert On' : 'Alert Off',
-                                  style: const TextStyle(
+                                  style: GoogleFonts.plusJakartaSans(
                                     fontSize: 11,
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.textBodyOnFrost,
+                                    letterSpacing: 0.1,
                                   ),
                                 ),
                               ],
@@ -404,13 +474,16 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.trending_up, color: AppColors.primary),
+                      Icon(Icons.trending_up, color: AppColors.iconSectionOnFrost, size: 22),
                       const SizedBox(width: 8),
-                      const Text(
+                      Text(
                         '7-Day Occurrence Forecast',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.w800,
                           fontSize: 17,
+                          color: AppColors.textBodyOnFrost,
+                          height: 1.2,
+                          letterSpacing: -0.1,
                         ),
                       ),
                     ],
@@ -419,122 +492,128 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                   ...prediction.forecast.asMap().entries.map((e) {
                     final day = e.value;
                     final first = e.key == 0;
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        side: BorderSide(
-                          color: first
-                              ? AppColors.primary
-                              : Colors.grey.shade200,
-                          width: first ? 2 : 1,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: first
-                                  ? AppColors.primary.withValues(alpha: 0.1)
-                                  : Colors.grey.shade100,
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(14),
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: GlassPanel(
+                        padding: EdgeInsets.zero,
+                        borderRadius: 16,
+                        blurSigma: 14,
+                        fillAlpha: 0.56,
+                        verticalFrostGradient: true,
+                        outlineColor: first ? AppColors.primary : null,
+                        outlineWidth: first ? 2 : 1.1,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: first
+                                    ? AppColors.primary.withValues(alpha: 0.12)
+                                    : Colors.white.withValues(alpha: 0.42),
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(14),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    _formatDate(day.date),
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 15,
+                                      color: AppColors.textBodyOnFrost,
+                                      letterSpacing: -0.05,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _probBg(day.probability),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: Colors.grey.shade400,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      '${day.probability} Chance',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                        color: _probFg(day.probability),
+                                        letterSpacing: 0.05,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  _formatDate(day.date),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
+                            Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: _forecastCell(
+                                          icon: Icons.schedule,
+                                          label: 'Best Time',
+                                          value: day.timeOfDay,
+                                          iconColor: AppColors.primary,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: _forecastCell(
+                                          label: 'Weather',
+                                          value: day.weather,
+                                          emoji: _weatherEmoji(day.weather),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
+                                  const SizedBox(height: 10),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: _forecastCell(
+                                          icon: Icons.thermostat,
+                                          label: 'Temperature',
+                                          value: '${day.temperature}°C',
+                                          iconColor: Colors.orange.shade700,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: _forecastCell(
+                                          icon: Icons.water_drop,
+                                          label: 'Humidity',
+                                          value: '${day.humidity}%',
+                                          iconColor: Colors.cyan.shade700,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: _probBg(day.probability),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: Colors.grey.shade400,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    '${day.probability} Chance',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: _probFg(day.probability),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: Column(
-                              children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: _forecastCell(
-                                        icon: Icons.schedule,
-                                        label: 'Best Time',
-                                        value: day.timeOfDay,
-                                        iconColor: AppColors.primary,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: _forecastCell(
-                                        label: 'Weather',
-                                        value: day.weather,
-                                        emoji: _weatherEmoji(day.weather),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: _forecastCell(
-                                        icon: Icons.thermostat,
-                                        label: 'Temperature',
-                                        value: '${day.temperature}°C',
-                                        iconColor: Colors.orange.shade700,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: _forecastCell(
-                                        icon: Icons.water_drop,
-                                        label: 'Humidity',
-                                        value: '${day.humidity}%',
-                                        iconColor: Colors.cyan.shade700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     );
                   }),
-                  FilledButton(
+                  GlassCtaPill(
+                    emphasized: true,
+                    minHeight: 48,
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute<void>(
@@ -543,15 +622,14 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                         ),
                       );
                     },
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(48),
-                    ),
                     child: const Text('View Full Species Details'),
                   ),
-                  const SizedBox(height: 80),
+                  SizedBox(height: bottomPad),
                 ],
               ),
             ),
+          ),
+        ],
           ),
         ],
       ),
@@ -592,15 +670,24 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
             children: [
               Text(
                 label,
-                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textSubtitleOnFrost,
+                  height: 1.2,
+                  letterSpacing: 0.15,
+                ),
               ),
               Text(
                 value,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 15,
+                  color: AppColors.textBodyOnFrost,
+                  height: 1.25,
+                  letterSpacing: 0.02,
                 ),
               ),
             ],

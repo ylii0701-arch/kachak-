@@ -1,11 +1,11 @@
 {
-    "name": "kachak_tracker",
-    "short_name": "kachak_tracker",
+    "name": "KACHAK",
+    "short_name": "KACHAK",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F4ECD8",
+    "theme_color": "#2F855A",
+    "description": "KACHAK — Malaysian wildlife explorer.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

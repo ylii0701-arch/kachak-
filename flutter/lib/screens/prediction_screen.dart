@@ -4,6 +4,7 @@ import '../data/malaysia_cities.dart';
 import '../data/predictions_data.dart';
 import '../data/species_data.dart';
 import '../theme/app_theme.dart';
+import '../widgets/glass.dart';
 import '../widgets/species_network_image.dart';
 import 'species_prediction_screen.dart';
 
@@ -83,97 +84,106 @@ class _PredictionScreenState extends State<PredictionScreen> {
   Widget build(BuildContext context) {
     final predictions = locationPredictions[_predictionRegion] ?? [];
 
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(24, 36, 24, 24),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.primary, Color(0xFF276749)],
+    return Material(
+      color: Colors.transparent,
+      child: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 28, 16, 10),
+              child: GlassPanel(
+                padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
+                borderRadius: 26,
+                fillAlpha: 0.4,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.trending_up, color: AppColors.primary, size: 34),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Predictions',
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                color: AppColors.accent,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Discover which species are most likely to appear in your area',
+                      style: TextStyle(color: Colors.grey.shade700, fontSize: 15, height: 1.35),
+                    ),
+                  ],
+                ),
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.trending_up, color: Colors.white, size: 36),
-                    const SizedBox(width: 12),
-                    Text('Predictions', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Discover which species are most likely to appear in your area',
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 16),
-                ),
-              ],
-            ),
           ),
-        ),
-        SliverToBoxAdapter(
-          child: Container(
-            color: Colors.white,
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: GlassPanel(
+                padding: const EdgeInsets.all(16),
+                borderRadius: 22,
+                fillAlpha: 0.38,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.place, color: AppColors.primary),
-                    const SizedBox(width: 8),
-                    const Text('Select Region', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: _openCityPicker,
-                    borderRadius: BorderRadius.circular(12),
-                    child: InputDecorator(
-                      decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        suffixIcon: const Icon(Icons.arrow_drop_down_rounded, size: 28),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  _selectedCity,
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  'Tap to search all cities',
-                                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                                ),
-                              ],
+                    Row(
+                      children: [
+                        const Icon(Icons.place, color: AppColors.primary),
+                        const SizedBox(width: 8),
+                        const Text('Select Region', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: _openCityPicker,
+                        borderRadius: BorderRadius.circular(12),
+                        child: InputDecorator(
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey.shade300),
                             ),
+                            suffixIcon: const Icon(Icons.arrow_drop_down_rounded, size: 28),
                           ),
-                        ],
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      _selectedCity,
+                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      'Tap to search all cities',
+                                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
           sliver: SliverList(
@@ -202,6 +212,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Card(
+                    clipBehavior: Clip.antiAlias,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade200)),
                     child: InkWell(
                       onTap: () {
@@ -290,6 +301,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
           ),
         ),
       ],
+      ),
     );
   }
 }

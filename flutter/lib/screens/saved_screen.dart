@@ -5,6 +5,7 @@ import '../data/species_data.dart';
 import '../models/species.dart';
 import '../providers/saved_species_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/glass.dart';
 import '../widgets/difficulty_stars.dart';
 import '../widgets/species_network_image.dart';
 import 'species_detail_screen.dart';
@@ -19,64 +20,87 @@ class SavedScreen extends StatelessWidget {
     final saved = context.watch<SavedSpeciesProvider>();
     final list = speciesData.where((s) => saved.isSaved(s.id)).toList();
 
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(20, 28, 20, 16),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0x1A2F855A), Colors.transparent],
+    return Material(
+      color: Colors.transparent,
+      child: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 28, 16, 12),
+              child: GlassPanel(
+                padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+                borderRadius: 26,
+                fillAlpha: 0.42,
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
+                      ),
+                      child: const Icon(Icons.favorite, color: AppColors.primary, size: 28),
+                    ),
+                    const SizedBox(width: 14),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Saved Species', style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppColors.accent)),
+                        Text('${list.length} species', style: TextStyle(color: Colors.grey.shade700)),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(Icons.favorite, color: AppColors.primary, size: 28),
-                ),
-                const SizedBox(width: 14),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Saved Species', style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppColors.accent)),
-                    Text('${list.length} species', style: TextStyle(color: Colors.grey.shade600)),
-                  ],
-                ),
-              ],
-            ),
           ),
-        ),
         if (list.isEmpty)
           SliverFillRemaining(
+            hasScrollBody: false,
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.search, size: 80, color: Colors.grey.shade300),
-                    const SizedBox(height: 16),
-                    const Text('No favorite species yet', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Start exploring and save species you are interested in photographing.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey.shade600, height: 1.4),
-                    ),
-                    const SizedBox(height: 24),
-                    FilledButton(
-                      onPressed: onExplore ?? () {},
-                      child: const Text('Explore Species'),
-                    ),
-                  ],
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                child: GlassPanel(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                  borderRadius: 24,
+                  fillAlpha: 0.5,
+                  blurSigma: 22,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.favorite_outline_rounded, size: 56, color: AppColors.primary.withValues(alpha: 0.85)),
+                      const SizedBox(height: 20),
+                      Text(
+                        'No favorite species yet',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: AppColors.accent,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Start exploring and save species you want to photograph.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: const Color(0xFF3D4D45),
+                          fontSize: 15,
+                          height: 1.45,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                      FilledButton(
+                        onPressed: onExplore ?? () {},
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size.fromHeight(48),
+                          padding: const EdgeInsets.symmetric(horizontal: 28),
+                        ),
+                        child: const Text('Explore species'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -86,7 +110,7 @@ class SavedScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
-                    (context, index) {
+                (context, index) {
                   final s = list[index];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
@@ -97,12 +121,14 @@ class SavedScreen extends StatelessWidget {
               ),
             ),
           ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _savedCard(BuildContext context, Species s, SavedSpeciesProvider saved) {
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -171,7 +197,7 @@ class SavedScreen extends StatelessWidget {
               onPressed: () async {
                 try {
                   await saved.toggleSaved(s.id);
-                } catch (e) {
+                } catch (_) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(

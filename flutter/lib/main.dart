@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'providers/app_shell_controller.dart';
 import 'providers/saved_species_provider.dart';
-import 'screens/main_shell.dart';
+import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
@@ -27,9 +27,10 @@ class KachakApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Kachak',
+      title: 'KACHAK',
+      debugShowCheckedModeBanner: false,
       theme: buildKachakTheme(),
-      home: const MainShell(),
+      home: const SplashScreen(),
     );
   }
 }

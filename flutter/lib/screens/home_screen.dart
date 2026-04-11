@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../data/species_data.dart';
 import '../models/species.dart';
 import '../providers/saved_species_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/glass.dart';
 import '../widgets/difficulty_stars.dart';
 import '../widgets/species_network_image.dart';
 import 'species_detail_screen.dart';
@@ -21,7 +23,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _category = 'All';
   String _status = 'All';
@@ -38,7 +39,14 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _gridView = false;
   bool _showAll = false;
 
-  static const _categories = ['All', Species.mammals, Species.birds, Species.reptiles, Species.amphibians, Species.insects];
+  static const _categories = [
+    'All',
+    Species.mammals,
+    Species.birds,
+    Species.reptiles,
+    Species.amphibians,
+    Species.insects,
+  ];
   static const _statuses = [
     'All',
     Species.leastConcern,
@@ -48,12 +56,6 @@ class _HomeScreenState extends State<HomeScreen> {
     Species.criticallyEndangered,
   ];
   static const _difficulties = <Object>['All', 1, 2, 3, 4, 5];
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
 
   List<Species> get _filtered {
     var list = speciesData.where((s) {
@@ -111,44 +113,54 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final filtered = _filtered;
-    final initialCount = filtered.isEmpty ? 0 : (filtered.length * 0.25).ceil().clamp(1, filtered.length);
+    final initialCount =
+        filtered.isEmpty ? 0 : (filtered.length * 0.25).ceil().clamp(1, filtered.length);
     final displayed = _showAll ? filtered : filtered.take(initialCount).toList();
     final hasMore = filtered.length > initialCount && !_showAll;
     final saved = context.watch<SavedSpeciesProvider>();
 
     return Material(
-      color: Theme.of(context).colorScheme.surface,
+      color: Colors.transparent,
       child: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0x1A2F855A), Colors.transparent],
-                ),
-              ),
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+            child: GlassPanel(
+              padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
+              borderRadius: 26,
+              fillAlpha: 0.42,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Kachak',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppColors.accent),
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.6,
+                      height: 1.05,
+                      color: AppColors.accent,
+                    ),
                   ),
+                  const SizedBox(height: 4),
                   Text(
                     'Malaysian Wildlife Explorer',
-                    style: TextStyle(color: Colors.grey.shade700, fontSize: 16),
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.35,
+                      height: 1.35,
+                      color: const Color(0xFF5C6B63),
+                    ),
                   ),
                   const SizedBox(height: 20),
                   TextField(
-                    controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Search species name',
                       prefixIcon: const Icon(Icons.search),
                       suffixIcon: _searchQuery.isNotEmpty
-                          ? IconButton(icon: const Icon(Icons.close), onPressed: () { _searchController.clear(); setState(() => _searchQuery = ''); })
+                          ? IconButton(icon: const Icon(Icons.close), onPressed: () => setState(() => _searchQuery = ''))
                           : null,
                     ),
                     onChanged: (v) => setState(() => _searchQuery = v),
@@ -225,101 +237,102 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          if (filtered.isEmpty && _searchQuery.isNotEmpty)
-            SliverFillRemaining(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.search_off, size: 64, color: Colors.grey.shade400),
-                      const SizedBox(height: 12),
-                      Text('No species found matching "$_searchQuery"', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
-                      const SizedBox(height: 8),
-                      Text('Try checking your spelling or using different filters.', style: TextStyle(color: Colors.grey.shade600), textAlign: TextAlign.center),
-                      const SizedBox(height: 16),
-                      FilledButton(onPressed: () { _searchController.clear(); setState(() => _searchQuery = ''); }, child: const Text('Clear search')),
-                    ],
-                  ),
+        ),
+        if (filtered.isEmpty && _searchQuery.isNotEmpty)
+          SliverFillRemaining(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.info_outline, size: 64, color: Colors.grey.shade400),
+                    const SizedBox(height: 12),
+                    const Text('No species found', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 8),
+                    Text('No species matching "$_searchQuery"'),
+                    const SizedBox(height: 16),
+                    FilledButton(onPressed: () => setState(() => _searchQuery = ''), child: const Text('Clear search')),
+                  ],
+                ),
+              ),
+            ),
+          )
+        else if (filtered.isEmpty)
+          SliverFillRemaining(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.filter_alt_off, size: 64, color: Colors.grey.shade400),
+                    const SizedBox(height: 12),
+                    const Text('No results match your filters'),
+                    const SizedBox(height: 16),
+                    FilledButton(onPressed: _resetFilters, child: const Text('Reset filters')),
+                  ],
+                ),
+              ),
+            ),
+          )
+        else if (_gridView) ...[
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                // Taller cells than width/0.72 so title + chips + Save fit without overflow.
+                childAspectRatio: 0.58,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => _speciesCard(displayed[index], saved, compact: true),
+                childCount: displayed.length,
+              ),
+            ),
+          ),
+          if (hasMore)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+                child: OutlinedButton(
+                  onPressed: () => setState(() => _showAll = true),
+                  child: const Text('View More Species'),
                 ),
               ),
             )
-          else if (filtered.isEmpty)
-            SliverFillRemaining(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.filter_alt_off, size: 64, color: Colors.grey.shade400),
-                      const SizedBox(height: 12),
-                      const Text('No results match your filters'),
-                      const SizedBox(height: 16),
-                      FilledButton(onPressed: _resetFilters, child: const Text('Reset filters')),
-                    ],
-                  ),
-                ),
+          else
+            const SliverToBoxAdapter(child: SizedBox(height: 100)),
+        ]
+        else
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  if (index == displayed.length && hasMore) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: OutlinedButton(
+                        onPressed: () => setState(() => _showAll = true),
+                        child: const Text('View More Species'),
+                      ),
+                    );
+                  }
+                  if (index >= displayed.length) return null;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _speciesCard(displayed[index], saved, compact: false),
+                  );
+                },
+                childCount: displayed.length + (hasMore ? 1 : 0),
               ),
-            )
-          else if (_gridView) ...[
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    // Taller cells than width/0.72 so title + chips + Save fit without overflow.
-                    childAspectRatio: 0.58,
-                  ),
-                  delegate: SliverChildBuilderDelegate(
-                        (context, index) => _speciesCard(displayed[index], saved, compact: true),
-                    childCount: displayed.length,
-                  ),
-                ),
-              ),
-              if (hasMore)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
-                    child: OutlinedButton(
-                      onPressed: () => setState(() => _showAll = true),
-                      child: const Text('View More Species'),
-                    ),
-                  ),
-                )
-              else
-                const SliverToBoxAdapter(child: SizedBox(height: 100)),
-            ]
-            else
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                      if (index == displayed.length && hasMore) {
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: OutlinedButton(
-                            onPressed: () => setState(() => _showAll = true),
-                            child: const Text('View More Species'),
-                          ),
-                        );
-                      }
-                      if (index >= displayed.length) return null;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _speciesCard(displayed[index], saved, compact: false),
-                      );
-                    },
-                    childCount: displayed.length + (hasMore ? 1 : 0),
-                  ),
-                ),
-              ),
-        ],
-      ),
+            ),
+          ),
+      ],
+    ),
     );
   }
 
@@ -333,7 +346,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }) {
     final color = primary ? AppColors.primary : AppColors.accent;
     return Material(
-      color: selected ? color : Colors.white,
+      color: selected ? color : Colors.white.withValues(alpha: 0.82),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -551,14 +564,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _speciesCard(Species s, SavedSpeciesProvider saved, {required bool compact}) {
     final imgH = compact ? 120.0 : 180.0;
-
-    // --- SAFE STATUS CHECKS ---
     final hasStatus = s.conservationStatus.trim().isNotEmpty;
     final bg = hasStatus ? statusBackgroundColor(s.conservationStatus) : Colors.grey.shade300;
     final fg = hasStatus ? statusForegroundColor(s.conservationStatus) : Colors.black54;
     final statusText = hasStatus
         ? (compact ? statusAbbreviation(s.conservationStatus) : s.conservationStatus)
         : (compact ? 'N/A' : 'Status Unavailable');
+    final commonName = s.commonName.trim().isNotEmpty ? s.commonName : 'Unknown Species';
+    final scientificName = s.scientificName.trim().isNotEmpty
+        ? s.scientificName
+        : 'Scientific name unavailable';
+    final categoryText = s.category.trim().isNotEmpty ? s.category : 'Category N/A';
+
+    final tagFontSize = compact ? 10.0 : 12.0;
+    const tagLabelPadding = EdgeInsets.symmetric(horizontal: 5, vertical: 2);
+    final tagTextStyle = TextStyle(fontSize: tagFontSize, fontWeight: FontWeight.w600, height: 1.05);
+    const tagShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(6)),
+    );
+    const tagDensity = VisualDensity(horizontal: -2, vertical: -2);
 
     final infoPadding = EdgeInsets.all(compact ? 10 : 16);
     final infoColumn = Padding(
@@ -567,37 +591,45 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // --- SAFE NAME CHECKS ---
           Text(
-            s.commonName.trim().isNotEmpty ? s.commonName : 'Unknown Species',
+            commonName,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(fontSize: compact ? 16 : 20, fontWeight: FontWeight.w600),
           ),
           Text(
-            s.scientificName.trim().isNotEmpty ? s.scientificName : 'Scientific name unavailable',
+            scientificName,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey.shade600, fontSize: compact ? 11 : 13),
           ),
           const SizedBox(height: 8),
           Wrap(
-            spacing: 6,
-            runSpacing: 6,
+            spacing: 5,
+            runSpacing: 5,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              // --- SAFE CATEGORY CHECK ---
               Chip(
-                label: Text(
-                    s.category.trim().isNotEmpty ? s.category : 'Category N/A',
-                    style: TextStyle(fontSize: compact ? 10 : 12)
-                ),
-                visualDensity: VisualDensity.compact,
+                label: Text(categoryText, style: tagTextStyle.copyWith(color: Colors.black87)),
+                labelPadding: tagLabelPadding,
+                visualDensity: tagDensity,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 padding: EdgeInsets.zero,
+                shape: tagShape,
+                side: BorderSide(color: Colors.grey.shade400),
+                backgroundColor: Colors.white,
+                surfaceTintColor: Colors.transparent,
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
-                child: Text(statusText, style: TextStyle(color: fg, fontSize: compact ? 10 : 12, fontWeight: FontWeight.w600)),
+              Chip(
+                label: Text(statusText, style: tagTextStyle.copyWith(color: fg)),
+                labelPadding: tagLabelPadding,
+                visualDensity: tagDensity,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                padding: EdgeInsets.zero,
+                shape: tagShape,
+                side: BorderSide(width: 1, color: bg),
+                backgroundColor: bg,
+                surfaceTintColor: Colors.transparent,
               ),
             ],
           ),
@@ -619,8 +651,8 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: () async {
           try {
             await saved.toggleSaved(s.id);
-          } catch (e) {
-            if (context.mounted) {
+          } catch (_) {
+            if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Failed to update saved species. Please try again.'),
@@ -673,6 +705,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

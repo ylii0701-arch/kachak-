@@ -31,7 +31,7 @@ class SavedSpeciesProvider extends ChangeNotifier {
   Future<void> toggleSaved(String speciesId) async {
     final wasSaved = _ids.contains(speciesId);
 
-    // 1. Optimistically update the list in memory and UI
+    // Optimistically update local state first.
     if (wasSaved) {
       _ids.remove(speciesId);
     } else {
@@ -39,15 +39,13 @@ class SavedSpeciesProvider extends ChangeNotifier {
     }
     notifyListeners();
 
-    // 2. Try to save to device storage (setString returns false if it fails)
+    // Persist; rollback if storage fails.
     final success = await _prefs.setString(_storageKey, jsonEncode(_ids.toList()));
-
-    // 3. If storage fails, revert the memory state and throw an error
     if (!success) {
       if (wasSaved) {
-        _ids.add(speciesId); // Put it back
+        _ids.add(speciesId);
       } else {
-        _ids.remove(speciesId); // Remove it again
+        _ids.remove(speciesId);
       }
       notifyListeners();
       throw Exception('Storage full or unavailable.');

@@ -113,6 +113,10 @@ const List<SpeciesLocation> speciesLocations = [
   SpeciesLocation(id: 'loc18', speciesId: '11', lat: 3.1990, lng: 101.7190, lastSeen: '2026-04-02'),
   SpeciesLocation(id: 'loc19', speciesId: '11', lat: 3.1790, lng: 101.7090, lastSeen: '2026-04-01'),
   SpeciesLocation(id: 'loc20', speciesId: '12', lat: 3.2090, lng: 101.7290, lastSeen: '2026-03-28'),
+  SpeciesLocation(id: 'loc21', speciesId: '13', lat: 3.1980, lng: 101.7120, lastSeen: '2026-03-25'),
+  SpeciesLocation(id: 'loc22', speciesId: '14', lat: 5.3820, lng: 117.0810, lastSeen: '2026-03-22'),
+  SpeciesLocation(id: 'loc23', speciesId: '15', lat: 2.0150, lng: 103.4420, lastSeen: '2026-03-30'),
+  SpeciesLocation(id: 'loc24', speciesId: '17', lat: 4.0480, lng: 114.8800, lastSeen: '2026-04-02'),
 ];
 
 final List<PhotographySpot> photographySpots = [
@@ -184,7 +188,7 @@ final List<PhotographySpot> photographySpots = [
     habitatType: 'Secondary Forest',
     accessibility: 'Difficult',
     publicAccess: false,
-    speciesIds: ['4', '6', '11', '12'],
+    speciesIds: ['4', '6', '11', '12', '13'],
     description:
         'Remote area with rare species. Permit required. Suitable for experienced photographers only.',
   ),
