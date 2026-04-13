@@ -1,16 +1,18 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
+import '../config/map_keys.dart';
+import '../data/malaysia_cities.dart';
 import '../data/map_data.dart';
 import '../data/species_data.dart';
 import '../models/species.dart';
 import '../providers/app_shell_controller.dart';
+import '../services/openweather_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/species_network_image.dart';
 import 'species_detail_screen.dart';
@@ -23,13 +25,11 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  static const LatLng _kDefaultCenter = LatLng(3.1390, 101.6869);
+  static const LatLng _kDefaultCenter = LatLng(4.2105, 101.9758);
 
-  /// All observation data is in Peninsular Malaysia; the map must frame this
-  /// region. Auto-panning to the device's GPS (e.g. North America) would move
-  /// the viewport away from every marker (they are culled when off-screen).
-  static LatLngBounds get _wildlifeBounds {
+  static LatLngBounds get _mapBounds {
     final points = <LatLng>[
+      for (final city in kMalaysianCities) LatLng(city.lat, city.lng),
       for (final loc in speciesLocations) LatLng(loc.lat, loc.lng),
       for (final spot in photographySpots) LatLng(spot.lat, spot.lng),
     ];
@@ -43,27 +43,39 @@ class _MapScreenState extends State<MapScreen> {
   LatLng? _user;
   String? _locationToast;
   bool _loadingLocation = true;
+  bool _loadingCityWeather = true;
+  bool _showCityWeatherMarkers = true;
+  bool _showWildlifeMarkers = true;
+  bool _showPhotoSpots = true;
 
-  static const double _minZoom = 3;
+  final Map<String, CityWeatherBundle> _cityWeatherByName = {};
+  final OpenWeatherService _weatherService =
+      const OpenWeatherService(apiKey: openWeatherApiKey);
+
+  static const double _minZoom = 4;
   static const double _maxZoom = 18;
 
   @override
   void initState() {
     super.initState();
+
     _mapOptions = MapOptions(
       initialCenter: _kDefaultCenter,
-      initialZoom: 12,
+      initialZoom: 5.3,
       minZoom: _minZoom,
       maxZoom: _maxZoom,
       keepAlive: true,
       initialCameraFit: CameraFit.bounds(
-        bounds: _wildlifeBounds,
-        padding: const EdgeInsets.fromLTRB(32, 88, 32, 120),
-        maxZoom: 13,
+        bounds: _mapBounds,
+        padding: const EdgeInsets.fromLTRB(28, 96, 28, 120),
+        maxZoom: 6.5,
         minZoom: _minZoom,
       ),
     );
+
     _initLocation();
+    _loadCityWeather();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _shell = context.read<AppShellController>();
@@ -76,6 +88,7 @@ class _MapScreenState extends State<MapScreen> {
     if (!mounted) return;
     final shell = _shell ?? context.read<AppShellController>();
     if (shell.index != 2) return;
+
     final jump = shell.consumeMapJump();
     if (jump != null) {
       _mapController.move(jump.point, jump.zoom);
@@ -89,18 +102,77 @@ class _MapScreenState extends State<MapScreen> {
     super.dispose();
   }
 
+  Future<void> _loadCityWeather() async {
+    setState(() => _loadingCityWeather = true);
+
+    final Map<String, CityWeatherBundle> loaded = {};
+
+    try {
+      for (final city in kMalaysianCities) {
+        final weather = await _weatherService.fetchCityWeather(
+          cityName: city.name,
+          lat: city.lat,
+          lon: city.lng,
+        );
+        loaded[city.name] = weather;
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _cityWeatherByName
+          ..clear()
+          ..addAll(loaded);
+        _loadingCityWeather = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loadingCityWeather = false;
+        _locationToast =
+            'Weather data could not be loaded right now. Map is still available.';
+      });
+
+      Future.delayed(const Duration(seconds: 5), () {
+        if (mounted) {
+          setState(() => _locationToast = null);
+        }
+      });
+    }
+  }
+
   void _zoomBy(double delta) {
     final cam = _mapController.camera;
     final z = (cam.zoom + delta).clamp(_minZoom, _maxZoom);
     _mapController.move(cam.center, z);
   }
 
-  void _fitWildlifeHotspots() {
+  void _fitMalaysia() {
     _mapController.fitCamera(
       CameraFit.bounds(
-        bounds: _wildlifeBounds,
-        padding: const EdgeInsets.fromLTRB(32, 88, 32, 120),
-        maxZoom: 13,
+        bounds: _mapBounds,
+        padding: const EdgeInsets.fromLTRB(28, 96, 28, 120),
+        maxZoom: 6.5,
+        minZoom: _minZoom,
+      ),
+    );
+  }
+
+  void _fitWildlifeHotspots() {
+    final points = <LatLng>[
+      for (final loc in speciesLocations) LatLng(loc.lat, loc.lng),
+      for (final spot in photographySpots) LatLng(spot.lat, spot.lng),
+    ];
+
+    if (points.isEmpty) {
+      _fitMalaysia();
+      return;
+    }
+
+    _mapController.fitCamera(
+      CameraFit.bounds(
+        bounds: LatLngBounds.fromPoints(points),
+        padding: const EdgeInsets.fromLTRB(32, 96, 32, 120),
+        maxZoom: 10,
         minZoom: _minZoom,
       ),
     );
@@ -109,7 +181,7 @@ class _MapScreenState extends State<MapScreen> {
   void _goToMyLocation() {
     final u = _user;
     if (u == null) return;
-    _mapController.move(u, 12);
+    _mapController.move(u, 10);
   }
 
   Future<void> _initLocation() async {
@@ -118,103 +190,122 @@ class _MapScreenState extends State<MapScreen> {
       if (perm == LocationPermission.denied) {
         perm = await Geolocator.requestPermission();
       }
-      if (perm == LocationPermission.denied || perm == LocationPermission.deniedForever) {
+
+      if (perm == LocationPermission.denied ||
+          perm == LocationPermission.deniedForever) {
         if (mounted) {
           setState(() {
-            _locationToast = 'Location permission denied. Using Kuala Lumpur.';
+            _locationToast = 'Location permission denied. Using Malaysia view.';
             _loadingLocation = false;
           });
+
           Future.delayed(const Duration(seconds: 5), () {
-            if (mounted) setState(() => _locationToast = null);
+            if (mounted) {
+              setState(() => _locationToast = null);
+            }
           });
         }
         return;
       }
+
       final pos = await Geolocator.getCurrentPosition();
-      if (mounted) {
-        final here = LatLng(pos.latitude, pos.longitude);
-        setState(() {
-          _user = here;
-          _loadingLocation = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _locationToast = 'Unable to detect your location. Using Kuala Lumpur.';
-          _loadingLocation = false;
-        });
-        Future.delayed(const Duration(seconds: 5), () {
-          if (mounted) setState(() => _locationToast = null);
-        });
-      }
+      if (!mounted) return;
+
+      setState(() {
+        _user = LatLng(pos.latitude, pos.longitude);
+        _loadingLocation = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        _locationToast = 'Unable to detect your location. Using Malaysia view.';
+        _loadingLocation = false;
+      });
+
+      Future.delayed(const Duration(seconds: 5), () {
+        if (mounted) {
+          setState(() => _locationToast = null);
+        }
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final photographyMarkers = <Marker>[];
-    for (final spot in photographySpots) {
-      photographyMarkers.add(
-        Marker(
-          point: LatLng(spot.lat, spot.lng),
-          width: 36,
-          height: 36,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => _showPhotographySpotSheet(context, spot),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.amber.shade400, Colors.orange.shade600],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+    final protectedPolygons = <Polygon>[
+      for (final z in restrictedZones)
+        Polygon(
+          points: z.coordinates,
+          color: Colors.red.withValues(alpha: 0.14),
+          borderColor: Colors.red.shade700,
+          borderStrokeWidth: 2,
+        ),
+      for (final a in protectedAreas)
+        Polygon(
+          points: a.coordinates,
+          color: Colors.green.withValues(alpha: 0.12),
+          borderColor: AppColors.primary,
+          borderStrokeWidth: 2,
+        ),
+    ];
+
+    final circles = <CircleMarker>[
+      if (_user != null)
+        CircleMarker(
+          point: _user!,
+          radius: 10000,
+          useRadiusInMeter: true,
+          color: const Color(0xFF6FCF97).withValues(alpha: 0.08),
+          borderColor: const Color(0xFF6FCF97),
+          borderStrokeWidth: 2,
+        ),
+    ];
+
+    final photographyMarkers = <Marker>[
+      if (_showPhotoSpots)
+        for (final spot in photographySpots)
+          Marker(
+            point: LatLng(spot.lat, spot.lng),
+            width: 38,
+            height: 38,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => _showPhotographySpotSheet(context, spot),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.amber.shade400, Colors.orange.shade600],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.white, width: 2),
+                  boxShadow: const [
+                    BoxShadow(
+                      blurRadius: 8,
+                      color: Colors.black26,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
                 ),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white, width: 2),
-                boxShadow: const [BoxShadow(blurRadius: 6, color: Colors.black26)],
+                child: const Center(
+                  child: Text('📷', style: TextStyle(fontSize: 16)),
+                ),
               ),
-              child: const Center(child: Text('📷', style: TextStyle(fontSize: 16))),
             ),
           ),
-        ),
-      );
-    }
+    ];
 
-    final speciesMarkers = <Marker>[];
-    for (final loc in speciesLocations) {
-      final species = speciesById(loc.speciesId);
-      if (species == null) continue;
-      final weather = closestWeather(loc.lat, loc.lng);
-      final spot = photographySpotForSpecies(species.id);
-      final protected = protectedAreaAt(loc.lat, loc.lng);
-      final danger = isInDangerZone(loc.lat, loc.lng);
+    final speciesMarkers = <Marker>[
+      if (_showWildlifeMarkers)
+        for (final loc in speciesLocations)
+          if (speciesById(loc.speciesId) != null)
+            _buildSpeciesMarker(context, speciesById(loc.speciesId)!, loc),
+    ];
 
-      speciesMarkers.add(
-        Marker(
-          point: LatLng(loc.lat, loc.lng),
-          width: 44,
-          height: 44,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => _showSpeciesSheet(context, species, loc, weather, spot, protected, danger),
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 3),
-                boxShadow: const [BoxShadow(blurRadius: 6, color: Colors.black26)],
-              ),
-              child: const Center(child: Text('🦁', style: TextStyle(fontSize: 18))),
-            ),
-          ),
-        ),
-      );
-    }
-
-    final userMarkers = <Marker>[];
-    if (_user != null) {
-      userMarkers.add(
+    final userMarkers = <Marker>[
+      if (_user != null)
         Marker(
           point: _user!,
           width: 28,
@@ -225,49 +316,42 @@ class _MapScreenState extends State<MapScreen> {
                 color: const Color(0xFF6FCF97),
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white, width: 3),
-                boxShadow: const [BoxShadow(blurRadius: 8, color: Color(0x992F855A))],
+                boxShadow: const [
+                  BoxShadow(
+                    blurRadius: 8,
+                    color: Color(0x992F855A),
+                  ),
+                ],
               ),
             ),
           ),
         ),
-      );
-    }
+    ];
 
-    final polygons = <Polygon>[];
-    for (final z in restrictedZones) {
-      polygons.add(
-        Polygon(
-          points: z.coordinates,
-          color: Colors.red.withValues(alpha: 0.15),
-          borderColor: Colors.red.shade700,
-          borderStrokeWidth: 2,
-        ),
-      );
-    }
-    for (final a in protectedAreas) {
-      polygons.add(
-        Polygon(
-          points: a.coordinates,
-          color: Colors.green.withValues(alpha: 0.12),
-          borderColor: AppColors.primary,
-          borderStrokeWidth: 2,
-        ),
-      );
-    }
-
-    final circles = <CircleMarker>[];
-    if (_user != null) {
-      circles.add(
-        CircleMarker(
-          point: _user!,
-          radius: 10000,
-          useRadiusInMeter: true,
-          color: const Color(0xFF6FCF97).withValues(alpha: 0.08),
-          borderColor: const Color(0xFF6FCF97),
-          borderStrokeWidth: 2,
-        ),
-      );
-    }
+    final cityWeatherMarkers = <Marker>[
+      if (_showCityWeatherMarkers)
+        for (final city in kMalaysianCities)
+          Marker(
+            point: LatLng(city.lat, city.lng),
+            width: 88,
+            height: 88,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                final weather = _cityWeatherByName[city.name];
+                if (weather != null) {
+                  _showCityWeatherSheet(context, city, weather);
+                }
+              },
+              child: _CityWeatherMarker(
+                cityName: city.name,
+                weather: _cityWeatherByName[city.name],
+                loading: _loadingCityWeather &&
+                    !_cityWeatherByName.containsKey(city.name),
+              ),
+            ),
+          ),
+    ];
 
     return Stack(
       children: [
@@ -276,17 +360,17 @@ class _MapScreenState extends State<MapScreen> {
           options: _mapOptions,
           children: [
             TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.kachak.kachak_tracker',
+              urlTemplate: mapboxStaticTilesUrlTemplate,
             ),
             IgnorePointer(
-              child: PolygonLayer(polygons: polygons),
+              child: PolygonLayer(polygons: protectedPolygons),
             ),
             IgnorePointer(
               child: CircleLayer(circles: circles),
             ),
             MarkerLayer(
               markers: [
+                ...cityWeatherMarkers,
                 ...photographyMarkers,
                 ...speciesMarkers,
                 ...userMarkers,
@@ -294,46 +378,9 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ],
         ),
-        SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.44),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.62), width: 1.1),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.08),
-                        blurRadius: 16,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    child: Text(
-                      'Wildlife Map',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.accent,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
         if (_locationToast != null)
           Positioned(
-            top: 72,
+            top: 84,
             left: 16,
             right: 16,
             child: Material(
@@ -343,7 +390,7 @@ class _MapScreenState extends State<MapScreen> {
                 padding: const EdgeInsets.all(12),
                 child: Row(
                   children: [
-                    Icon(Icons.warning_amber_rounded, color: Colors.red.shade700),
+                    Icon(Icons.info_outline, color: Colors.amber.shade800),
                     const SizedBox(width: 10),
                     Expanded(child: Text(_locationToast!)),
                     IconButton(
@@ -361,51 +408,176 @@ class _MapScreenState extends State<MapScreen> {
               child: Center(child: CircularProgressIndicator()),
             ),
           ),
-        Positioned(
-          right: 12,
-          bottom: 12,
-          child: SafeArea(
-            child: Material(
-              elevation: 6,
-              borderRadius: BorderRadius.circular(12),
-              color: Colors.white,
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    tooltip: 'Show species & photo spots',
-                    onPressed: _fitWildlifeHotspots,
-                    icon: const Icon(Icons.filter_center_focus, color: AppColors.primary),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  if (_user != null)
-                    IconButton(
-                      tooltip: 'My location',
-                      onPressed: _goToMyLocation,
-                      icon: const Icon(Icons.my_location, color: AppColors.primary),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
-                  IconButton(
-                    tooltip: 'Zoom in',
-                    onPressed: () => _zoomBy(1),
-                    icon: const Icon(Icons.add, color: AppColors.primary),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
-                  IconButton(
-                    tooltip: 'Zoom out',
-                    onPressed: () => _zoomBy(-1),
-                    icon: const Icon(Icons.remove, color: AppColors.primary),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ],
+        _buildMapControls(),
+      ],
+    );
+  }
+
+  Marker _buildSpeciesMarker(
+    BuildContext context,
+    Species species,
+    SpeciesLocation loc,
+  ) {
+    final weather = closestWeather(loc.lat, loc.lng);
+    final spot = photographySpotForSpecies(species.id);
+    final protected = protectedAreaAt(loc.lat, loc.lng);
+    final danger = isInDangerZone(loc.lat, loc.lng);
+
+    return Marker(
+      point: LatLng(loc.lat, loc.lng),
+      width: 44,
+      height: 44,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => _showSpeciesSheet(
+          context,
+          species,
+          loc,
+          weather,
+          spot,
+          protected,
+          danger,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 3),
+            boxShadow: const [
+              BoxShadow(
+                blurRadius: 6,
+                color: Colors.black26,
               ),
-            ),
+            ],
+          ),
+          child: const Center(
+            child: Text('🦁', style: TextStyle(fontSize: 18)),
           ),
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildMapControls() {
+    return Positioned(
+      right: 12,
+      bottom: 12,
+      child: SafeArea(
+        child: Material(
+          elevation: 8,
+          borderRadius: BorderRadius.circular(14),
+          color: Colors.white.withValues(alpha: 0.96),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                tooltip: 'Refresh weather',
+                onPressed: _loadCityWeather,
+                icon: Icon(
+                  _loadingCityWeather ? Icons.sync : Icons.refresh,
+                  color: AppColors.primary,
+                ),
+                visualDensity: VisualDensity.compact,
+              ),
+              Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
+              IconButton(
+                tooltip: _showCityWeatherMarkers
+                    ? 'Hide city weather'
+                    : 'Show city weather',
+                onPressed: () {
+                  setState(() {
+                    _showCityWeatherMarkers = !_showCityWeatherMarkers;
+                  });
+                },
+                icon: Icon(
+                  _showCityWeatherMarkers
+                      ? Icons.location_city
+                      : Icons.location_city_outlined,
+                  color: AppColors.primary,
+                ),
+                visualDensity: VisualDensity.compact,
+              ),
+              Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
+              IconButton(
+                tooltip: _showWildlifeMarkers
+                    ? 'Hide wildlife markers'
+                    : 'Show wildlife markers',
+                onPressed: () {
+                  setState(() {
+                    _showWildlifeMarkers = !_showWildlifeMarkers;
+                  });
+                },
+                icon: Icon(
+                  _showWildlifeMarkers
+                      ? Icons.pets
+                      : Icons.pets_outlined,
+                  color: AppColors.primary,
+                ),
+                visualDensity: VisualDensity.compact,
+              ),
+              Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
+              IconButton(
+                tooltip: _showPhotoSpots
+                    ? 'Hide photo spots'
+                    : 'Show photo spots',
+                onPressed: () {
+                  setState(() {
+                    _showPhotoSpots = !_showPhotoSpots;
+                  });
+                },
+                icon: Icon(
+                  _showPhotoSpots
+                      ? Icons.camera_alt
+                      : Icons.camera_alt_outlined,
+                  color: AppColors.primary,
+                ),
+                visualDensity: VisualDensity.compact,
+              ),
+              Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
+              IconButton(
+                tooltip: 'Fit Malaysia',
+                onPressed: _fitMalaysia,
+                icon: const Icon(Icons.public, color: AppColors.primary),
+                visualDensity: VisualDensity.compact,
+              ),
+              Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
+              IconButton(
+                tooltip: 'Show wildlife hotspots',
+                onPressed: _fitWildlifeHotspots,
+                icon: const Icon(
+                  Icons.filter_center_focus,
+                  color: AppColors.primary,
+                ),
+                visualDensity: VisualDensity.compact,
+              ),
+              if (_user != null) ...[
+                Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
+                IconButton(
+                  tooltip: 'My location',
+                  onPressed: _goToMyLocation,
+                  icon: const Icon(Icons.my_location, color: AppColors.primary),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
+              Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
+              IconButton(
+                tooltip: 'Zoom in',
+                onPressed: () => _zoomBy(1),
+                icon: const Icon(Icons.add, color: AppColors.primary),
+                visualDensity: VisualDensity.compact,
+              ),
+              Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
+              IconButton(
+                tooltip: 'Zoom out',
+                onPressed: () => _zoomBy(-1),
+                icon: const Icon(Icons.remove, color: AppColors.primary),
+                visualDensity: VisualDensity.compact,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -446,7 +618,10 @@ class _MapScreenState extends State<MapScreen> {
                   style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
                 ),
                 const SizedBox(height: 12),
-                Text(place.description, style: TextStyle(color: Colors.grey.shade800, height: 1.45)),
+                Text(
+                  place.description,
+                  style: TextStyle(color: Colors.grey.shade800, height: 1.45),
+                ),
                 const SizedBox(height: 18),
                 FilledButton(
                   onPressed: () => Navigator.pop(ctx),
@@ -472,7 +647,9 @@ class _MapScreenState extends State<MapScreen> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (ctx) {
         return DraggableScrollableSheet(
           expand: false,
@@ -496,34 +673,68 @@ class _MapScreenState extends State<MapScreen> {
                   alignment: Alignment.centerRight,
                   child: Chip(label: Text('${species.difficultyLevel}★')),
                 ),
-                Text(species.commonName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary)),
-                Text('Last seen: ${loc.lastSeen}', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                Text(
+                  species.commonName,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+                Text(
+                  'Last seen: ${loc.lastSeen}',
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                ),
                 const SizedBox(height: 12),
                 if (protected != null)
                   ListTile(
                     leading: const Text('🛡️', style: TextStyle(fontSize: 22)),
-                    title: Text(protected.name, style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.green)),
+                    title: Text(
+                      protected.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.green,
+                      ),
+                    ),
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                   )
                 else if (danger)
                   ListTile(
                     leading: Icon(Icons.warning, color: Colors.red.shade700),
-                    title: Text('Danger Zone - Not Recommended', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.red.shade800)),
+                    title: Text(
+                      'Danger Zone - Not Recommended',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red.shade800,
+                      ),
+                    ),
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                   )
                 else
                   ListTile(
-                    leading: Icon(Icons.warning_amber, color: Colors.amber.shade800),
-                    title: Text('Outside Protected Area', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.amber.shade900)),
+                    leading: Icon(
+                      Icons.warning_amber,
+                      color: Colors.amber.shade800,
+                    ),
+                    title: Text(
+                      'Outside Protected Area',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.amber.shade900,
+                      ),
+                    ),
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                   ),
                 if (spot != null)
                   ListTile(
                     leading: const Text('📷'),
-                    title: Text(spot.name, style: const TextStyle(fontWeight: FontWeight.w500)),
+                    title: Text(
+                      spot.name,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -538,7 +749,10 @@ class _MapScreenState extends State<MapScreen> {
                   onPressed: () {
                     Navigator.pop(ctx);
                     Navigator.of(context).push(
-                      MaterialPageRoute<void>(builder: (_) => SpeciesDetailScreen(speciesId: species.id)),
+                      MaterialPageRoute<void>(
+                        builder: (_) =>
+                            SpeciesDetailScreen(speciesId: species.id),
+                      ),
                     );
                   },
                   child: const Text('View More Details'),
@@ -548,6 +762,294 @@ class _MapScreenState extends State<MapScreen> {
           },
         );
       },
+    );
+  }
+
+  void _showCityWeatherSheet(
+    BuildContext context,
+    MalaysianCity city,
+    CityWeatherBundle weather,
+  ) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Image.network(
+                      openWeatherIconUrl(weather.iconCode),
+                      width: 52,
+                      height: 52,
+                      errorBuilder: (_, _, _) => const Icon(
+                        Icons.cloud,
+                        size: 40,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            city.name,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          Text(
+                            '${city.state} • ${weather.temperature.toStringAsFixed(0)}°C • ${weather.description}',
+                            style: TextStyle(
+                              color: Colors.grey.shade800,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _InfoChip(label: 'Humidity ${weather.humidity}%'),
+                    _InfoChip(
+                      label: 'Wind ${weather.windSpeed.toStringAsFixed(1)} m/s',
+                    ),
+                    _InfoChip(
+                      label:
+                          'Updated ${weather.fetchedAt.hour.toString().padLeft(2, '0')}:${weather.fetchedAt.minute.toString().padLeft(2, '0')}',
+                    ),
+                    _InfoChip(
+                      label:
+                          'Prediction Region: ${predictionRegionForCity(city)}',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Next Forecast Slots',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.accent,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 112,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: weather.forecast.length,
+                    separatorBuilder: (_, _) => const SizedBox(width: 10),
+                    itemBuilder: (_, index) {
+                      final point = weather.forecast[index];
+                      return Container(
+                        width: 112,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: AppColors.primary.withValues(alpha: 0.12),
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${point.time.hour.toString().padLeft(2, '0')}:00',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.accent,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Image.network(
+                              openWeatherIconUrl(point.iconCode),
+                              width: 34,
+                              height: 34,
+                              errorBuilder: (_, _, _) => const Icon(
+                                Icons.cloud_outlined,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              '${point.temperature.toStringAsFixed(0)}°C',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'This city weather marker gives a quick overview for that area. Wildlife markers remain separate for animal-specific details.',
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _CityWeatherMarker extends StatelessWidget {
+  const _CityWeatherMarker({
+    required this.cityName,
+    required this.weather,
+    required this.loading,
+  });
+
+  final String cityName;
+  final CityWeatherBundle? weather;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) {
+    if (loading) {
+      return _glassShell(
+        child: const SizedBox(
+          width: 26,
+          height: 26,
+          child: CircularProgressIndicator(strokeWidth: 2.2),
+        ),
+      );
+    }
+
+    if (weather == null) {
+      return _glassShell(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.cloud_off, color: Colors.grey),
+            SizedBox(height: 4),
+            Text(
+              'No data',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return _glassShell(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 34,
+            height: 34,
+            child: Image.network(
+              openWeatherIconUrl(weather!.iconCode),
+              errorBuilder: (_, _, _) => const Icon(
+                Icons.cloud,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            weather!.temperature.toStringAsFixed(0),
+            style: const TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
+              color: AppColors.accent,
+            ),
+          ),
+          Text(
+            cityName,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _glassShell({required Widget child}) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.72),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.9),
+              width: 1,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 8,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  const _InfoChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.12),
+        ),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: AppColors.accent,
+        ),
+      ),
     );
   }
 }
