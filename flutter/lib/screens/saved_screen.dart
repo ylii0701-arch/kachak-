@@ -5,6 +5,7 @@ import '../data/species_data.dart';
 import '../models/species.dart';
 import '../providers/saved_species_provider.dart';
 import '../theme/app_theme.dart';
+import '../utils/adaptive.dart';
 import '../widgets/glass.dart';
 import '../widgets/difficulty_stars.dart';
 import '../widgets/species_network_image.dart';
@@ -17,8 +18,9 @@ class SavedScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scale = Adaptive.scale(context);
     final saved = context.watch<SavedSpeciesProvider>();
-    final list = speciesData.where((s) => saved.isSaved(s.id)).toList();
+    final list = speciesData.where((sp) => saved.isSaved(sp.id)).toList();
 
     return Material(
       color: Colors.transparent,
@@ -26,23 +28,23 @@ class SavedScreen extends StatelessWidget {
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 28, 16, 12),
+              padding: EdgeInsets.fromLTRB(16 * scale, 28 * scale, 16 * scale, 12 * scale),
               child: GlassPanel(
-                padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
-                borderRadius: 26,
+                padding: EdgeInsets.fromLTRB(18 * scale, 18 * scale, 18 * scale, 18 * scale),
+                borderRadius: 26 * scale,
                 fillAlpha: 0.42,
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: EdgeInsets.all(12 * scale),
                       decoration: BoxDecoration(
                         color: AppColors.primary.withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(16 * scale),
                         border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
                       ),
-                      child: const Icon(Icons.favorite, color: AppColors.primary, size: 28),
+                      child: Icon(Icons.favorite, color: AppColors.primary, size: 28 * scale),
                     ),
-                    const SizedBox(width: 14),
+                    SizedBox(width: 14 * scale),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -60,17 +62,17 @@ class SavedScreen extends StatelessWidget {
             hasScrollBody: false,
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+              padding: EdgeInsets.fromLTRB(20 * scale, 0, 20 * scale, 24 * scale),
                 child: GlassPanel(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                  borderRadius: 24,
+                  padding: EdgeInsets.symmetric(horizontal: 24 * scale, vertical: 32 * scale),
+                  borderRadius: 24 * scale,
                   fillAlpha: 0.5,
                   blurSigma: 22,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.favorite_outline_rounded, size: 56, color: AppColors.primary.withValues(alpha: 0.85)),
-                      const SizedBox(height: 20),
+                      Icon(Icons.favorite_outline_rounded, size: 56 * scale, color: AppColors.primary.withValues(alpha: 0.85)),
+                      SizedBox(height: 20 * scale),
                       Text(
                         'No favorite species yet',
                         textAlign: TextAlign.center,
@@ -79,7 +81,7 @@ class SavedScreen extends StatelessWidget {
                               fontWeight: FontWeight.w700,
                             ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12 * scale),
                       Text(
                         'Start exploring and save species you want to photograph.',
                         textAlign: TextAlign.center,
@@ -90,12 +92,12 @@ class SavedScreen extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(height: 28),
+                      SizedBox(height: 28 * scale),
                       FilledButton(
                         onPressed: onExplore ?? () {},
                         style: FilledButton.styleFrom(
-                          minimumSize: const Size.fromHeight(48),
-                          padding: const EdgeInsets.symmetric(horizontal: 28),
+                          minimumSize: Size.fromHeight(48 * scale),
+                          padding: EdgeInsets.symmetric(horizontal: 28 * scale),
                         ),
                         child: const Text('Explore species'),
                       ),
@@ -107,14 +109,14 @@ class SavedScreen extends StatelessWidget {
           )
         else
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+            padding: EdgeInsets.fromLTRB(16 * scale, 8 * scale, 16 * scale, 100 * scale),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  final s = list[index];
+                  final species = list[index];
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _savedCard(context, s, saved),
+                    padding: EdgeInsets.only(bottom: 12 * scale),
+                    child: _savedCard(context, species, saved),
                   );
                 },
                 childCount: list.length,
@@ -127,6 +129,7 @@ class SavedScreen extends StatelessWidget {
   }
 
   Widget _savedCard(BuildContext context, Species s, SavedSpeciesProvider saved) {
+    final scale = Adaptive.scale(context);
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -142,11 +145,11 @@ class SavedScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SizedBox(
-                  height: 180,
+                  height: Adaptive.clamp(context, 180, min: 140, max: 240),
                   child: SpeciesNetworkImage(url: s.imageUrl, fit: BoxFit.cover),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16 * scale),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -155,16 +158,16 @@ class SavedScreen extends StatelessWidget {
                         s.scientificName,
                         style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey.shade600),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8 * scale),
                       Wrap(
                         spacing: 8,
                         children: [
                           Chip(label: Text(s.category), visualDensity: VisualDensity.compact),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            padding: EdgeInsets.symmetric(horizontal: 10 * scale, vertical: 6 * scale),
                             decoration: BoxDecoration(
                               color: statusBackgroundColor(s.conservationStatus),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(20 * scale),
                             ),
                             child: Text(
                               s.conservationStatus,
@@ -177,12 +180,15 @@ class SavedScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8 * scale),
                       Row(
                         children: [
                           Text('Difficulty:', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-                          const SizedBox(width: 6),
-                          DifficultyStars(level: s.difficultyLevel, size: 16),
+                          SizedBox(width: 6 * scale),
+                          DifficultyStars(
+                            level: s.difficultyLevel,
+                            size: Adaptive.clamp(context, 16, min: 13, max: 20),
+                          ),
                         ],
                       ),
                     ],
@@ -192,7 +198,7 @@ class SavedScreen extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            padding: EdgeInsets.fromLTRB(16 * scale, 0, 16 * scale, 16 * scale),
             child: FilledButton.icon(
               onPressed: () async {
                 try {

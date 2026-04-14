@@ -6,6 +6,7 @@ import 'providers/app_shell_controller.dart';
 import 'providers/saved_species_provider.dart';
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
+import 'utils/adaptive.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +31,14 @@ class KachakApp extends StatelessWidget {
       title: 'KACHAK',
       debugShowCheckedModeBanner: false,
       theme: buildKachakTheme(),
+      builder: (context, child) {
+        final base = Theme.of(context);
+        final textScale = Adaptive.clamp(context, 1, min: 0.9, max: 1.12);
+        final themed = base.copyWith(
+          textTheme: base.textTheme.apply(fontSizeFactor: textScale),
+        );
+        return Theme(data: themed, child: child ?? const SizedBox.shrink());
+      },
       home: const SplashScreen(),
     );
   }

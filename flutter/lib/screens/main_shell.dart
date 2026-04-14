@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/app_shell_controller.dart';
 import '../theme/app_theme.dart';
+import '../utils/adaptive.dart';
 import '../widgets/glass.dart';
 import 'home_screen.dart';
 import 'map_screen.dart';
@@ -23,13 +24,15 @@ class _GlassBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = Adaptive.scale(context);
+    final radius = 22 * s;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(22),
+      borderRadius: BorderRadius.circular(radius),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BorderRadius.circular(radius),
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -53,13 +56,13 @@ class _GlassBottomNav extends StatelessWidget {
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(6, 11, 6, 7),
+            padding: EdgeInsets.fromLTRB(6 * s, 11 * s, 6 * s, 7 * s),
             child: Row(
               children: [
-                _item(0, Icons.home_outlined, Icons.home, 'Home'),
-                _item(1, Icons.trending_up_outlined, Icons.trending_up, 'Predict'),
-                _item(2, Icons.map_outlined, Icons.map, 'Map'),
-                _item(3, Icons.favorite_border, Icons.favorite, 'Saved'),
+                _item(context, 0, Icons.home_outlined, Icons.home, 'Home'),
+                _item(context, 1, Icons.trending_up_outlined, Icons.trending_up, 'Predict'),
+                _item(context, 2, Icons.map_outlined, Icons.map, 'Map'),
+                _item(context, 3, Icons.favorite_border, Icons.favorite, 'Saved'),
               ],
             ),
           ),
@@ -68,14 +71,23 @@ class _GlassBottomNav extends StatelessWidget {
     );
   }
 
-  Widget _item(int index, IconData iconOutlined, IconData iconFilled, String label) {
+  Widget _item(
+    BuildContext context,
+    int index,
+    IconData iconOutlined,
+    IconData iconFilled,
+    String label,
+  ) {
     final selected = selectedIndex == index;
+    final s = Adaptive.scale(context);
+    final iconSize = (22 * s).clamp(18.0, 24.0);
+    final labelSize = (11 * s).clamp(10.0, 13.0);
     return Expanded(
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () => onSelect(index),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(20 * s),
           splashColor: AppColors.primary.withValues(alpha: 0.18),
           highlightColor: AppColors.primary.withValues(alpha: 0.06),
           child: Column(
@@ -85,24 +97,24 @@ class _GlassBottomNav extends StatelessWidget {
               AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
                 curve: Curves.easeOutCubic,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                padding: EdgeInsets.symmetric(horizontal: 12 * s, vertical: 5 * s),
                 decoration: BoxDecoration(
                   color: selected ? AppColors.primary : Colors.transparent,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Icon(
                   selected ? iconFilled : iconOutlined,
-                  size: 22,
+                  size: iconSize,
                   color: selected ? Colors.white : _inactive,
                 ),
               ),
-              const SizedBox(height: 3),
+              SizedBox(height: 3 * s),
               Text(
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
+                  fontSize: labelSize,
                   fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
                   color: selected ? AppColors.textBodyOnFrost : _inactive,
                   height: 1.1,
@@ -124,6 +136,7 @@ class MainShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final shell = context.watch<AppShellController>();
     final bottom = MediaQuery.paddingOf(context).bottom;
+    final s = Adaptive.scale(context);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -146,7 +159,12 @@ class MainShell extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: Padding(
-        padding: EdgeInsets.fromLTRB(8, 0, 8, bottom > 0 ? bottom + 2 : 6),
+        padding: EdgeInsets.fromLTRB(
+          8 * s,
+          0,
+          8 * s,
+          bottom > 0 ? bottom + (2 * s) : 6 * s,
+        ),
         child: _GlassBottomNav(
           selectedIndex: shell.index,
           onSelect: (i) => context.read<AppShellController>().selectTab(i),

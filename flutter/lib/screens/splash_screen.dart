@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/app_theme.dart';
+import '../utils/adaptive.dart';
 import '../widgets/glass.dart';
 import 'main_shell.dart';
 
@@ -19,6 +20,7 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = Adaptive.scale(context);
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     const headlineColor = Color(0xFF1A3D2E);
     const bodyColor = Color(0xFF4A5C52);
@@ -31,13 +33,13 @@ class SplashScreen extends StatelessWidget {
           const MistBackdrop(),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+              padding: EdgeInsets.fromLTRB(20 * s, 12 * s, 20 * s, 8 * s),
               child: Column(
                 children: [
                   const Spacer(flex: 2),
                   GlassPanel(
-                    padding: const EdgeInsets.fromLTRB(22, 28, 22, 28),
-                    borderRadius: 28,
+                    padding: EdgeInsets.fromLTRB(22 * s, 28 * s, 22 * s, 28 * s),
+                    borderRadius: 28 * s,
                     fillAlpha: 0.34,
                     blurSigma: 28,
                     child: Column(
@@ -45,29 +47,29 @@ class SplashScreen extends StatelessWidget {
                       children: [
                         Image.asset(
                           'assets/images/kachak_logo_green.png',
-                          height: 168,
+                          height: Adaptive.clamp(context, 168, min: 120, max: 220),
                           fit: BoxFit.contain,
                           semanticLabel: 'Kachak logo',
                         ),
-                        const SizedBox(height: 22),
+                        SizedBox(height: 22 * s),
                         Text(
                           "Discover Malaysia's Wildlife\n& Conservation",
                           textAlign: TextAlign.center,
                           style: GoogleFonts.plusJakartaSans(
                             color: headlineColor,
-                            fontSize: 22,
+                            fontSize: Adaptive.clamp(context, 22, min: 18, max: 28),
                             fontWeight: FontWeight.w700,
                             height: 1.28,
                             letterSpacing: -0.15,
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        SizedBox(height: 10 * s),
                         Text(
                           'Authoritative species insights, ethical wildlife photography, and protected-area context — built for Malaysian field exploration.',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.plusJakartaSans(
                             color: bodyColor,
-                            fontSize: 14,
+                            fontSize: Adaptive.clamp(context, 14, min: 12, max: 17),
                             fontWeight: FontWeight.w400,
                             height: 1.45,
                             letterSpacing: 0.02,
@@ -78,7 +80,7 @@ class SplashScreen extends StatelessWidget {
                   ),
                   const Spacer(flex: 3),
                   _SplashGoRail(onGo: () => _go(context)),
-                  SizedBox(height: bottomInset + 6),
+                  SizedBox(height: bottomInset + (6 * s)),
                 ],
               ),
             ),
@@ -99,20 +101,18 @@ class _SplashGoRail extends StatefulWidget {
 }
 
 class _SplashGoRailState extends State<_SplashGoRail> with SingleTickerProviderStateMixin {
-  static const double _trackW = 92;
-  static const double _trackH = 196;
-  static const double _knobSize = 56;
-  static const double _knobInset = (_trackW - _knobSize) / 2;
-  /// Resting position: knob sits near bottom of pill.
-  static const double _knobBottomMin = 10;
-  /// Upper limit: knob stays below chevrons / label (no overlap).
-  static const double _knobBottomMax = 74;
-  static const double _knobTrigger = 66;
   static const double _flingVelocity = -720;
 
-  double _knobBottom = _knobBottomMin;
+  double _knobBottom = 10;
   late AnimationController _snapCtrl;
   Animation<double>? _snapAnim;
+
+  double _knobBottomMinFor(BuildContext context) =>
+      Adaptive.clamp(context, 10, min: 8, max: 14);
+  double _knobBottomMaxFor(BuildContext context) =>
+      Adaptive.clamp(context, 74, min: 56, max: 94);
+  double _knobTriggerFor(BuildContext context) =>
+      Adaptive.clamp(context, 66, min: 50, max: 84);
 
   @override
   void initState() {
@@ -135,17 +135,21 @@ class _SplashGoRailState extends State<_SplashGoRail> with SingleTickerProviderS
   }
 
   void _snapBack() {
+    final min = _knobBottomMinFor(context);
     _snapCtrl.stop();
-    _snapAnim = Tween<double>(begin: _knobBottom, end: _knobBottomMin).animate(
+    _snapAnim = Tween<double>(begin: _knobBottom, end: min).animate(
       CurvedAnimation(parent: _snapCtrl, curve: Curves.easeOutCubic),
     );
     _snapCtrl.forward(from: 0);
   }
 
   void _onDragEnd(DragEndDetails d) {
+    final min = _knobBottomMinFor(context);
+    final max = _knobBottomMaxFor(context);
+    final trigger = _knobTriggerFor(context);
     final v = d.primaryVelocity ?? 0;
-    final reachedTop = _knobBottom >= _knobTrigger;
-    final mid = (_knobBottomMin + _knobBottomMax) / 2;
+    final reachedTop = _knobBottom >= trigger;
+    final mid = (min + max) / 2;
     final flingUp = v < _flingVelocity && _knobBottom > mid;
     if (reachedTop || flingUp) {
       widget.onGo();
@@ -155,7 +159,7 @@ class _SplashGoRailState extends State<_SplashGoRail> with SingleTickerProviderS
   }
 
   void _onDragCancel() {
-    if (_knobBottom >= _knobTrigger) {
+    if (_knobBottom >= _knobTriggerFor(context)) {
       widget.onGo();
     } else {
       _snapBack();
@@ -164,18 +168,25 @@ class _SplashGoRailState extends State<_SplashGoRail> with SingleTickerProviderS
 
   @override
   Widget build(BuildContext context) {
+    final railW = Adaptive.clamp(context, 92, min: 72, max: 108);
+    final railH = Adaptive.clamp(context, 196, min: 156, max: 240);
+    final knobSize = Adaptive.clamp(context, 56, min: 44, max: 66);
+    final knobInset = (railW - knobSize) / 2;
+    final knobBottomMin = _knobBottomMinFor(context);
+    final knobBottomMax = _knobBottomMaxFor(context);
+    final knobBottom = _knobBottom.clamp(knobBottomMin, knobBottomMax);
     return Semantics(
       label: 'Drag the Go button up to the top to enter, or tap Go',
       child: SizedBox(
-        width: _trackW,
-        height: _trackH,
+        width: railW,
+        height: railH,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(_trackW / 2),
+          borderRadius: BorderRadius.circular(railW / 2),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(_trackW / 2),
+                borderRadius: BorderRadius.circular(railW / 2),
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -228,16 +239,16 @@ class _SplashGoRailState extends State<_SplashGoRail> with SingleTickerProviderS
                     ),
                   ),
                   Positioned(
-                    left: _knobInset,
-                    right: _knobInset,
-                    bottom: _knobBottom,
-                    height: _knobSize,
+                    left: knobInset,
+                    right: knobInset,
+                    bottom: knobBottom,
+                    height: knobSize,
                     child: GestureDetector(
                       onVerticalDragStart: (_) => _snapCtrl.stop(),
                       onVerticalDragUpdate: (d) {
                         setState(() {
                           // Finger moves up → delta.dy negative → increase bottom → knob rises.
-                          _knobBottom = (_knobBottom - d.delta.dy).clamp(_knobBottomMin, _knobBottomMax);
+                          _knobBottom = (_knobBottom - d.delta.dy).clamp(knobBottomMin, knobBottomMax);
                         });
                       },
                       onVerticalDragEnd: _onDragEnd,

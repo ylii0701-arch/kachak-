@@ -6,6 +6,7 @@ import '../data/species_data.dart';
 import '../models/species.dart';
 import '../providers/saved_species_provider.dart';
 import '../theme/app_theme.dart';
+import '../utils/adaptive.dart';
 import '../widgets/glass.dart';
 import '../widgets/difficulty_stars.dart';
 import '../widgets/species_network_image.dart';
@@ -112,6 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scale = Adaptive.scale(context);
     final filtered = _filtered;
     final initialCount =
         filtered.isEmpty ? 0 : (filtered.length * 0.25).ceil().clamp(1, filtered.length);
@@ -125,10 +127,10 @@ class _HomeScreenState extends State<HomeScreen> {
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+            padding: EdgeInsets.fromLTRB(16 * scale, 24 * scale, 16 * scale, 8 * scale),
             child: GlassPanel(
-              padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
-              borderRadius: 26,
+              padding: EdgeInsets.fromLTRB(18 * scale, 20 * scale, 18 * scale, 18 * scale),
+              borderRadius: 26 * scale,
               fillAlpha: 0.42,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     'Kachak',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 28,
+                      fontSize: Adaptive.clamp(context, 28, min: 22, max: 34),
                       fontWeight: FontWeight.w700,
                       letterSpacing: -0.6,
                       height: 1.05,
@@ -154,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: const Color(0xFF5C6B63),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20 * scale),
                   TextField(
                     decoration: InputDecoration(
                       hintText: 'Search species name',
@@ -165,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     onChanged: (v) => setState(() => _searchQuery = v),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12 * scale),
                   Row(
                     children: [
                       Expanded(
@@ -246,12 +248,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.info_outline, size: 64, color: Colors.grey.shade400),
-                    const SizedBox(height: 12),
+                    Icon(Icons.info_outline, size: 64 * scale, color: Colors.grey.shade400),
+                    SizedBox(height: 12 * scale),
                     const Text('No species found', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8 * scale),
                     Text('No species matching "$_searchQuery"'),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16 * scale),
                     FilledButton(onPressed: () => setState(() => _searchQuery = ''), child: const Text('Clear search')),
                   ],
                 ),
@@ -266,10 +268,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.filter_alt_off, size: 64, color: Colors.grey.shade400),
-                    const SizedBox(height: 12),
+                    Icon(Icons.filter_alt_off, size: 64 * scale, color: Colors.grey.shade400),
+                    SizedBox(height: 12 * scale),
                     const Text('No results match your filters'),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16 * scale),
                     FilledButton(onPressed: _resetFilters, child: const Text('Reset filters')),
                   ],
                 ),
@@ -278,12 +280,19 @@ class _HomeScreenState extends State<HomeScreen> {
           )
         else if (_gridView) ...[
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            padding: EdgeInsets.fromLTRB(16 * scale, 8 * scale, 16 * scale, 0),
             sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: Adaptive.adaptiveGridCount(
+                  context,
+                  minTileWidth: 180,
+                  min: 1,
+                  max: 3,
+                  horizontalPadding: 32 * scale,
+                  spacing: 12 * scale,
+                ),
+                mainAxisSpacing: 12 * scale,
+                crossAxisSpacing: 12 * scale,
                 // Taller cells than width/0.72 so title + chips + Save fit without overflow.
                 childAspectRatio: 0.58,
               ),
@@ -296,7 +305,7 @@ class _HomeScreenState extends State<HomeScreen> {
           if (hasMore)
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+                padding: EdgeInsets.fromLTRB(16 * scale, 12 * scale, 16 * scale, 100 * scale),
                 child: OutlinedButton(
                   onPressed: () => setState(() => _showAll = true),
                   child: const Text('View More Species'),
@@ -304,17 +313,17 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             )
           else
-            const SliverToBoxAdapter(child: SizedBox(height: 100)),
+            SliverToBoxAdapter(child: SizedBox(height: 100 * scale)),
         ]
         else
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+            padding: EdgeInsets.fromLTRB(16 * scale, 8 * scale, 16 * scale, 100 * scale),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
                   if (index == displayed.length && hasMore) {
                     return Padding(
-                      padding: const EdgeInsets.only(top: 8),
+                      padding: EdgeInsets.only(top: 8 * scale),
                       child: OutlinedButton(
                         onPressed: () => setState(() => _showAll = true),
                         child: const Text('View More Species'),
@@ -323,7 +332,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
                   if (index >= displayed.length) return null;
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
+                    padding: EdgeInsets.only(bottom: 12 * scale),
                     child: _speciesCard(displayed[index], saved, compact: false),
                   );
                 },
@@ -563,7 +572,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _speciesCard(Species s, SavedSpeciesProvider saved, {required bool compact}) {
-    final imgH = compact ? 120.0 : 180.0;
+    final imgH = compact
+        ? Adaptive.clamp(context, 120, min: 92, max: 150)
+        : Adaptive.clamp(context, 180, min: 140, max: 240);
     final hasStatus = s.conservationStatus.trim().isNotEmpty;
     final bg = hasStatus ? statusBackgroundColor(s.conservationStatus) : Colors.grey.shade300;
     final fg = hasStatus ? statusForegroundColor(s.conservationStatus) : Colors.black54;
@@ -576,15 +587,18 @@ class _HomeScreenState extends State<HomeScreen> {
         : 'Scientific name unavailable';
     final categoryText = s.category.trim().isNotEmpty ? s.category : 'Category N/A';
 
-    final tagFontSize = compact ? 10.0 : 12.0;
-    const tagLabelPadding = EdgeInsets.symmetric(horizontal: 5, vertical: 2);
+    final scale = Adaptive.scale(context);
+    final tagFontSize =
+        compact ? Adaptive.clamp(context, 10, min: 9, max: 12) : Adaptive.clamp(context, 12, min: 10, max: 14);
+    final tagLabelPadding =
+        EdgeInsets.symmetric(horizontal: 5 * scale, vertical: 2 * scale);
     final tagTextStyle = TextStyle(fontSize: tagFontSize, fontWeight: FontWeight.w600, height: 1.05);
     const tagShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(6)),
     );
     const tagDensity = VisualDensity(horizontal: -2, vertical: -2);
 
-    final infoPadding = EdgeInsets.all(compact ? 10 : 16);
+    final infoPadding = EdgeInsets.all((compact ? 10 : 16) * scale);
     final infoColumn = Padding(
       padding: infoPadding,
       child: Column(
@@ -595,18 +609,29 @@ class _HomeScreenState extends State<HomeScreen> {
             commonName,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: compact ? 16 : 20, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              fontSize: compact
+                  ? Adaptive.clamp(context, 16, min: 13, max: 19)
+                  : Adaptive.clamp(context, 20, min: 16, max: 24),
+              fontWeight: FontWeight.w600,
+            ),
           ),
           Text(
             scientificName,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey.shade600, fontSize: compact ? 11 : 13),
+            style: TextStyle(
+              fontStyle: FontStyle.italic,
+              color: Colors.grey.shade600,
+              fontSize: compact
+                  ? Adaptive.clamp(context, 11, min: 10, max: 13)
+                  : Adaptive.clamp(context, 13, min: 11, max: 15),
+            ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8 * scale),
           Wrap(
-            spacing: 5,
-            runSpacing: 5,
+            spacing: 5 * scale,
+            runSpacing: 5 * scale,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Chip(
@@ -633,12 +658,25 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6 * scale),
           Row(
             children: [
-              Text('Difficulty:', style: TextStyle(fontSize: compact ? 10 : 12, color: Colors.grey.shade600)),
-              const SizedBox(width: 6),
-              DifficultyStars(level: s.difficultyLevel, size: compact ? 12 : 16),
+              Text(
+                'Difficulty:',
+                style: TextStyle(
+                  fontSize: compact
+                      ? Adaptive.clamp(context, 10, min: 9, max: 12)
+                      : Adaptive.clamp(context, 12, min: 10, max: 14),
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              SizedBox(width: 6 * scale),
+              DifficultyStars(
+                level: s.difficultyLevel,
+                size: compact
+                    ? Adaptive.clamp(context, 12, min: 10, max: 14)
+                    : Adaptive.clamp(context, 16, min: 13, max: 20),
+              ),
             ],
           ),
         ],
@@ -646,7 +684,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     final saveButton = Padding(
-      padding: EdgeInsets.fromLTRB(compact ? 10 : 16, 0, compact ? 10 : 16, compact ? 10 : 16),
+      padding: EdgeInsets.fromLTRB(
+        (compact ? 10 : 16) * scale,
+        0,
+        (compact ? 10 : 16) * scale,
+        (compact ? 10 : 16) * scale,
+      ),
       child: FilledButton.icon(
         onPressed: () async {
           try {

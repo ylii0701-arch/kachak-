@@ -9,6 +9,7 @@ import '../models/species.dart';
 import '../providers/app_shell_controller.dart';
 import '../providers/saved_species_provider.dart';
 import '../theme/app_theme.dart';
+import '../utils/adaptive.dart';
 import '../widgets/difficulty_stars.dart';
 import '../widgets/glass.dart';
 import '../widgets/species_network_image.dart';
@@ -20,6 +21,7 @@ class SpeciesDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = Adaptive.scale(context);
     final species = speciesById(speciesId);
     if (species == null) {
       return Scaffold(
@@ -58,7 +60,7 @@ class SpeciesDetailScreen extends StatelessWidget {
           CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 280,
+            expandedHeight: Adaptive.clamp(context, 280, min: 220, max: 360),
             pinned: true,
             backgroundColor: Colors.white.withValues(alpha: 0.88),
             surfaceTintColor: Colors.transparent,
@@ -66,12 +68,12 @@ class SpeciesDetailScreen extends StatelessWidget {
               padding: EdgeInsets.zero,
               onPressed: () => Navigator.of(context).pop(),
               icon: Container(
-                padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(8 * s),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.38),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                child: Icon(Icons.arrow_back, color: Colors.white, size: 20 * s),
               ),
             ),
             flexibleSpace: FlexibleSpaceBar(
@@ -99,12 +101,12 @@ class SpeciesDetailScreen extends StatelessWidget {
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16 * s),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 GlassPanel(
-                  padding: const EdgeInsets.all(20),
-                  borderRadius: 20,
+                  padding: EdgeInsets.all(20 * s),
+                  borderRadius: 20 * s,
                   blurSigma: 14,
                   fillAlpha: 0.6,
                   verticalFrostGradient: true,
@@ -116,27 +118,27 @@ class SpeciesDetailScreen extends StatelessWidget {
                         style: GoogleFonts.plusJakartaSans(
                           color: AppColors.textBodyOnFrost,
                           fontWeight: FontWeight.w800,
-                          fontSize: 26,
+                          fontSize: Adaptive.clamp(context, 26, min: 20, max: 32),
                           height: 1.15,
                           letterSpacing: -0.4,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      SizedBox(height: 6 * s),
                       Text(
                         species.scientificName,
                         style: GoogleFonts.plusJakartaSans(
                           fontStyle: FontStyle.italic,
                           color: AppColors.textSubtitleOnFrost,
-                          fontSize: 16,
+                          fontSize: Adaptive.clamp(context, 16, min: 13, max: 20),
                           fontWeight: FontWeight.w600,
                           height: 1.35,
                           letterSpacing: 0.1,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12 * s),
                       Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
+                        spacing: 8 * s,
+                        runSpacing: 8 * s,
                         children: [
                           Chip(
                             label: Text(
@@ -144,14 +146,14 @@ class SpeciesDetailScreen extends StatelessWidget {
                               style: GoogleFonts.plusJakartaSans(
                                 color: AppColors.textBodyOnFrost,
                                 fontWeight: FontWeight.w700,
-                                fontSize: 13,
+                                fontSize: Adaptive.clamp(context, 13, min: 11, max: 16),
                                 letterSpacing: 0.05,
                               ),
                             ),
                             backgroundColor: Colors.white.withValues(alpha: 0.88),
                             side: BorderSide(color: Colors.white.withValues(alpha: 0.82)),
                             visualDensity: VisualDensity.compact,
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            padding: EdgeInsets.symmetric(horizontal: 4 * s),
                           ),
                           Chip(
                             label: Text(
@@ -159,20 +161,20 @@ class SpeciesDetailScreen extends StatelessWidget {
                               style: GoogleFonts.plusJakartaSans(
                                 color: AppColors.textBodyOnFrost,
                                 fontWeight: FontWeight.w700,
-                                fontSize: 13,
+                                fontSize: Adaptive.clamp(context, 13, min: 11, max: 16),
                                 letterSpacing: 0.05,
                               ),
                             ),
                             backgroundColor: Colors.white.withValues(alpha: 0.88),
                             side: BorderSide(color: Colors.white.withValues(alpha: 0.82)),
                             visualDensity: VisualDensity.compact,
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            padding: EdgeInsets.symmetric(horizontal: 4 * s),
                           ),
                           Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              padding: EdgeInsets.symmetric(horizontal: 12 * s, vertical: 8 * s),
                               decoration: BoxDecoration(
                                 color: statusBackgroundColor(species.conservationStatus),
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(20 * s),
                               ),
                               child: Text(
                                 species.conservationStatus,
@@ -184,7 +186,7 @@ class SpeciesDetailScreen extends StatelessWidget {
                             ),
                           ],
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12 * s),
                       Row(
                         children: [
                           Text(
@@ -192,18 +194,18 @@ class SpeciesDetailScreen extends StatelessWidget {
                             style: GoogleFonts.plusJakartaSans(
                               color: AppColors.textSubtitleOnFrost,
                               fontWeight: FontWeight.w700,
-                              fontSize: 14,
+                              fontSize: Adaptive.clamp(context, 14, min: 12, max: 17),
                               letterSpacing: 0.08,
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8 * s),
                           DifficultyStars(level: species.difficultyLevel),
                         ],
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12 * s),
                 GlassCtaPill(
                   emphasized: isFav,
                   onPressed: () async {
@@ -225,12 +227,12 @@ class SpeciesDetailScreen extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(isFav ? Icons.favorite : Icons.favorite_border),
-                      const SizedBox(width: 10),
+                      SizedBox(width: 10 * s),
                       Text(isFav ? 'Saved to Favorites' : 'Save to Favorites'),
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12 * s),
                 _sectionCard(context, title: 'About', icon: Icons.info_outline, child: Text(species.description)),
                 _sectionCard(context, title: 'Habitat', icon: Icons.place_outlined, child: Text(species.habitat)),
                 _habitatLocationsSection(context, species),
@@ -337,7 +339,7 @@ class SpeciesDetailScreen extends StatelessWidget {
                     }).toList(),
                   ),
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 32 * s),
               ]),
             ),
           ),

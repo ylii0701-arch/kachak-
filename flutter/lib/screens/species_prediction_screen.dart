@@ -7,6 +7,7 @@ import '../data/predictions_data.dart';
 import '../data/species_data.dart';
 import '../providers/saved_species_provider.dart';
 import '../theme/app_theme.dart';
+import '../utils/adaptive.dart';
 import '../widgets/glass.dart';
 import '../widgets/species_network_image.dart';
 import 'species_detail_screen.dart';
@@ -134,6 +135,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final s = Adaptive.scale(context);
     final species = speciesById(widget.speciesId);
     final prediction = speciesPredictions[widget.speciesId];
     final saved = context.watch<SavedSpeciesProvider>();
@@ -157,9 +159,9 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
       );
     }
 
-    final topInset = MediaQuery.paddingOf(context).top + kToolbarHeight + 6;
+    final topInset = MediaQuery.paddingOf(context).top + kToolbarHeight + (6 * s);
 
-    final bottomPad = MediaQuery.paddingOf(context).bottom + 20;
+    final bottomPad = MediaQuery.paddingOf(context).bottom + (20 * s);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -170,7 +172,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
           CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: topInset + 88,
+            expandedHeight: topInset + (88 * s),
             pinned: true,
             backgroundColor: Colors.white.withValues(alpha: 0.88),
             surfaceTintColor: Colors.transparent,
@@ -178,22 +180,22 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
               padding: EdgeInsets.zero,
               onPressed: () => Navigator.of(context).pop(),
               icon: Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(8 * s),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.38),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                child: Icon(Icons.arrow_back, color: Colors.white, size: 20 * s),
               ),
             ),
             actions: [
               Padding(
-                padding: const EdgeInsets.only(right: 4),
+                padding: EdgeInsets.only(right: 4 * s),
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   onPressed: () => saved.toggleSaved(species.id),
                   icon: Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(8 * s),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.38),
                       shape: BoxShape.circle,
@@ -201,7 +203,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                     child: Icon(
                       saved.isSaved(species.id) ? Icons.favorite : Icons.favorite_border,
                       color: saved.isSaved(species.id) ? Colors.red.shade200 : Colors.white,
-                      size: 20,
+                      size: 20 * s,
                     ),
                   ),
                 ),
@@ -230,7 +232,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                     ),
                   ),
                   Padding(
-                      padding: EdgeInsets.fromLTRB(16, topInset, 16, 18),
+                      padding: EdgeInsets.fromLTRB(16 * s, topInset, 16 * s, 18 * s),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -239,17 +241,17 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(12 * s),
                                 child: SizedBox(
-                                  width: 68,
-                                  height: 68,
+                                  width: Adaptive.clamp(context, 68, min: 52, max: 86),
+                                  height: Adaptive.clamp(context, 68, min: 52, max: 86),
                                   child: SpeciesNetworkImage(
                                     url: species.imageUrl,
                                     fit: BoxFit.cover,
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              SizedBox(width: 12 * s),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,42 +259,42 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                   children: [
                                     Text(
                                       species.commonName,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 22,
+                                        fontSize: Adaptive.clamp(context, 22, min: 17, max: 28),
                                         fontWeight: FontWeight.w700,
                                         height: 1.15,
                                         shadows: _predictionHeroShadows,
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
+                                    SizedBox(height: 4 * s),
                                     Text(
                                       species.scientificName,
                                       style: TextStyle(
                                         color: Colors.white.withValues(alpha: 0.94),
                                         fontStyle: FontStyle.italic,
-                                        fontSize: 14,
+                                        fontSize: Adaptive.clamp(context, 14, min: 11, max: 18),
                                         fontWeight: FontWeight.w500,
                                         height: 1.25,
                                         shadows: _predictionHeroShadows,
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: 8 * s),
                                     Row(
                                       children: [
                                         Icon(
                                           Icons.place_rounded,
                                           color: Colors.white.withValues(alpha: 0.92),
-                                          size: 17,
+                                          size: 17 * s,
                                           shadows: _predictionHeroShadows,
                                         ),
-                                        const SizedBox(width: 5),
+                                        SizedBox(width: 5 * s),
                                         Expanded(
                                           child: Text(
                                             '${prediction.locationName} • ${prediction.distance}km away',
                                             style: TextStyle(
                                               color: Colors.white.withValues(alpha: 0.92),
-                                              fontSize: 13,
+                                              fontSize: Adaptive.clamp(context, 13, min: 11, max: 16),
                                               fontWeight: FontWeight.w500,
                                               height: 1.35,
                                               shadows: _predictionHeroShadows,
@@ -317,14 +319,14 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
           SliverToBoxAdapter(
             child: Padding(
               // Space below hero — avoid overlapping the app bar.
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              padding: EdgeInsets.fromLTRB(16 * s, 16 * s, 16 * s, 0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   GlassPanel(
                     padding: EdgeInsets.zero,
-                    borderRadius: 18,
+                    borderRadius: 18 * s,
                     blurSigma: 14,
                     fillAlpha: 0.58,
                     verticalFrostGradient: true,
@@ -334,7 +336,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                         children: [
                           Expanded(
                             child: Padding(
-                              padding: const EdgeInsets.all(16),
+                              padding: EdgeInsets.all(16 * s),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -342,12 +344,12 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                     '🌿 Key Factors',
                                     style: GoogleFonts.plusJakartaSans(
                                       fontWeight: FontWeight.w800,
-                                      fontSize: 17,
+                                      fontSize: Adaptive.clamp(context, 17, min: 14, max: 21),
                                       color: AppColors.textBodyOnFrost,
                                       letterSpacing: -0.1,
                                     ),
                                   ),
-                                  const SizedBox(height: 10),
+                                  SizedBox(height: 10 * s),
                                   Row(
                                     children:
                                         [
@@ -362,21 +364,21 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                           return Expanded(
                                             child: Padding(
                                               padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 2,
+                                                  EdgeInsets.symmetric(
+                                                    horizontal: 2 * s,
                                                   ),
                                               child: Column(
                                                 children: [
                                                   Container(
                                                     padding:
-                                                        const EdgeInsets.all(8),
+                                                        EdgeInsets.all(8 * s),
                                                     decoration: BoxDecoration(
                                                       color: primary
                                                           ? AppColors.primary
                                                           : Colors.white.withValues(alpha: 0.38),
                                                       borderRadius:
                                                           BorderRadius.circular(
-                                                            10,
+                                                            10 * s,
                                                           ),
                                                       border: primary
                                                           ? Border.all(
@@ -398,7 +400,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                                           ? Icons
                                                                 .water_drop_outlined
                                                           : Icons.thermostat,
-                                                      size: 18,
+                                                      size: 18 * s,
                                                       color: primary ? Colors.white : AppColors.textSubtitleOnFrost,
                                                     ),
                                                   ),
@@ -421,7 +423,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                           ),
                           Container(width: 1, color: Colors.white.withValues(alpha: 0.45)),
                           SizedBox(
-                            width: 100,
+                            width: Adaptive.clamp(context, 100, min: 80, max: 128),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -448,7 +450,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                 Text(
                                   _notificationOn ? 'Alert On' : 'Alert Off',
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11,
+                                    fontSize: Adaptive.clamp(context, 11, min: 10, max: 13),
                                     fontWeight: FontWeight.w800,
                                     color: AppColors.textBodyOnFrost,
                                     letterSpacing: 0.1,
@@ -461,26 +463,26 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20 * s),
                 ],
               ),
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+            padding: EdgeInsets.fromLTRB(12 * s, 8 * s, 12 * s, 12 * s),
             sliver: SliverToBoxAdapter(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.trending_up, color: AppColors.iconSectionOnFrost, size: 22),
-                      const SizedBox(width: 8),
+                      Icon(Icons.trending_up, color: AppColors.iconSectionOnFrost, size: 22 * s),
+                      SizedBox(width: 8 * s),
                       Text(
                         '7-Day Occurrence Forecast',
                         style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.w800,
-                          fontSize: 17,
+                          fontSize: Adaptive.clamp(context, 17, min: 14, max: 21),
                           color: AppColors.textBodyOnFrost,
                           height: 1.2,
                           letterSpacing: -0.1,
@@ -488,15 +490,15 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8 * s),
                   ...prediction.forecast.asMap().entries.map((e) {
                     final day = e.value;
                     final first = e.key == 0;
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
+                      padding: EdgeInsets.only(bottom: 8 * s),
                       child: GlassPanel(
                         padding: EdgeInsets.zero,
-                        borderRadius: 16,
+                        borderRadius: 16 * s,
                         blurSigma: 14,
                         fillAlpha: 0.56,
                         verticalFrostGradient: true,
@@ -506,16 +508,16 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 8,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10 * s,
+                                vertical: 8 * s,
                               ),
                               decoration: BoxDecoration(
                                 color: first
                                     ? AppColors.primary.withValues(alpha: 0.12)
                                     : Colors.white.withValues(alpha: 0.42),
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(14),
+                                borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(14 * s),
                                 ),
                               ),
                               child: Row(
@@ -525,19 +527,19 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                     _formatDate(day.date),
                                     style: GoogleFonts.plusJakartaSans(
                                       fontWeight: FontWeight.w800,
-                                      fontSize: 15,
+                                      fontSize: Adaptive.clamp(context, 15, min: 12, max: 19),
                                       color: AppColors.textBodyOnFrost,
                                       letterSpacing: -0.05,
                                     ),
                                   ),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 4,
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 10 * s,
+                                      vertical: 4 * s,
                                     ),
                                     decoration: BoxDecoration(
                                       color: _probBg(day.probability),
-                                      borderRadius: BorderRadius.circular(20),
+                                      borderRadius: BorderRadius.circular(20 * s),
                                       border: Border.all(
                                         color: Colors.grey.shade400,
                                       ),
@@ -545,7 +547,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                     child: Text(
                                       '${day.probability} Chance',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 11,
+                                        fontSize: Adaptive.clamp(context, 11, min: 10, max: 13),
                                         fontWeight: FontWeight.w800,
                                         color: _probFg(day.probability),
                                         letterSpacing: 0.05,
@@ -556,7 +558,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(10),
+                              padding: EdgeInsets.all(10 * s),
                               child: Column(
                                 children: [
                                   Row(
@@ -580,7 +582,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 10),
+                                  SizedBox(height: 10 * s),
                                   Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -613,7 +615,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                   }),
                   GlassCtaPill(
                     emphasized: true,
-                    minHeight: 48,
+                    minHeight: 48 * s,
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute<void>(
