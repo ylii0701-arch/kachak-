@@ -447,7 +447,7 @@ const List<Species> speciesData = [
   Species(
     id: '99',
     commonName: '', // Tests "Unknown Species"
-    scientificName: '   ', // Tests "Scientific name unavailable" (space trimming)
+    scientificName: '', // Tests "Scientific name unavailable" (space trimming)
     category: '', // Tests "Category N/A"
     conservationStatus: '', // Tests "Status Unavailable" and Grey Chip
     habitat: '', // Tests section card empty text fallback
