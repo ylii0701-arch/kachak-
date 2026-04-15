@@ -108,69 +108,70 @@ class SpeciesDetailScreen extends StatelessWidget {
                   padding: EdgeInsets.all(20 * s),
                   borderRadius: 20 * s,
                   blurSigma: 14,
-                  fillAlpha: 0.6,
+                  fillAlpha: 0.62,
                   verticalFrostGradient: true,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        species.commonName,
-                        style: GoogleFonts.plusJakartaSans(
-                          color: AppColors.textBodyOnFrost,
-                          fontWeight: FontWeight.w800,
-                          fontSize: Adaptive.clamp(context, 26, min: 20, max: 32),
-                          height: 1.15,
-                          letterSpacing: -0.4,
-                        ),
-                      ),
-                      SizedBox(height: 6 * s),
-                      Text(
-                        species.scientificName,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontStyle: FontStyle.italic,
-                          color: AppColors.textSubtitleOnFrost,
-                          fontSize: Adaptive.clamp(context, 16, min: 13, max: 20),
-                          fontWeight: FontWeight.w600,
-                          height: 1.35,
-                          letterSpacing: 0.1,
-                        ),
-                      ),
-                      SizedBox(height: 12 * s),
-                      Wrap(
-                        spacing: 8 * s,
-                        runSpacing: 8 * s,
-                        children: [
-                          Chip(
-                            label: Text(
-                              species.category,
-                              style: GoogleFonts.plusJakartaSans(
-                                color: AppColors.textBodyOnFrost,
-                                fontWeight: FontWeight.w700,
-                                fontSize: Adaptive.clamp(context, 13, min: 11, max: 16),
-                                letterSpacing: 0.05,
-                              ),
-                            ),
-                            backgroundColor: Colors.white.withValues(alpha: 0.88),
-                            side: BorderSide(color: Colors.white.withValues(alpha: 0.82)),
-                            visualDensity: VisualDensity.compact,
-                            padding: EdgeInsets.symmetric(horizontal: 4 * s),
+                  child: _innerInfoCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          species.commonName,
+                          style: GoogleFonts.plusJakartaSans(
+                            color: AppColors.textBodyOnFrost,
+                            fontWeight: FontWeight.w800,
+                            fontSize: Adaptive.clamp(context, 26, min: 20, max: 32),
+                            height: 1.15,
+                            letterSpacing: -0.4,
                           ),
-                          Chip(
-                            label: Text(
-                              species.activityPattern,
-                              style: GoogleFonts.plusJakartaSans(
-                                color: AppColors.textBodyOnFrost,
-                                fontWeight: FontWeight.w700,
-                                fontSize: Adaptive.clamp(context, 13, min: 11, max: 16),
-                                letterSpacing: 0.05,
-                              ),
-                            ),
-                            backgroundColor: Colors.white.withValues(alpha: 0.88),
-                            side: BorderSide(color: Colors.white.withValues(alpha: 0.82)),
-                            visualDensity: VisualDensity.compact,
-                            padding: EdgeInsets.symmetric(horizontal: 4 * s),
+                        ),
+                        SizedBox(height: 6 * s),
+                        Text(
+                          species.scientificName,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontStyle: FontStyle.italic,
+                            color: AppColors.textSubtitleOnFrost,
+                            fontSize: Adaptive.clamp(context, 16, min: 13, max: 20),
+                            fontWeight: FontWeight.w600,
+                            height: 1.35,
+                            letterSpacing: 0.1,
                           ),
-                          Container(
+                        ),
+                        SizedBox(height: 12 * s),
+                        Wrap(
+                          spacing: 8 * s,
+                          runSpacing: 8 * s,
+                          children: [
+                            Chip(
+                              label: Text(
+                                species.category,
+                                style: GoogleFonts.plusJakartaSans(
+                                  color: AppColors.textBodyOnFrost,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: Adaptive.clamp(context, 13, min: 11, max: 16),
+                                  letterSpacing: 0.05,
+                                ),
+                              ),
+                              backgroundColor: Colors.white.withValues(alpha: 0.9),
+                              side: BorderSide(color: Colors.white.withValues(alpha: 0.84)),
+                              visualDensity: VisualDensity.compact,
+                              padding: EdgeInsets.symmetric(horizontal: 4 * s),
+                            ),
+                            Chip(
+                              label: Text(
+                                species.activityPattern,
+                                style: GoogleFonts.plusJakartaSans(
+                                  color: AppColors.textBodyOnFrost,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: Adaptive.clamp(context, 13, min: 11, max: 16),
+                                  letterSpacing: 0.05,
+                                ),
+                              ),
+                              backgroundColor: Colors.white.withValues(alpha: 0.9),
+                              side: BorderSide(color: Colors.white.withValues(alpha: 0.84)),
+                              visualDensity: VisualDensity.compact,
+                              padding: EdgeInsets.symmetric(horizontal: 4 * s),
+                            ),
+                            Container(
                               padding: EdgeInsets.symmetric(horizontal: 12 * s, vertical: 8 * s),
                               decoration: BoxDecoration(
                                 color: statusBackgroundColor(species.conservationStatus),
@@ -185,51 +186,62 @@ class SpeciesDetailScreen extends StatelessWidget {
                               ),
                             ),
                           ],
-                      ),
-                      SizedBox(height: 12 * s),
-                      Row(
-                        children: [
-                          Text(
-                            'Shooting difficulty',
-                            style: GoogleFonts.plusJakartaSans(
-                              color: AppColors.textSubtitleOnFrost,
-                              fontWeight: FontWeight.w700,
-                              fontSize: Adaptive.clamp(context, 14, min: 12, max: 17),
-                              letterSpacing: 0.08,
+                        ),
+                        SizedBox(height: 12 * s),
+                        Row(
+                          children: [
+                            Text(
+                              'Shooting difficulty',
+                              style: GoogleFonts.plusJakartaSans(
+                                color: AppColors.textSubtitleOnFrost,
+                                fontWeight: FontWeight.w700,
+                                fontSize: Adaptive.clamp(context, 14, min: 12, max: 17),
+                                letterSpacing: 0.08,
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 8 * s),
-                          DifficultyStars(level: species.difficultyLevel),
-                        ],
-                      ),
-                    ],
+                            SizedBox(width: 8 * s),
+                            DifficultyStars(level: species.difficultyLevel),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 SizedBox(height: 12 * s),
-                GlassCtaPill(
-                  emphasized: isFav,
-                  onPressed: () async {
-                    try {
-                      await saved.toggleSaved(species.id);
-                    } catch (_) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Failed to update saved species. Please try again.'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    }
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(isFav ? Icons.favorite : Icons.favorite_border),
-                      SizedBox(width: 10 * s),
-                      Text(isFav ? 'Saved to Favorites' : 'Save to Favorites'),
-                    ],
+                GlassPanel(
+                  padding: EdgeInsets.all(8 * s),
+                  borderRadius: 20 * s,
+                  blurSigma: 14,
+                  fillAlpha: 0.62,
+                  verticalFrostGradient: true,
+                  child: _innerInfoCard(
+                    padding: EdgeInsets.zero,
+                    child: GlassCtaPill(
+                      emphasized: isFav,
+                      onPressed: () async {
+                        try {
+                          await saved.toggleSaved(species.id);
+                        } catch (_) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Failed to update saved species. Please try again.'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(isFav ? Icons.favorite : Icons.favorite_border),
+                          SizedBox(width: 10 * s),
+                          Text(isFav ? 'Saved to Favorites' : 'Save to Favorites'),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(height: 12 * s),
@@ -389,43 +401,45 @@ class SpeciesDetailScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         borderRadius: 20,
         blurSigma: 14,
-        fillAlpha: 0.6,
+        fillAlpha: 0.62,
         verticalFrostGradient: true,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.map_outlined, size: 22, color: AppColors.iconSectionOnFrost),
-                const SizedBox(width: 8),
-                Text(
-                  'Habitat & Locations',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 17,
-                    color: AppColors.textBodyOnFrost,
-                    letterSpacing: -0.15,
+        child: _innerInfoCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.map_outlined, size: 22, color: AppColors.iconSectionOnFrost),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Habitat & Locations',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 17,
+                      color: AppColors.textBodyOnFrost,
+                      letterSpacing: -0.15,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tap a row to open the map centered on that pin.',
-              style: GoogleFonts.plusJakartaSans(
-                color: AppColors.textSubtitleOnFrost,
-                fontSize: 13,
-                height: 1.45,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.02,
+                ],
               ),
-            ),
-            const SizedBox(height: 16),
-            for (var i = 0; i < rows.length; i++) ...[
-              rows[i],
-              if (i < rows.length - 1) const SizedBox(height: 8),
+              const SizedBox(height: 8),
+              Text(
+                'Tap a row to open the map centered on that pin.',
+                style: GoogleFonts.plusJakartaSans(
+                  color: AppColors.textSubtitleOnFrost,
+                  fontSize: 13,
+                  height: 1.45,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.02,
+                ),
+              ),
+              const SizedBox(height: 16),
+              for (var i = 0; i < rows.length; i++) ...[
+                rows[i],
+                if (i < rows.length - 1) const SizedBox(height: 8),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -439,10 +453,10 @@ class SpeciesDetailScreen extends StatelessWidget {
     required LatLng point,
   }) {
     return Material(
-      color: Colors.white.withValues(alpha: 0.78),
+      color: Colors.white.withValues(alpha: 0.84),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.white.withValues(alpha: 0.72)),
+        side: BorderSide(color: Colors.white.withValues(alpha: 0.78)),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -530,42 +544,57 @@ class SpeciesDetailScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         borderRadius: 20,
         blurSigma: 14,
-        fillAlpha: 0.6,
+        fillAlpha: 0.62,
         verticalFrostGradient: true,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                if (icon != null) ...[
-                  Icon(icon, size: 22, color: AppColors.iconSectionOnFrost),
-                  const SizedBox(width: 8),
-                ],
-                Text(
-                  title,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 17,
-                    color: AppColors.textBodyOnFrost,
-                    letterSpacing: -0.1,
+        child: _innerInfoCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  if (icon != null) ...[
+                    Icon(icon, size: 22, color: AppColors.iconSectionOnFrost),
+                    const SizedBox(width: 8),
+                  ],
+                  Text(
+                    title,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 17,
+                      color: AppColors.textBodyOnFrost,
+                      letterSpacing: -0.1,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            DefaultTextStyle.merge(
-              style: GoogleFonts.plusJakartaSans(
-                height: 1.55,
-                fontSize: 16,
-                color: AppColors.textBodyOnFrost,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.08,
+                ],
               ),
-              child: content,
-            ),
-          ],
+              const SizedBox(height: 12),
+              DefaultTextStyle.merge(
+                style: GoogleFonts.plusJakartaSans(
+                  height: 1.55,
+                  fontSize: 16,
+                  color: AppColors.textBodyOnFrost,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.08,
+                ),
+                child: content,
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _innerInfoCard({required Widget child, EdgeInsets? padding}) {
+    return Container(
+      width: double.infinity,
+      padding: padding ?? const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.86),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
+      ),
+      child: child,
     );
   }
 }

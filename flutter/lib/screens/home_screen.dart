@@ -38,7 +38,10 @@ class _HomeScreenState extends State<HomeScreen> {
   _SortBy _tempSortBy = _SortBy.none;
   _SortOrder _tempSortOrder = _SortOrder.ascending;
   bool _gridView = false;
-  bool _showAll = false;
+  int _currentPage = 1;
+  static const int _pageSize = 6;
+  final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   static const _categories = [
     'All',
@@ -57,6 +60,13 @@ class _HomeScreenState extends State<HomeScreen> {
     Species.criticallyEndangered,
   ];
   static const _difficulties = <Object>['All', 1, 2, 3, 4, 5];
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   List<Species> get _filtered {
     var list = speciesData.where((s) {
@@ -97,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _tempCategory = 'All';
       _tempStatus = 'All';
       _tempDifficulty = 'All';
-      _showAll = false;
+      _currentPage = 1;
     });
   }
 
@@ -107,23 +117,48 @@ class _HomeScreenState extends State<HomeScreen> {
       _sortOrder = _SortOrder.ascending;
       _tempSortBy = _SortBy.none;
       _tempSortOrder = _SortOrder.ascending;
-      _showAll = false;
+      _currentPage = 1;
     });
+  }
+
+  void _clearSearchInput() {
+    setState(() {
+      _searchController.clear();
+      _searchQuery = '';
+      _currentPage = 1;
+    });
+  }
+
+  void _goToPage(int page, {bool smooth = true}) {
+    setState(() {
+      _currentPage = page;
+    });
+    if (!_scrollController.hasClients) return;
+    if (smooth) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeOutCubic,
+      );
+    } else {
+      _scrollController.jumpTo(0);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final scale = Adaptive.scale(context);
     final filtered = _filtered;
-    final initialCount =
-        filtered.isEmpty ? 0 : (filtered.length * 0.25).ceil().clamp(1, filtered.length);
-    final displayed = _showAll ? filtered : filtered.take(initialCount).toList();
-    final hasMore = filtered.length > initialCount && !_showAll;
+    final totalPages = filtered.isEmpty ? 1 : (filtered.length / _pageSize).ceil();
+    final page = _currentPage.clamp(1, totalPages);
+    final start = filtered.isEmpty ? 0 : (page - 1) * _pageSize;
+    final displayed = filtered.skip(start).take(_pageSize).toList();
     final saved = context.watch<SavedSpeciesProvider>();
 
     return Material(
       color: Colors.transparent,
       child: CustomScrollView(
+      controller: _scrollController,
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
@@ -158,14 +193,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   SizedBox(height: 20 * scale),
                   TextField(
+                    controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Search species name',
                       prefixIcon: const Icon(Icons.search),
                       suffixIcon: _searchQuery.isNotEmpty
-                          ? IconButton(icon: const Icon(Icons.close), onPressed: () => setState(() => _searchQuery = ''))
+                          ? IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: _clearSearchInput,
+                            )
                           : null,
                     ),
-                    onChanged: (v) => setState(() => _searchQuery = v),
+                    onChanged: (v) => setState(() {
+                      _searchQuery = v;
+                      _currentPage = 1;
+                    }),
                   ),
                   SizedBox(height: 12 * scale),
                   Row(
@@ -254,7 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     SizedBox(height: 8 * scale),
                     Text('No species matching "$_searchQuery"'),
                     SizedBox(height: 16 * scale),
-                    FilledButton(onPressed: () => setState(() => _searchQuery = ''), child: const Text('Clear search')),
+                    FilledButton(onPressed: _clearSearchInput, child: const Text('Clear search')),
                   ],
                 ),
               ),
@@ -302,18 +344,14 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          if (hasMore)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(16 * scale, 12 * scale, 16 * scale, 100 * scale),
-                child: OutlinedButton(
-                  onPressed: () => setState(() => _showAll = true),
-                  child: const Text('View More Species'),
-                ),
-              ),
-            )
-          else
-            SliverToBoxAdapter(child: SizedBox(height: 100 * scale)),
+          SliverToBoxAdapter(
+            child: _paginationFooter(
+              scale: scale,
+              page: page,
+              totalPages: totalPages,
+              hasResults: filtered.isNotEmpty,
+            ),
+          ),
         ]
         else
           SliverPadding(
@@ -321,12 +359,12 @@ class _HomeScreenState extends State<HomeScreen> {
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  if (index == displayed.length && hasMore) {
+                  if (index == displayed.length) {
                     return Padding(
                       padding: EdgeInsets.only(top: 8 * scale),
-                      child: OutlinedButton(
-                        onPressed: () => setState(() => _showAll = true),
-                        child: const Text('View More Species'),
+                      child: _paginationControls(
+                        page: page,
+                        totalPages: totalPages,
                       ),
                     );
                   }
@@ -336,7 +374,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: _speciesCard(displayed[index], saved, compact: false),
                   );
                 },
-                childCount: displayed.length + (hasMore ? 1 : 0),
+                childCount: displayed.length + (filtered.isNotEmpty ? 1 : 0),
               ),
             ),
           ),
@@ -465,7 +503,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         _status = _tempStatus;
                         _difficulty = _tempDifficulty;
                         _showFilters = false;
-                        _showAll = false;
+                        _currentPage = 1;
                       });
                     },
                     child: const Text('Confirm'),
@@ -541,7 +579,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         _sortBy = _tempSortBy;
                         _sortOrder = _tempSortOrder;
                         _showSort = false;
-                        _showAll = false;
+                        _currentPage = 1;
                       });
                     },
                     child: const Text('Confirm'),
@@ -568,6 +606,156 @@ class _HomeScreenState extends State<HomeScreen> {
       onSelected: (_) => setState(() => _tempSortBy = value),
       selectedColor: AppColors.accent,
       labelStyle: TextStyle(color: sel ? Colors.white : null),
+    );
+  }
+
+  Widget _paginationFooter({
+    required double scale,
+    required int page,
+    required int totalPages,
+    required bool hasResults,
+  }) {
+    if (!hasResults) return SizedBox(height: 100 * scale);
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16 * scale, 12 * scale, 16 * scale, 100 * scale),
+      child: _paginationControls(page: page, totalPages: totalPages),
+    );
+  }
+
+  Widget _paginationControls({required int page, required int totalPages}) {
+    if (totalPages <= 1) return const SizedBox.shrink();
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: page > 1 ? () => _goToPage(page - 1) : null,
+                icon: const Icon(Icons.chevron_left),
+                label: const Text('Previous'),
+                style: _pagerButtonStyle(),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: page < totalPages ? () => _goToPage(page + 1) : null,
+                icon: const Icon(Icons.chevron_right),
+                label: const Text('Next'),
+                style: _pagerButtonStyle(),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.center,
+          children: _buildPageTokens(page: page, totalPages: totalPages).map((token) {
+            if (token == null) {
+              return Container(
+                width: 44,
+                height: 40,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '...',
+                  style: TextStyle(
+                    color: AppColors.accent.withValues(alpha: 0.8),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              );
+            }
+            return OutlinedButton(
+              onPressed: token == page ? null : () => _goToPage(token),
+              style: _pageNumberButtonStyle(selected: token == page),
+              child: Text('$token'),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 10),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.86),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.28),
+            ),
+          ),
+          child: Text(
+            'Page $page / $totalPages',
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              color: AppColors.accent,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<int?> _buildPageTokens({required int page, required int totalPages}) {
+    if (totalPages <= 5) {
+      return [for (var p = 1; p <= totalPages; p++) p];
+    }
+
+    final keep = <int>{
+      1,
+      totalPages,
+      page,
+      (page - 1).clamp(1, totalPages),
+      (page + 1).clamp(1, totalPages),
+    }.toList()
+      ..sort();
+
+    final tokens = <int?>[];
+    for (var i = 0; i < keep.length; i++) {
+      final current = keep[i];
+      if (tokens.isNotEmpty) {
+        final prev = tokens.last;
+        if (prev != null && current - prev > 1) {
+          tokens.add(null);
+        }
+      }
+      tokens.add(current);
+    }
+    return tokens;
+  }
+
+  ButtonStyle _pagerButtonStyle() {
+    return OutlinedButton.styleFrom(
+      backgroundColor: Colors.white.withValues(alpha: 0.86),
+      foregroundColor: AppColors.accent,
+      disabledForegroundColor: Colors.grey.shade500,
+      side: BorderSide(
+        color: AppColors.primary.withValues(alpha: 0.45),
+        width: 1.3,
+      ),
+      textStyle: const TextStyle(fontWeight: FontWeight.w700),
+      padding: const EdgeInsets.symmetric(vertical: 12),
+    );
+  }
+
+  ButtonStyle _pageNumberButtonStyle({required bool selected}) {
+    return OutlinedButton.styleFrom(
+      minimumSize: const Size(44, 40),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      backgroundColor: selected
+          ? AppColors.primary.withValues(alpha: 0.9)
+          : Colors.white.withValues(alpha: 0.84),
+      foregroundColor: selected ? Colors.white : AppColors.accent,
+      side: BorderSide(
+        color: selected
+            ? AppColors.primary
+            : AppColors.primary.withValues(alpha: 0.45),
+      ),
+      textStyle: const TextStyle(fontWeight: FontWeight.w700),
     );
   }
 
