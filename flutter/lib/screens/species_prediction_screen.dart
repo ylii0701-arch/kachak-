@@ -38,11 +38,17 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
 
   Future<void> _loadNotif() async {
     final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getBool('notification_${widget.speciesId}') ?? false;
     if (!mounted) return;
-    setState(
-      () => _notificationOn =
-          prefs.getBool('notification_${widget.speciesId}') ?? false,
-    );
+    setState(() => _notificationOn = stored);
+  }
+
+  Future<void> _forceNotifOffIfUnsaved(bool isSaved) async {
+    if (isSaved || !_notificationOn) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notification_${widget.speciesId}', false);
+    if (!mounted) return;
+    setState(() => _notificationOn = false);
   }
 
   Future<void> _toggleNotif(
@@ -193,7 +199,12 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                 padding: EdgeInsets.only(right: 4 * s),
                 child: IconButton(
                   padding: EdgeInsets.zero,
-                  onPressed: () => saved.toggleSaved(species.id),
+                  onPressed: () async {
+                    final wasSaved = saved.isSaved(species.id);
+                    await saved.toggleSaved(species.id);
+                    final isSavedNow = !wasSaved;
+                    await _forceNotifOffIfUnsaved(isSavedNow);
+                  },
                   icon: Container(
                     padding: EdgeInsets.all(8 * s),
                     decoration: BoxDecoration(
@@ -240,18 +251,6 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              ClipRRect(
-                              borderRadius: BorderRadius.circular(12 * s),
-                                child: SizedBox(
-                                  width: Adaptive.clamp(context, 68, min: 52, max: 86),
-                                  height: Adaptive.clamp(context, 68, min: 52, max: 86),
-                                  child: SpeciesNetworkImage(
-                                    url: species.imageUrl,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 12 * s),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -314,6 +313,19 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                     ),
                   ],
                 ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Builder(
+              builder: (context) {
+                final isSaved = saved.isSaved(species.id);
+                if (!isSaved && _notificationOn) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _forceNotifOffIfUnsaved(false);
+                  });
+                }
+                return const SizedBox.shrink();
+              },
             ),
           ),
           SliverToBoxAdapter(

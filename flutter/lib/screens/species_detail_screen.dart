@@ -214,33 +214,30 @@ class SpeciesDetailScreen extends StatelessWidget {
                   blurSigma: 14,
                   fillAlpha: 0.62,
                   verticalFrostGradient: true,
-                  child: _innerInfoCard(
-                    padding: EdgeInsets.zero,
-                    child: GlassCtaPill(
-                      emphasized: isFav,
-                      onPressed: () async {
-                        try {
-                          await saved.toggleSaved(species.id);
-                        } catch (_) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Failed to update saved species. Please try again.'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
+                  child: GlassCtaPill(
+                    emphasized: isFav,
+                    onPressed: () async {
+                      try {
+                        await saved.toggleSaved(species.id);
+                      } catch (_) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Failed to update saved species. Please try again.'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
                         }
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(isFav ? Icons.favorite : Icons.favorite_border),
-                          SizedBox(width: 10 * s),
-                          Text(isFav ? 'Saved to Favorites' : 'Save to Favorites'),
-                        ],
-                      ),
+                      }
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(isFav ? Icons.favorite : Icons.favorite_border),
+                        SizedBox(width: 10 * s),
+                        Text(isFav ? 'Saved to Favorites' : 'Save to Favorites'),
+                      ],
                     ),
                   ),
                 ),
