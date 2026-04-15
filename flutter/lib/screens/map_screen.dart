@@ -167,13 +167,11 @@ class _MapScreenState extends State<MapScreen> {
 
     try {
       final loaded = <String, CityWeatherBundle>{};
-      for (final city in _mapWeatherCities) {
-        final coords = _weatherCityCoordinates[city.name];
-        if (coords == null) continue;
+      for (final city in kMalaysianCities) {
         final weather = await _weatherService.fetchCityWeather(
           cityName: city.name,
-          lat: coords.latitude,
-          lon: coords.longitude,
+          lat: city.lat,
+          lon: city.lng,
         );
         loaded[city.name] = weather;
       }
@@ -203,14 +201,12 @@ class _MapScreenState extends State<MapScreen> {
     final s = Adaptive.scale(context);
     final cityWeatherMarkers = <Marker>[];
     if (_showCityWeatherMarkers) {
-      for (final city in _mapWeatherCities) {
-        final coords = _weatherCityCoordinates[city.name];
-        if (coords == null) continue;
+      for (final city in kMalaysianCities) {
         cityWeatherMarkers.add(
           Marker(
-            point: coords,
-            width: Adaptive.clamp(context, 64, min: 52, max: 78),
-            height: Adaptive.clamp(context, 64, min: 52, max: 78),
+            point: LatLng(city.lat, city.lng),
+            width: Adaptive.clamp(context, 68, min: 56, max: 84),
+            height: Adaptive.clamp(context, 68, min: 56, max: 84),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
@@ -483,8 +479,8 @@ class _MapScreenState extends State<MapScreen> {
                     },
                     icon: Icon(
                       _showCityWeatherMarkers
-                          ? Icons.location_city
-                          : Icons.location_city_outlined,
+                          ? Icons.cloud_rounded
+                          : Icons.cloud_off_rounded,
                       color: AppColors.primary,
                     ),
                     visualDensity: VisualDensity.compact,
@@ -684,68 +680,242 @@ class _MapScreenState extends State<MapScreen> {
       ),
       builder: (ctx) {
         return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
+          child: Container(
+            color: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: Adaptive.clamp(context, 46, min: 38, max: 56),
+                        height: Adaptive.clamp(context, 46, min: 38, max: 56),
+                        decoration: BoxDecoration(
+                          color: Colors.blueGrey.shade200,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: SizedBox(
+                            width: Adaptive.clamp(context, 40, min: 32, max: 48),
+                            height: Adaptive.clamp(context, 40, min: 32, max: 48),
+                            child: Image.network(
+                              'https://openweathermap.org/img/wn/${weather.iconCode}@2x.png',
+                              fit: BoxFit.contain,
+                              loadingBuilder: (context, child, progress) {
+                                if (progress == null) return child;
+                                return const Icon(
+                                  Icons.cloud_queue,
+                                  color: AppColors.primary,
+                                );
+                              },
+                              errorBuilder: (_, _, _) => const Icon(
+                                Icons.cloud_queue,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: Adaptive.of(context, 10)),
+                      Expanded(
+                        child: Text(
+                          city.name,
+                          style: TextStyle(
+                            fontSize: Adaptive.clamp(context, 18, min: 15, max: 22),
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: Adaptive.of(context, 10)),
+                  Text(
+                    '${weather.temperature.toStringAsFixed(0)}°C · ${weather.description}',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w600,
+                      fontSize: Adaptive.clamp(context, 14, min: 12, max: 17),
+                    ),
+                  ),
+                  SizedBox(height: Adaptive.of(context, 8)),
+                  Text(
+                    'Humidity ${weather.humidity}% · Wind ${weather.windSpeed.toStringAsFixed(1)} m/s',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: Adaptive.clamp(context, 13, min: 11, max: 16),
+                    ),
+                  ),
+                  SizedBox(height: Adaptive.of(context, 8)),
+                  Text(
+                    'Prediction region: ${predictionRegionForCityName(city.name)}',
+                    style: TextStyle(
+                      color: Colors.black54,
+                      fontSize: Adaptive.clamp(context, 13, min: 11, max: 16),
+                    ),
+                  ),
+                  SizedBox(height: Adaptive.of(context, 14)),
+                  Text(
+                    'Next 3-hour forecast',
+                    style: TextStyle(
+                      fontSize: Adaptive.clamp(context, 14, min: 12, max: 17),
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.accent,
+                    ),
+                  )
+                  ,
+                  SizedBox(height: Adaptive.of(context, 8)),
+                  if (weather.forecast.isEmpty)
+                    Text(
+                      'Forecast is not available right now.',
+                      style: TextStyle(
+                        color: Colors.black54,
+                        fontSize: Adaptive.clamp(context, 12, min: 11, max: 14),
+                      ),
+                    )
+                  else
                     SizedBox(
-                      width: Adaptive.clamp(context, 42, min: 34, max: 52),
-                      height: Adaptive.clamp(context, 42, min: 34, max: 52),
-                      child: Image.network(
-                        'https://openweathermap.org/img/wn/${weather.iconCode}@2x.png',
-                        errorBuilder: (_, _, _) => const Icon(
-                          Icons.cloud,
-                          color: AppColors.primary,
-                        ),
+                      height: Adaptive.clamp(context, 124, min: 108, max: 148),
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: weather.forecast.length,
+                        separatorBuilder: (_, _) =>
+                            SizedBox(width: Adaptive.of(context, 8)),
+                        itemBuilder: (context, index) {
+                          final slot = weather.forecast[index];
+                          return _ForecastMiniCard(slot: slot);
+                        },
                       ),
                     ),
-                    SizedBox(width: Adaptive.of(context, 10)),
-                    Expanded(
-                      child: Text(
-                        city.name,
-                        style: TextStyle(
-                          fontSize: Adaptive.clamp(context, 18, min: 15, max: 22),
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: Adaptive.of(context, 10)),
-                Text(
-                  '${weather.temperature.toStringAsFixed(0)}°C · ${weather.description}',
-                  style: TextStyle(
-                    color: Colors.grey.shade800,
-                    fontSize: Adaptive.clamp(context, 14, min: 12, max: 17),
-                  ),
-                ),
-                SizedBox(height: Adaptive.of(context, 8)),
-                Text(
-                  'Humidity ${weather.humidity}% · Wind ${weather.windSpeed.toStringAsFixed(1)} m/s',
-                  style: TextStyle(
-                    color: Colors.grey.shade700,
-                    fontSize: Adaptive.clamp(context, 13, min: 11, max: 16),
-                  ),
-                ),
-                SizedBox(height: Adaptive.of(context, 8)),
-                Text(
-                  'Prediction region: ${predictionRegionForCityName(city.name)}',
-                  style: TextStyle(
-                    color: Colors.grey.shade700,
-                    fontSize: Adaptive.clamp(context, 13, min: 11, max: 16),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
       },
     );
+  }
+}
+
+class _ForecastMiniCard extends StatelessWidget {
+  const _ForecastMiniCard({required this.slot});
+
+  final CityForecastEntry slot;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: Adaptive.clamp(context, 112, min: 98, max: 130),
+      padding: EdgeInsets.all(Adaptive.of(context, 8)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade400),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x14000000),
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            _slotLabel(slot.timestamp),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: AppColors.primary,
+              fontSize: Adaptive.clamp(context, 11, min: 10, max: 13),
+            ),
+          ),
+          Row(
+            children: [
+              SizedBox(
+                width: Adaptive.clamp(context, 28, min: 24, max: 34),
+                height: Adaptive.clamp(context, 28, min: 24, max: 34),
+                child: Image.network(
+                  'https://openweathermap.org/img/wn/${slot.iconCode}.png',
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return const Icon(Icons.cloud_queue, color: AppColors.primary);
+                  },
+                  errorBuilder: (_, _, _) => const Icon(Icons.cloud),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  '${slot.temperature.toStringAsFixed(0)}°C',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.accent,
+                    fontSize: Adaptive.clamp(context, 12, min: 11, max: 14),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Text(
+            slot.description,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.grey.shade800,
+              fontSize: Adaptive.clamp(context, 10, min: 9, max: 12),
+            ),
+          ),
+          Text(
+            'H ${slot.humidity}% · W ${slot.windSpeed.toStringAsFixed(1)}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.grey.shade700,
+              fontSize: Adaptive.clamp(context, 9, min: 8, max: 11),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String _slotLabel(DateTime dt) {
+  final local = dt.toLocal();
+  final day = _weekdayShort(local.weekday);
+  final hour = local.hour.toString().padLeft(2, '0');
+  final min = local.minute.toString().padLeft(2, '0');
+  return '$day $hour:$min';
+}
+
+String _weekdayShort(int weekday) {
+  switch (weekday) {
+    case DateTime.monday:
+      return 'Mon';
+    case DateTime.tuesday:
+      return 'Tue';
+    case DateTime.wednesday:
+      return 'Wed';
+    case DateTime.thursday:
+      return 'Thu';
+    case DateTime.friday:
+      return 'Fri';
+    case DateTime.saturday:
+      return 'Sat';
+    case DateTime.sunday:
+      return 'Sun';
+    default:
+      return '';
   }
 }
 
@@ -762,96 +932,92 @@ class _CityWeatherMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = Adaptive.scale(context);
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 6 * s, vertical: 5 * s),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.88),
-        borderRadius: BorderRadius.circular(12 * s),
-        border: Border.all(color: Colors.white, width: 1.3 * s),
-        boxShadow: [BoxShadow(blurRadius: 6 * s, color: Colors.black26)],
-      ),
-      child: loading
-          ? SizedBox(
-              width: Adaptive.clamp(context, 20, min: 16, max: 24),
-              height: Adaptive.clamp(context, 20, min: 16, max: 24),
-              child: CircularProgressIndicator(strokeWidth: 2 * s),
-            )
-          : Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (weather != null)
-                  SizedBox(
-                    width: Adaptive.clamp(context, 18, min: 14, max: 22),
-                    height: Adaptive.clamp(context, 18, min: 14, max: 22),
-                    child: Image.network(
-                      'https://openweathermap.org/img/wn/${weather!.iconCode}.png',
-                      errorBuilder: (_, _, _) => Icon(
-                        Icons.cloud,
-                        size: Adaptive.clamp(context, 14, min: 12, max: 17),
-                      ),
-                    ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxW = constraints.maxWidth;
+        final maxH = constraints.maxHeight;
+        final iconSize = (maxH * 0.34).clamp(16.0, 26.0);
+        final tempSize = (maxH * 0.19).clamp(10.0, 13.0);
+        final citySize = (maxH * 0.145).clamp(8.0, 11.0);
+        final paddingH = (maxW * 0.09).clamp(4.0, 7.0);
+        final paddingV = (maxH * 0.08).clamp(3.0, 6.0);
+
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: paddingH, vertical: paddingV),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.97),
+            borderRadius: BorderRadius.circular((maxW * 0.18).clamp(8.0, 14.0)),
+            border: Border.all(color: Colors.grey.shade300, width: 1.2),
+            boxShadow: const [BoxShadow(blurRadius: 8, color: Colors.black38)],
+          ),
+          child: Center(
+            child: loading
+                ? SizedBox(
+                    width: iconSize,
+                    height: iconSize,
+                    child: CircularProgressIndicator(strokeWidth: (iconSize * 0.1).clamp(1.6, 2.4)),
                   )
-                else
-                  Icon(
-                    Icons.cloud_off,
-                    size: Adaptive.clamp(context, 14, min: 12, max: 17),
-                  ),
-                Text(
-                  weather != null ? '${weather!.temperature.toStringAsFixed(0)}°' : '--',
-                  style: TextStyle(
-                    fontSize: Adaptive.clamp(context, 11, min: 10, max: 13),
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.accent,
-                  ),
-                ),
-                SizedBox(
-                  width: Adaptive.clamp(context, 48, min: 38, max: 58),
-                  child: Text(
-                    cityName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: Adaptive.clamp(context, 9, min: 8, max: 11),
-                      fontWeight: FontWeight.w600,
+                : FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (weather != null)
+                          SizedBox(
+                            width: iconSize,
+                            height: iconSize,
+                            child: Image.network(
+                              'https://openweathermap.org/img/wn/${weather!.iconCode}@2x.png',
+                              fit: BoxFit.contain,
+                              loadingBuilder: (context, child, progress) {
+                                if (progress == null) return child;
+                                return Icon(
+                                  Icons.cloud_queue,
+                                  color: AppColors.primary,
+                                  size: iconSize * 0.8,
+                                );
+                              },
+                              errorBuilder: (_, _, _) => Icon(
+                                Icons.cloud_queue,
+                                color: AppColors.primary,
+                                size: iconSize * 0.8,
+                              ),
+                            ),
+                          )
+                        else
+                          Icon(
+                            Icons.cloud_off,
+                            color: Colors.grey.shade600,
+                            size: iconSize * 0.8,
+                          ),
+                        SizedBox(height: (maxH * 0.03).clamp(1.0, 3.0)),
+                        Text(
+                          weather != null ? '${weather!.temperature.toStringAsFixed(0)}°' : '--',
+                          style: TextStyle(
+                            fontSize: tempSize,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.accent,
+                          ),
+                        ),
+                        SizedBox(
+                          width: maxW * 0.8,
+                          child: Text(
+                            cityName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: citySize,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
-            ),
+          ),
+        );
+      },
     );
   }
 }
-
-const List<MalaysianCity> _mapWeatherCities = [
-  MalaysianCity('Kuala Lumpur', 'Kuala Lumpur'),
-  MalaysianCity('Ipoh', 'Perak'),
-  MalaysianCity('Kuching', 'Sarawak'),
-  MalaysianCity('Kota Kinabalu', 'Sabah'),
-  MalaysianCity('Johor Bahru', 'Johor'),
-  MalaysianCity('George Town', 'Pulau Pinang'),
-  MalaysianCity('Shah Alam', 'Selangor'),
-  MalaysianCity('Melaka', 'Melaka'),
-  MalaysianCity('Alor Setar', 'Kedah'),
-  MalaysianCity('Miri', 'Sarawak'),
-  MalaysianCity('Kuantan', 'Pahang'),
-  MalaysianCity('Kuala Terengganu', 'Terengganu'),
-  MalaysianCity('Seremban', 'Negeri Sembilan'),
-];
-
-const Map<String, LatLng> _weatherCityCoordinates = {
-  'Kuala Lumpur': LatLng(3.1390, 101.6869),
-  'Ipoh': LatLng(4.5975, 101.0901),
-  'Kuching': LatLng(1.5533, 110.3592),
-  'Kota Kinabalu': LatLng(5.9804, 116.0735),
-  'Johor Bahru': LatLng(1.4927, 103.7414),
-  'George Town': LatLng(5.4141, 100.3288),
-  'Shah Alam': LatLng(3.0738, 101.5183),
-  'Melaka': LatLng(2.1896, 102.2501),
-  'Alor Setar': LatLng(6.1248, 100.3678),
-  'Miri': LatLng(4.3995, 113.9914),
-  'Kuantan': LatLng(3.8077, 103.3260),
-  'Kuala Terengganu': LatLng(5.3302, 103.1408),
-  'Seremban': LatLng(2.7297, 101.9381),
-};

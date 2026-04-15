@@ -347,6 +347,7 @@ const Map<String, SpeciesPrediction> speciesPredictions = {
   ),
 };
 
+// City choices are sourced from `malaysia_cities.dart`; this map stays region-only.
 const Map<Region, List<LocationPredictionCard>> locationPredictions = {
   'Kuala Lumpur': [
     LocationPredictionCard(speciesId: '8', probabilityPercent: 90, probability: 'High', bestTime: 'Dawn', bestWeather: 'Sunny'),
