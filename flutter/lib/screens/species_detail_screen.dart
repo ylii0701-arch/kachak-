@@ -56,6 +56,7 @@ class SpeciesDetailScreen extends StatelessWidget {
 
     final saved = context.watch<SavedSpeciesProvider>();
     final isFav = saved.isSaved(species.id);
+    final isNotified = saved.isNotified(species.id);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -91,6 +92,63 @@ class SpeciesDetailScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+                actions: [
+                  Padding(
+                    padding: EdgeInsets.only(right: 8 * s),
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () async {
+                        if (!isFav) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please save this species to your favorites first to enable notifications'),
+                            ),
+                          );
+                          return;
+                        }
+
+                        final success = await saved.toggleNotification(species.id);
+
+                        if (context.mounted) {
+                          if (!success) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Alert could not be enabled. Please allow notifications in settings.'),
+                              ),
+                            );
+                          } else {
+                            final nowOn = saved.isNotified(species.id);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  nowOn
+                                      ? 'High probability alerts enabled for ${species.commonName}'
+                                      : 'Notifications disabled for ${species.commonName}',
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      icon: Container(
+                        padding: EdgeInsets.all(8 * s),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.38),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isNotified
+                              ? Icons.notifications_active
+                              : Icons.notifications_off_outlined,
+                          color: isNotified
+                              ? Colors.amber.shade400
+                              : Colors.white,
+                          size: 20 * s,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: Stack(
                     fit: StackFit.expand,
@@ -358,39 +416,39 @@ class SpeciesDetailScreen extends StatelessWidget {
                                     const SizedBox(height: 6),
                                     species.bestSeasons.isNotEmpty
                                         ? Wrap(
-                                            spacing: 6,
-                                            runSpacing: 6,
-                                            children: species.bestSeasons.map((
-                                              e,
-                                            ) {
-                                              return Chip(
-                                                label: Text(e),
-                                                visualDensity:
-                                                    VisualDensity.compact,
-                                                backgroundColor: AppColors
-                                                    .primary
-                                                    .withValues(alpha: 0.12),
-                                                side: BorderSide.none,
-                                                labelStyle:
-                                                    GoogleFonts.plusJakartaSans(
-                                                      color: AppColors.primary,
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                      fontSize: 13,
-                                                      letterSpacing: 0.05,
-                                                    ),
-                                              );
-                                            }).toList(),
-                                          )
-                                        : Text(
-                                            'Best seasons currently unknown',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              color:
-                                                  AppColors.textSubtitleOnFrost,
-                                              fontStyle: FontStyle.italic,
-                                              fontSize: 14,
-                                            ),
+                                      spacing: 6,
+                                      runSpacing: 6,
+                                      children: species.bestSeasons.map((
+                                          e,
+                                          ) {
+                                        return Chip(
+                                          label: Text(e),
+                                          visualDensity:
+                                          VisualDensity.compact,
+                                          backgroundColor: AppColors
+                                              .primary
+                                              .withValues(alpha: 0.12),
+                                          side: BorderSide.none,
+                                          labelStyle:
+                                          GoogleFonts.plusJakartaSans(
+                                            color: AppColors.primary,
+                                            fontWeight:
+                                            FontWeight.w700,
+                                            fontSize: 13,
+                                            letterSpacing: 0.05,
                                           ),
+                                        );
+                                      }).toList(),
+                                    )
+                                        : Text(
+                                      'Best seasons currently unknown',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        color:
+                                        AppColors.textSubtitleOnFrost,
+                                        fontStyle: FontStyle.italic,
+                                        fontSize: 14,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -411,8 +469,8 @@ class SpeciesDetailScreen extends StatelessWidget {
                       icon: Icons.inventory_2_outlined,
                       child: Column(
                         children: species.recommendedGear.asMap().entries.map((
-                          e,
-                        ) {
+                            e,
+                            ) {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 8),
                             child: Row(
@@ -475,7 +533,7 @@ class SpeciesDetailScreen extends StatelessWidget {
           index: n,
           title: 'Recorded observation',
           subtitle:
-              'Last seen ${loc.lastSeen} · ${loc.lat.toStringAsFixed(4)}°, ${loc.lng.toStringAsFixed(4)}°',
+          'Last seen ${loc.lastSeen} · ${loc.lat.toStringAsFixed(4)}°, ${loc.lng.toStringAsFixed(4)}°',
           point: LatLng(loc.lat, loc.lng),
           speciesId: species.id,
         ),
@@ -550,13 +608,13 @@ class SpeciesDetailScreen extends StatelessWidget {
   }
 
   Widget _locationMapRow(
-    BuildContext context, {
-    required int index,
-    required String title,
-    required String subtitle,
-    required LatLng point,
-    required String speciesId,
-  }) {
+      BuildContext context, {
+        required int index,
+        required String title,
+        required String subtitle,
+        required LatLng point,
+        required String speciesId,
+      }) {
     return Material(
       color: Colors.white.withValues(alpha: 0.84),
       shape: RoundedRectangleBorder(
@@ -631,11 +689,11 @@ class SpeciesDetailScreen extends StatelessWidget {
   }
 
   Widget _sectionCard(
-    BuildContext context, {
-    required String title,
-    IconData? icon,
-    required Widget child,
-  }) {
+      BuildContext context, {
+        required String title,
+        IconData? icon,
+        required Widget child,
+      }) {
     Widget content = child;
     if (child is Text && (child.data == null || child.data!.trim().isEmpty)) {
       content = Text(
