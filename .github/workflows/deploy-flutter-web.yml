@@ -42,7 +42,9 @@ jobs:
           OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
         run: |
           flutter pub get
-          flutter build web --release --base-href "/${{ github.event.repository.name }}/" --dart-define=MAPBOX_ACCESS_TOKEN="$MAPBOX_ACCESS_TOKEN" --dart-define=OPENWEATHER_API_KEY="$OPENWEATHER_API_KEY"
+          MAPBOX_ACCESS_TOKEN_CLEAN="$(printf '%s' "$MAPBOX_ACCESS_TOKEN" | tr -d '\r\n')"
+          OPENWEATHER_API_KEY_CLEAN="$(printf '%s' "$OPENWEATHER_API_KEY" | tr -d '\r\n')"
+          flutter build web --release --base-href "/${{ github.event.repository.name }}/" --dart-define=MAPBOX_ACCESS_TOKEN="$MAPBOX_ACCESS_TOKEN_CLEAN" --dart-define=OPENWEATHER_API_KEY="$OPENWEATHER_API_KEY_CLEAN"
 
       - uses: actions/upload-pages-artifact@v4
         with:
