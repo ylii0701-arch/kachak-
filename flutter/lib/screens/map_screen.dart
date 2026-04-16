@@ -49,6 +49,10 @@ class _MapScreenState extends State<MapScreen> {
   bool _loadingLocation = true;
   bool _loadingCityWeather = false;
   bool _showCityWeatherMarkers = true;
+  final TextEditingController _speciesSearchController =
+      TextEditingController();
+  String _speciesQuery = '';
+  Species? _selectedSpecies;
   final Map<String, CityWeatherBundle> _cityWeatherByName = {};
   final OpenWeatherService _weatherService = const OpenWeatherService(
     apiKey: openWeatherApiKey,
@@ -95,9 +99,103 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   void dispose() {
+    _speciesSearchController.dispose();
     _shell?.removeListener(_applyShellMapJump);
     _mapController.dispose();
     super.dispose();
+  }
+
+  bool _matchesSpeciesQuery(Species species, String query) {
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return false;
+    return species.commonName.toLowerCase().contains(q) ||
+        species.scientificName.toLowerCase().contains(q);
+  }
+
+  List<Species> _matchingSpeciesSuggestions(String query) {
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return const [];
+    return speciesData
+        .where((species) => _matchesSpeciesQuery(species, q))
+        .take(6)
+        .toList(growable: false);
+  }
+
+  void _onSpeciesQueryChanged(String value) {
+    final q = value.trim().toLowerCase();
+    setState(() {
+      _speciesQuery = value;
+      if (_selectedSpecies != null) {
+        final selected = _selectedSpecies!;
+        final common = selected.commonName.trim().toLowerCase();
+        final scientific = selected.scientificName.trim().toLowerCase();
+        if (q != common && q != scientific) {
+          _selectedSpecies = null;
+        }
+      }
+    });
+  }
+
+  void _clearSpeciesSearch() {
+    _speciesSearchController.clear();
+    setState(() {
+      _speciesQuery = '';
+      _selectedSpecies = null;
+    });
+  }
+
+  void _selectSpeciesSuggestion(Species species) {
+    final text = species.commonName.trim().isEmpty
+        ? species.scientificName
+        : species.commonName;
+    _speciesSearchController.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+    setState(() {
+      _speciesQuery = text;
+      _selectedSpecies = species;
+    });
+    for (final loc in speciesLocations) {
+      if (loc.speciesId == species.id) {
+        _mapController.move(LatLng(loc.lat, loc.lng), 11.8);
+        break;
+      }
+    }
+    FocusScope.of(context).unfocus();
+  }
+
+  Widget _buildGlassCard({
+    required Widget child,
+    required double scale,
+    double radius = 16,
+    double blur = 16,
+    double alpha = 0.44,
+  }) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius * scale),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: alpha),
+            borderRadius: BorderRadius.circular(radius * scale),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.62),
+              width: 1.1 * scale,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      ),
+    );
   }
 
   void _zoomBy(double delta) {
@@ -129,7 +227,8 @@ class _MapScreenState extends State<MapScreen> {
       if (perm == LocationPermission.denied) {
         perm = await Geolocator.requestPermission();
       }
-      if (perm == LocationPermission.denied || perm == LocationPermission.deniedForever) {
+      if (perm == LocationPermission.denied ||
+          perm == LocationPermission.deniedForever) {
         if (mounted) {
           setState(() {
             _locationToast = 'Location permission denied. Using Kuala Lumpur.';
@@ -152,7 +251,8 @@ class _MapScreenState extends State<MapScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _locationToast = 'Unable to detect your location. Using Kuala Lumpur.';
+          _locationToast =
+              'Unable to detect your location. Using Kuala Lumpur.';
           _loadingLocation = false;
         });
         Future.delayed(const Duration(seconds: 5), () {
@@ -199,6 +299,11 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     final s = Adaptive.scale(context);
+    final q = _speciesQuery.trim().toLowerCase();
+    final suggestions = _matchingSpeciesSuggestions(_speciesQuery);
+    final showSuggestionList =
+        q.isNotEmpty && _selectedSpecies == null && suggestions.isNotEmpty;
+    final showSpeciesMarkers = q.isNotEmpty || _selectedSpecies != null;
     final cityWeatherMarkers = <Marker>[];
     if (_showCityWeatherMarkers) {
       for (final city in kMalaysianCities) {
@@ -219,7 +324,8 @@ class _MapScreenState extends State<MapScreen> {
                 cityName: city.name,
                 weather: _cityWeatherByName[city.name],
                 loading:
-                    _loadingCityWeather && !_cityWeatherByName.containsKey(city.name),
+                    _loadingCityWeather &&
+                    !_cityWeatherByName.containsKey(city.name),
               ),
             ),
           ),
@@ -246,12 +352,16 @@ class _MapScreenState extends State<MapScreen> {
                 ),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.white, width: 2),
-                boxShadow: const [BoxShadow(blurRadius: 6, color: Colors.black26)],
+                boxShadow: const [
+                  BoxShadow(blurRadius: 6, color: Colors.black26),
+                ],
               ),
               child: Center(
                 child: Text(
                   '📷',
-                  style: TextStyle(fontSize: Adaptive.clamp(context, 16, min: 13, max: 20)),
+                  style: TextStyle(
+                    fontSize: Adaptive.clamp(context, 16, min: 13, max: 20),
+                  ),
                 ),
               ),
             ),
@@ -261,39 +371,59 @@ class _MapScreenState extends State<MapScreen> {
     }
 
     final speciesMarkers = <Marker>[];
-    for (final loc in speciesLocations) {
-      final species = speciesById(loc.speciesId);
-      if (species == null) continue;
-      final weather = closestWeather(loc.lat, loc.lng);
-      final spot = photographySpotForSpecies(species.id);
-      final protected = protectedAreaAt(loc.lat, loc.lng);
-      final danger = isInDangerZone(loc.lat, loc.lng);
+    if (showSpeciesMarkers) {
+      for (final loc in speciesLocations) {
+        final species = speciesById(loc.speciesId);
+        if (species == null) continue;
+        if (_selectedSpecies != null && species.id != _selectedSpecies!.id) {
+          continue;
+        }
+        if (_selectedSpecies == null && !_matchesSpeciesQuery(species, q)) {
+          continue;
+        }
+        final weather = closestWeather(loc.lat, loc.lng);
+        final spot = photographySpotForSpecies(species.id);
+        final protected = protectedAreaAt(loc.lat, loc.lng);
+        final danger = isInDangerZone(loc.lat, loc.lng);
 
-      speciesMarkers.add(
-        Marker(
-          point: LatLng(loc.lat, loc.lng),
-          width: Adaptive.clamp(context, 44, min: 36, max: 52),
-          height: Adaptive.clamp(context, 44, min: 36, max: 52),
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => _showSpeciesSheet(context, species, loc, weather, spot, protected, danger),
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 3),
-                boxShadow: const [BoxShadow(blurRadius: 6, color: Colors.black26)],
+        speciesMarkers.add(
+          Marker(
+            point: LatLng(loc.lat, loc.lng),
+            width: Adaptive.clamp(context, 44, min: 36, max: 52),
+            height: Adaptive.clamp(context, 44, min: 36, max: 52),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => _showSpeciesSheet(
+                context,
+                species,
+                loc,
+                weather,
+                spot,
+                protected,
+                danger,
               ),
-              child: Center(
-                child: Text(
-                  '🦁',
-                  style: TextStyle(fontSize: Adaptive.clamp(context, 18, min: 14, max: 22)),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 3),
+                  boxShadow: const [
+                    BoxShadow(blurRadius: 6, color: Colors.black26),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    '🦁',
+                    style: TextStyle(
+                      fontSize: Adaptive.clamp(context, 18, min: 14, max: 22),
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      );
+        );
+      }
     }
 
     final userMarkers = <Marker>[];
@@ -309,7 +439,9 @@ class _MapScreenState extends State<MapScreen> {
                 color: const Color(0xFF6FCF97),
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white, width: 3),
-                boxShadow: const [BoxShadow(blurRadius: 8, color: Color(0x992F855A))],
+                boxShadow: const [
+                  BoxShadow(blurRadius: 8, color: Color(0x992F855A)),
+                ],
               ),
             ),
           ),
@@ -363,12 +495,8 @@ class _MapScreenState extends State<MapScreen> {
               urlTemplate: mapboxStaticTilesUrlTemplate,
               userAgentPackageName: 'com.kachak.kachak_tracker',
             ),
-            IgnorePointer(
-              child: PolygonLayer(polygons: polygons),
-            ),
-            IgnorePointer(
-              child: CircleLayer(circles: circles),
-            ),
+            IgnorePointer(child: PolygonLayer(polygons: polygons)),
+            IgnorePointer(child: CircleLayer(circles: circles)),
             MarkerLayer(
               markers: [
                 ...cityWeatherMarkers,
@@ -381,38 +509,195 @@ class _MapScreenState extends State<MapScreen> {
         ),
         SafeArea(
           child: Padding(
-            padding: EdgeInsets.all(16 * s),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20 * s),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.44),
-                    borderRadius: BorderRadius.circular(20 * s),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.62), width: 1.1 * s),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.08),
-                        blurRadius: 16,
-                        offset: const Offset(0, 4),
+            padding: EdgeInsets.fromLTRB(16 * s, 12 * s, 16 * s, 0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    SizedBox(
+                      width: Adaptive.clamp(context, 126, min: 106, max: 150),
+                      child: _buildGlassCard(
+                        scale: s,
+                        radius: 18,
+                        child: SizedBox(
+                          height: Adaptive.clamp(context, 52, min: 46, max: 60),
+                          child: Center(
+                            child: Text(
+                              'Wildlife Map',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: Adaptive.clamp(
+                                  context,
+                                  18,
+                                  min: 15,
+                                  max: 22,
+                                ),
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.accent,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8 * s),
+                    Expanded(
+                      child: _buildGlassCard(
+                        scale: s,
+                        radius: 18,
+                        child: SizedBox(
+                          height: Adaptive.clamp(context, 52, min: 46, max: 60),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 44 * s,
+                                child: Icon(
+                                  Icons.search,
+                                  color: AppColors.accent.withValues(alpha: 0.86),
+                                  size: Adaptive.clamp(context, 20, min: 17, max: 23),
+                                ),
+                              ),
+                              Expanded(
+                                child: TextField(
+                                  controller: _speciesSearchController,
+                                  onChanged: _onSpeciesQueryChanged,
+                                  textInputAction: TextInputAction.search,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: AppColors.accent,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: Adaptive.clamp(
+                                      context,
+                                      15,
+                                      min: 13,
+                                      max: 18,
+                                    ),
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: 'Search species',
+                                    hintStyle: TextStyle(
+                                      color: AppColors.accent.withValues(alpha: 0.84),
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                    filled: false,
+                                    fillColor: Colors.transparent,
+                                    isDense: true,
+                                    border: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    disabledBorder: InputBorder.none,
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 6 * s,
+                                      vertical: 10 * s,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 44 * s,
+                                child: q.isEmpty
+                                    ? null
+                                    : IconButton(
+                                        icon: Icon(
+                                          Icons.close,
+                                          color: AppColors.accent.withValues(
+                                            alpha: 0.86,
+                                          ),
+                                        ),
+                                        onPressed: _clearSpeciesSearch,
+                                      ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (showSuggestionList) ...[
+                  SizedBox(height: 8 * s),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: Adaptive.clamp(context, 160, min: 138, max: 200),
+                      ),
+                      Expanded(
+                        child: _buildGlassCard(
+                          scale: s,
+                          radius: 16,
+                          alpha: 0.86,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxHeight: Adaptive.clamp(
+                                context,
+                                230,
+                                min: 180,
+                                max: 260,
+                              ),
+                            ),
+                            child: ListView.separated(
+                              padding: EdgeInsets.symmetric(vertical: 6 * s),
+                              shrinkWrap: true,
+                              itemCount: suggestions.length,
+                              separatorBuilder: (_, _) => Divider(
+                                height: 1,
+                                thickness: 1,
+                                color: Colors.white.withValues(alpha: 0.7),
+                              ),
+                              itemBuilder: (context, index) {
+                                final species = suggestions[index];
+                                return ListTile(
+                                  dense: true,
+                                  leading: const Icon(
+                                    Icons.pets,
+                                    color: AppColors.primary,
+                                  ),
+                                  title: Text(
+                                    species.commonName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: AppColors.accent,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: Adaptive.clamp(
+                                        context,
+                                        14,
+                                        min: 12,
+                                        max: 16,
+                                      ),
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    species.scientificName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: AppColors.accent.withValues(
+                                        alpha: 0.76,
+                                      ),
+                                      fontSize: Adaptive.clamp(
+                                        context,
+                                        12,
+                                        min: 10,
+                                        max: 14,
+                                      ),
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                  onTap: () =>
+                                      _selectSpeciesSuggestion(species),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16 * s, vertical: 12 * s),
-                    child: Text(
-                      'Wildlife Map',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: Adaptive.clamp(context, 18, min: 15, max: 22),
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.accent,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+                ],
+              ],
             ),
           ),
         ),
@@ -428,7 +713,11 @@ class _MapScreenState extends State<MapScreen> {
                 padding: EdgeInsets.all(12 * s),
                 child: Row(
                   children: [
-                    Icon(Icons.warning_amber_rounded, color: Colors.red.shade700, size: 22 * s),
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      color: Colors.red.shade700,
+                      size: 22 * s,
+                    ),
                     SizedBox(width: 10 * s),
                     Expanded(child: Text(_locationToast!)),
                     IconButton(
@@ -489,14 +778,20 @@ class _MapScreenState extends State<MapScreen> {
                   IconButton(
                     tooltip: 'Show species & photo spots',
                     onPressed: _fitWildlifeHotspots,
-                    icon: const Icon(Icons.filter_center_focus, color: AppColors.primary),
+                    icon: const Icon(
+                      Icons.filter_center_focus,
+                      color: AppColors.primary,
+                    ),
                     visualDensity: VisualDensity.compact,
                   ),
                   if (_user != null)
                     IconButton(
                       tooltip: 'My location',
                       onPressed: _goToMyLocation,
-                      icon: const Icon(Icons.my_location, color: AppColors.primary),
+                      icon: const Icon(
+                        Icons.my_location,
+                        color: AppColors.primary,
+                      ),
                       visualDensity: VisualDensity.compact,
                     ),
                   Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
@@ -563,7 +858,10 @@ class _MapScreenState extends State<MapScreen> {
                   style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
                 ),
                 const SizedBox(height: 12),
-                Text(place.description, style: TextStyle(color: Colors.grey.shade800, height: 1.45)),
+                Text(
+                  place.description,
+                  style: TextStyle(color: Colors.grey.shade800, height: 1.45),
+                ),
                 const SizedBox(height: 18),
                 FilledButton(
                   onPressed: () => Navigator.pop(ctx),
@@ -589,7 +887,9 @@ class _MapScreenState extends State<MapScreen> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (ctx) {
         return DraggableScrollableSheet(
           expand: false,
@@ -613,40 +913,84 @@ class _MapScreenState extends State<MapScreen> {
                   alignment: Alignment.centerRight,
                   child: Chip(label: Text('${species.difficultyLevel}★')),
                 ),
-                Text(species.commonName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary)),
-                Text('Last seen: ${loc.lastSeen}', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                Text(
+                  species.commonName,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+                Text(
+                  species.scientificName,
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                    fontSize: 13,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                Text(
+                  'Last seen: ${loc.lastSeen}',
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                ),
                 const SizedBox(height: 12),
                 if (protected != null)
                   ListTile(
                     leading: const Text('🛡️', style: TextStyle(fontSize: 22)),
-                    title: Text(protected.name, style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.green)),
+                    title: Text(
+                      protected.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.green,
+                      ),
+                    ),
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                   )
                 else if (danger)
                   ListTile(
                     leading: Icon(Icons.warning, color: Colors.red.shade700),
-                    title: Text('Danger Zone - Not Recommended', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.red.shade800)),
+                    title: Text(
+                      'Danger Zone - Not Recommended',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red.shade800,
+                      ),
+                    ),
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                   )
                 else
                   ListTile(
-                    leading: Icon(Icons.warning_amber, color: Colors.amber.shade800),
-                    title: Text('Outside Protected Area', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.amber.shade900)),
+                    leading: Icon(
+                      Icons.warning_amber,
+                      color: Colors.amber.shade800,
+                    ),
+                    title: Text(
+                      'Outside Protected Area',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.amber.shade900,
+                      ),
+                    ),
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                   ),
                 if (spot != null)
                   ListTile(
                     leading: const Text('📷'),
-                    title: Text(spot.name, style: const TextStyle(fontWeight: FontWeight.w500)),
+                    title: Text(
+                      spot.name,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                   ),
                 ListTile(
                   leading: Text(weatherEmoji(weather.condition)),
-                  title: Text('${weather.temperature}°C • ${weather.condition}'),
+                  title: Text(
+                    '${weather.temperature}°C • ${weather.condition}',
+                  ),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -655,7 +999,10 @@ class _MapScreenState extends State<MapScreen> {
                   onPressed: () {
                     Navigator.pop(ctx);
                     Navigator.of(context).push(
-                      MaterialPageRoute<void>(builder: (_) => SpeciesDetailScreen(speciesId: species.id)),
+                      MaterialPageRoute<void>(
+                        builder: (_) =>
+                            SpeciesDetailScreen(speciesId: species.id),
+                      ),
                     );
                   },
                   child: const Text('View More Details'),
@@ -699,8 +1046,18 @@ class _MapScreenState extends State<MapScreen> {
                         ),
                         child: Center(
                           child: SizedBox(
-                            width: Adaptive.clamp(context, 40, min: 32, max: 48),
-                            height: Adaptive.clamp(context, 40, min: 32, max: 48),
+                            width: Adaptive.clamp(
+                              context,
+                              40,
+                              min: 32,
+                              max: 48,
+                            ),
+                            height: Adaptive.clamp(
+                              context,
+                              40,
+                              min: 32,
+                              max: 48,
+                            ),
                             child: Image.network(
                               'https://openweathermap.org/img/wn/${weather.iconCode}@2x.png',
                               fit: BoxFit.contain,
@@ -724,7 +1081,12 @@ class _MapScreenState extends State<MapScreen> {
                         child: Text(
                           city.name,
                           style: TextStyle(
-                            fontSize: Adaptive.clamp(context, 18, min: 15, max: 22),
+                            fontSize: Adaptive.clamp(
+                              context,
+                              18,
+                              min: 15,
+                              max: 22,
+                            ),
                             fontWeight: FontWeight.bold,
                             color: AppColors.primary,
                           ),
@@ -765,8 +1127,7 @@ class _MapScreenState extends State<MapScreen> {
                       fontWeight: FontWeight.w700,
                       color: AppColors.accent,
                     ),
-                  )
-                  ,
+                  ),
                   SizedBox(height: Adaptive.of(context, 8)),
                   if (weather.forecast.isEmpty)
                     Text(
@@ -845,7 +1206,10 @@ class _ForecastMiniCard extends StatelessWidget {
                   fit: BoxFit.contain,
                   loadingBuilder: (context, child, progress) {
                     if (progress == null) return child;
-                    return const Icon(Icons.cloud_queue, color: AppColors.primary);
+                    return const Icon(
+                      Icons.cloud_queue,
+                      color: AppColors.primary,
+                    );
                   },
                   errorBuilder: (_, _, _) => const Icon(Icons.cloud),
                 ),
@@ -943,7 +1307,10 @@ class _CityWeatherMarker extends StatelessWidget {
         final paddingV = (maxH * 0.08).clamp(3.0, 6.0);
 
         return Container(
-          padding: EdgeInsets.symmetric(horizontal: paddingH, vertical: paddingV),
+          padding: EdgeInsets.symmetric(
+            horizontal: paddingH,
+            vertical: paddingV,
+          ),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.97),
             borderRadius: BorderRadius.circular((maxW * 0.18).clamp(8.0, 14.0)),
@@ -955,7 +1322,9 @@ class _CityWeatherMarker extends StatelessWidget {
                 ? SizedBox(
                     width: iconSize,
                     height: iconSize,
-                    child: CircularProgressIndicator(strokeWidth: (iconSize * 0.1).clamp(1.6, 2.4)),
+                    child: CircularProgressIndicator(
+                      strokeWidth: (iconSize * 0.1).clamp(1.6, 2.4),
+                    ),
                   )
                 : FittedBox(
                     fit: BoxFit.scaleDown,
@@ -992,7 +1361,9 @@ class _CityWeatherMarker extends StatelessWidget {
                           ),
                         SizedBox(height: (maxH * 0.03).clamp(1.0, 3.0)),
                         Text(
-                          weather != null ? '${weather!.temperature.toStringAsFixed(0)}°' : '--',
+                          weather != null
+                              ? '${weather!.temperature.toStringAsFixed(0)}°'
+                              : '--',
                           style: TextStyle(
                             fontSize: tempSize,
                             fontWeight: FontWeight.w700,
