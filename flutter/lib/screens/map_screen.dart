@@ -53,13 +53,16 @@ class _MapScreenState extends State<MapScreen> {
       TextEditingController();
   String _speciesQuery = '';
   Species? _selectedSpecies;
+  bool _showNearbyAlongsideSelected = false;
   final Map<String, CityWeatherBundle> _cityWeatherByName = {};
   final OpenWeatherService _weatherService = const OpenWeatherService(
     apiKey: openWeatherApiKey,
   );
+  final Distance _distance = const Distance();
 
   static const double _minZoom = 3;
   static const double _maxZoom = 18;
+  static const double _nearbySpeciesRadiusMeters = 120000;
 
   @override
   void initState() {
@@ -93,6 +96,23 @@ class _MapScreenState extends State<MapScreen> {
     if (shell.index != 2) return;
     final jump = shell.consumeMapJump();
     if (jump != null) {
+      if (jump.speciesId != null) {
+        final species = speciesById(jump.speciesId);
+        if (species != null) {
+          final text = species.commonName.trim().isEmpty
+              ? species.scientificName
+              : species.commonName;
+          _speciesSearchController.value = TextEditingValue(
+            text: text,
+            selection: TextSelection.collapsed(offset: text.length),
+          );
+          setState(() {
+            _speciesQuery = text;
+            _selectedSpecies = species;
+            _showNearbyAlongsideSelected = true;
+          });
+        }
+      }
       _mapController.move(jump.point, jump.zoom);
     }
   }
@@ -131,6 +151,7 @@ class _MapScreenState extends State<MapScreen> {
         final scientific = selected.scientificName.trim().toLowerCase();
         if (q != common && q != scientific) {
           _selectedSpecies = null;
+          _showNearbyAlongsideSelected = false;
         }
       }
     });
@@ -141,6 +162,7 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       _speciesQuery = '';
       _selectedSpecies = null;
+      _showNearbyAlongsideSelected = false;
     });
   }
 
@@ -155,6 +177,7 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       _speciesQuery = text;
       _selectedSpecies = species;
+      _showNearbyAlongsideSelected = false;
     });
     for (final loc in speciesLocations) {
       if (loc.speciesId == species.id) {
@@ -163,6 +186,18 @@ class _MapScreenState extends State<MapScreen> {
       }
     }
     FocusScope.of(context).unfocus();
+  }
+
+  LatLng get _rangeCenter => _user ?? _kDefaultCenter;
+
+  bool _isWithinNearbyRange(SpeciesLocation loc) {
+    final center = _rangeCenter;
+    final meters = _distance.as(
+      LengthUnit.Meter,
+      center,
+      LatLng(loc.lat, loc.lng),
+    );
+    return meters <= _nearbySpeciesRadiusMeters;
   }
 
   Widget _buildGlassCard({
@@ -303,7 +338,7 @@ class _MapScreenState extends State<MapScreen> {
     final suggestions = _matchingSpeciesSuggestions(_speciesQuery);
     final showSuggestionList =
         q.isNotEmpty && _selectedSpecies == null && suggestions.isNotEmpty;
-    final showSpeciesMarkers = q.isNotEmpty || _selectedSpecies != null;
+    const showSpeciesMarkers = true;
     final cityWeatherMarkers = <Marker>[];
     if (_showCityWeatherMarkers) {
       for (final city in kMalaysianCities) {
@@ -375,10 +410,16 @@ class _MapScreenState extends State<MapScreen> {
       for (final loc in speciesLocations) {
         final species = speciesById(loc.speciesId);
         if (species == null) continue;
-        if (_selectedSpecies != null && species.id != _selectedSpecies!.id) {
-          continue;
-        }
-        if (_selectedSpecies == null && !_matchesSpeciesQuery(species, q)) {
+        final isNearby = _isWithinNearbyRange(loc);
+        final matchesSelected =
+            _selectedSpecies != null && species.id == _selectedSpecies!.id;
+        if (_selectedSpecies != null) {
+          if (!matchesSelected && !(_showNearbyAlongsideSelected && isNearby)) {
+            continue;
+          }
+        } else if (q.isNotEmpty) {
+          if (!_matchesSpeciesQuery(species, q)) continue;
+        } else if (!isNearby) {
           continue;
         }
         final weather = closestWeather(loc.lat, loc.lng);
@@ -555,8 +596,15 @@ class _MapScreenState extends State<MapScreen> {
                                 width: 44 * s,
                                 child: Icon(
                                   Icons.search,
-                                  color: AppColors.accent.withValues(alpha: 0.86),
-                                  size: Adaptive.clamp(context, 20, min: 17, max: 23),
+                                  color: AppColors.accent.withValues(
+                                    alpha: 0.86,
+                                  ),
+                                  size: Adaptive.clamp(
+                                    context,
+                                    20,
+                                    min: 17,
+                                    max: 23,
+                                  ),
                                 ),
                               ),
                               Expanded(
@@ -578,7 +626,9 @@ class _MapScreenState extends State<MapScreen> {
                                   decoration: InputDecoration(
                                     hintText: 'Search species',
                                     hintStyle: TextStyle(
-                                      color: AppColors.accent.withValues(alpha: 0.84),
+                                      color: AppColors.accent.withValues(
+                                        alpha: 0.84,
+                                      ),
                                       fontWeight: FontWeight.w700,
                                     ),
                                     filled: false,
