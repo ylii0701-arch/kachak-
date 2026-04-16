@@ -39,7 +39,10 @@ jobs:
         working-directory: flutter
         run: |
           flutter pub get
-          flutter build web --release --base-href "/${{ github.event.repository.name }}/"
+          flutter build web --release \
+            --base-href "/${{ github.event.repository.name }}/" \
+            --dart-define=MAPBOX_ACCESS_TOKEN=${{ secrets.MAPBOX_ACCESS_TOKEN }} \
+            --dart-define=OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}
 
       - uses: actions/upload-pages-artifact@v4
         with:
