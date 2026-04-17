@@ -71,7 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Species> get _filtered {
     var list = speciesData.where((s) {
       final q = _searchQuery.toLowerCase();
-      final matchSearch = q.isEmpty ||
+      final matchSearch =
+          q.isEmpty ||
           s.commonName.toLowerCase().contains(q) ||
           s.scientificName.toLowerCase().contains(q);
       final matchCat = _category == 'All' || s.category == _category;
@@ -83,7 +84,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (_sortBy == _SortBy.conservationStatus) {
       list.sort((a, b) {
-        final c = conservationStatusRank(a.conservationStatus) -
+        final c =
+            conservationStatusRank(a.conservationStatus) -
             conservationStatusRank(b.conservationStatus);
         return _sortOrder == _SortOrder.ascending ? c : -c;
       });
@@ -97,7 +99,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   int get _activeFilterCount =>
-      (_category != 'All' ? 1 : 0) + (_status != 'All' ? 1 : 0) + (_difficulty != 'All' ? 1 : 0);
+      (_category != 'All' ? 1 : 0) +
+      (_status != 'All' ? 1 : 0) +
+      (_difficulty != 'All' ? 1 : 0);
 
   void _resetFilters() {
     setState(() {
@@ -149,7 +153,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final scale = Adaptive.scale(context);
     final filtered = _filtered;
-    final totalPages = filtered.isEmpty ? 1 : (filtered.length / _pageSize).ceil();
+    final totalPages = filtered.isEmpty
+        ? 1
+        : (filtered.length / _pageSize).ceil();
     final page = _currentPage.clamp(1, totalPages);
     final start = filtered.isEmpty ? 0 : (page - 1) * _pageSize;
     final displayed = filtered.skip(start).take(_pageSize).toList();
@@ -158,228 +164,274 @@ class _HomeScreenState extends State<HomeScreen> {
     return Material(
       color: Colors.transparent,
       child: CustomScrollView(
-      controller: _scrollController,
-      slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(16 * scale, 24 * scale, 16 * scale, 8 * scale),
-            child: GlassPanel(
-              padding: EdgeInsets.fromLTRB(18 * scale, 20 * scale, 18 * scale, 18 * scale),
-              borderRadius: 26 * scale,
-              fillAlpha: 0.42,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Kachak',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: Adaptive.clamp(context, 28, min: 22, max: 34),
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.6,
-                      height: 1.05,
-                      color: AppColors.accent,
+        controller: _scrollController,
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                16 * scale,
+                24 * scale,
+                16 * scale,
+                8 * scale,
+              ),
+              child: GlassPanel(
+                padding: EdgeInsets.fromLTRB(
+                  18 * scale,
+                  20 * scale,
+                  18 * scale,
+                  18 * scale,
+                ),
+                borderRadius: 26 * scale,
+                fillAlpha: 0.42,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Kachak',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: Adaptive.clamp(context, 28, min: 22, max: 34),
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.6,
+                        height: 1.05,
+                        color: AppColors.accent,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Malaysian Wildlife Explorer',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.35,
-                      height: 1.35,
-                      color: const Color(0xFF5C6B63),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Malaysian Wildlife Explorer',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.35,
+                        height: 1.35,
+                        color: const Color(0xFF5C6B63),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 20 * scale),
-                  TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search species name',
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: _searchQuery.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: _clearSearchInput,
-                            )
-                          : null,
+                    SizedBox(height: 20 * scale),
+                    TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search species name',
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: _searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.close),
+                                onPressed: _clearSearchInput,
+                              )
+                            : null,
+                      ),
+                      onChanged: (v) => setState(() {
+                        _searchQuery = v;
+                        _currentPage = 1;
+                      }),
                     ),
-                    onChanged: (v) => setState(() {
-                      _searchQuery = v;
-                      _currentPage = 1;
-                    }),
-                  ),
-                  SizedBox(height: 12 * scale),
-                  Row(
+                    SizedBox(height: 12 * scale),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              _chipButton(
+                                label: 'Filter',
+                                icon: Icons.filter_list,
+                                selected:
+                                    _showFilters || _activeFilterCount > 0,
+                                primary: true,
+                                badge: _activeFilterCount > 0
+                                    ? '$_activeFilterCount'
+                                    : null,
+                                onTap: () {
+                                  setState(() {
+                                    if (_showFilters) {
+                                      _showFilters = false;
+                                    } else {
+                                      _tempCategory = _category;
+                                      _tempStatus = _status;
+                                      _tempDifficulty = _difficulty;
+                                      _showFilters = true;
+                                      _showSort = false;
+                                    }
+                                  });
+                                },
+                              ),
+                              _chipButton(
+                                label: 'Sort',
+                                icon: Icons.swap_vert,
+                                selected: _showSort || _sortBy != _SortBy.none,
+                                primary: false,
+                                badge: _sortBy != _SortBy.none ? '✓' : null,
+                                onTap: () {
+                                  setState(() {
+                                    if (_showSort) {
+                                      _showSort = false;
+                                    } else {
+                                      _tempSortBy = _sortBy;
+                                      _tempSortOrder = _sortOrder;
+                                      _showSort = true;
+                                      _showFilters = false;
+                                    }
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (_activeFilterCount > 0 || _sortBy != _SortBy.none)
+                          IconButton(
+                            onPressed: () {
+                              _resetFilters();
+                              _resetSort();
+                            },
+                            icon: const Icon(Icons.cleaning_services_outlined),
+                            color: Colors.red.shade700,
+                            tooltip: 'Clear all',
+                          ),
+                        IconButton(
+                          onPressed: () =>
+                              setState(() => _gridView = !_gridView),
+                          icon: Icon(
+                            _gridView ? Icons.view_list : Icons.grid_view,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_showFilters) _filterPanel(),
+                    if (_showSort) _sortPanel(),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          if (filtered.isEmpty && _searchQuery.isNotEmpty)
+            SliverFillRemaining(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Expanded(
-                        child: Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            _chipButton(
-                              label: 'Filter',
-                              icon: Icons.filter_list,
-                              selected: _showFilters || _activeFilterCount > 0,
-                              primary: true,
-                              badge: _activeFilterCount > 0 ? '$_activeFilterCount' : null,
-                              onTap: () {
-                                setState(() {
-                                  if (_showFilters) {
-                                    _showFilters = false;
-                                  } else {
-                                    _tempCategory = _category;
-                                    _tempStatus = _status;
-                                    _tempDifficulty = _difficulty;
-                                    _showFilters = true;
-                                    _showSort = false;
-                                  }
-                                });
-                              },
-                            ),
-                            _chipButton(
-                              label: 'Sort',
-                              icon: Icons.swap_vert,
-                              selected: _showSort || _sortBy != _SortBy.none,
-                              primary: false,
-                              badge: _sortBy != _SortBy.none ? '✓' : null,
-                              onTap: () {
-                                setState(() {
-                                  if (_showSort) {
-                                    _showSort = false;
-                                  } else {
-                                    _tempSortBy = _sortBy;
-                                    _tempSortOrder = _sortOrder;
-                                    _showSort = true;
-                                    _showFilters = false;
-                                  }
-                                });
-                              },
-                            ),
-                          ],
+                      Icon(
+                        Icons.info_outline,
+                        size: 64 * scale,
+                        color: Colors.grey.shade400,
+                      ),
+                      SizedBox(height: 12 * scale),
+                      const Text(
+                        'No species found',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      if (_activeFilterCount > 0 || _sortBy != _SortBy.none)
-                        IconButton(
-                          onPressed: () {
-                            _resetFilters();
-                            _resetSort();
-                          },
-                          icon: const Icon(Icons.cleaning_services_outlined),
-                          color: Colors.red.shade700,
-                          tooltip: 'Clear all',
-                        ),
-                      IconButton(
-                        onPressed: () => setState(() => _gridView = !_gridView),
-                        icon: Icon(_gridView ? Icons.view_list : Icons.grid_view),
+                      SizedBox(height: 8 * scale),
+                      Text('No species matching "$_searchQuery"'),
+                      SizedBox(height: 16 * scale),
+                      FilledButton(
+                        onPressed: _clearSearchInput,
+                        child: const Text('Clear search'),
                       ),
                     ],
                   ),
-                  if (_showFilters) _filterPanel(),
-                  if (_showSort) _sortPanel(),
-                ],
+                ),
               ),
-            ),
-          ),
-        ),
-        if (filtered.isEmpty && _searchQuery.isNotEmpty)
-          SliverFillRemaining(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.info_outline, size: 64 * scale, color: Colors.grey.shade400),
-                    SizedBox(height: 12 * scale),
-                    const Text('No species found', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-                    SizedBox(height: 8 * scale),
-                    Text('No species matching "$_searchQuery"'),
-                    SizedBox(height: 16 * scale),
-                    FilledButton(onPressed: _clearSearchInput, child: const Text('Clear search')),
-                  ],
+            )
+          else if (filtered.isEmpty)
+            SliverFillRemaining(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.filter_alt_off,
+                        size: 64 * scale,
+                        color: Colors.grey.shade400,
+                      ),
+                      SizedBox(height: 12 * scale),
+                      const Text('No results match your filters'),
+                      SizedBox(height: 16 * scale),
+                      FilledButton(
+                        onPressed: _resetFilters,
+                        child: const Text('Reset filters'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          else if (_gridView) ...[
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(
+                16 * scale,
+                8 * scale,
+                16 * scale,
+                0,
+              ),
+              sliver: SliverGrid(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  // Keep grid mode consistent across phones: always 2 columns.
+                  // Device logical width can vary by pixel density, which previously
+                  // caused 1-column or 3-column layouts on some screens.
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12 * scale,
+                  crossAxisSpacing: 12 * scale,
+                  // Taller cells than width/0.72 so title + chips + Save fit without overflow.
+                  childAspectRatio: 0.58,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) =>
+                      _speciesCard(displayed[index], saved, compact: true),
+                  childCount: displayed.length,
                 ),
               ),
             ),
-          )
-        else if (filtered.isEmpty)
-          SliverFillRemaining(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.filter_alt_off, size: 64 * scale, color: Colors.grey.shade400),
-                    SizedBox(height: 12 * scale),
-                    const Text('No results match your filters'),
-                    SizedBox(height: 16 * scale),
-                    FilledButton(onPressed: _resetFilters, child: const Text('Reset filters')),
-                  ],
-                ),
+            SliverToBoxAdapter(
+              child: _paginationFooter(
+                scale: scale,
+                page: page,
+                totalPages: totalPages,
+                hasResults: filtered.isNotEmpty,
               ),
             ),
-          )
-        else if (_gridView) ...[
-          SliverPadding(
-            padding: EdgeInsets.fromLTRB(16 * scale, 8 * scale, 16 * scale, 0),
-            sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: Adaptive.adaptiveGridCount(
-                  context,
-                  minTileWidth: 180,
-                  min: 1,
-                  max: 3,
-                  horizontalPadding: 32 * scale,
-                  spacing: 12 * scale,
-                ),
-                mainAxisSpacing: 12 * scale,
-                crossAxisSpacing: 12 * scale,
-                // Taller cells than width/0.72 so title + chips + Save fit without overflow.
-                childAspectRatio: 0.58,
+          ] else
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(
+                16 * scale,
+                8 * scale,
+                16 * scale,
+                100 * scale,
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => _speciesCard(displayed[index], saved, compact: true),
-                childCount: displayed.length,
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: _paginationFooter(
-              scale: scale,
-              page: page,
-              totalPages: totalPages,
-              hasResults: filtered.isNotEmpty,
-            ),
-          ),
-        ]
-        else
-          SliverPadding(
-            padding: EdgeInsets.fromLTRB(16 * scale, 8 * scale, 16 * scale, 100 * scale),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index == displayed.length) {
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index == displayed.length) {
+                      return Padding(
+                        padding: EdgeInsets.only(top: 8 * scale),
+                        child: _paginationControls(
+                          page: page,
+                          totalPages: totalPages,
+                        ),
+                      );
+                    }
+                    if (index >= displayed.length) return null;
                     return Padding(
-                      padding: EdgeInsets.only(top: 8 * scale),
-                      child: _paginationControls(
-                        page: page,
-                        totalPages: totalPages,
+                      padding: EdgeInsets.only(bottom: 12 * scale),
+                      child: _speciesCard(
+                        displayed[index],
+                        saved,
+                        compact: false,
                       ),
                     );
-                  }
-                  if (index >= displayed.length) return null;
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: 12 * scale),
-                    child: _speciesCard(displayed[index], saved, compact: false),
-                  );
-                },
-                childCount: displayed.length + (filtered.isNotEmpty ? 1 : 0),
+                  },
+                  childCount: displayed.length + (filtered.isNotEmpty ? 1 : 0),
+                ),
               ),
             ),
-          ),
-      ],
-    ),
+        ],
+      ),
     );
   }
 
@@ -402,25 +454,45 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: selected ? color : Colors.grey.shade300, width: 2),
+            border: Border.all(
+              color: selected ? color : Colors.grey.shade300,
+              width: 2,
+            ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 20, color: selected ? Colors.white : Colors.black87),
+              Icon(
+                icon,
+                size: 20,
+                color: selected ? Colors.white : Colors.black87,
+              ),
               const SizedBox(width: 6),
-              Text(label, style: TextStyle(fontWeight: FontWeight.w600, color: selected ? Colors.white : Colors.black87)),
+              Text(
+                label,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: selected ? Colors.white : Colors.black87,
+                ),
+              ),
               if (badge != null) ...[
                 const SizedBox(width: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: selected ? Colors.white : color,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     badge,
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: selected ? color : Colors.white),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: selected ? color : Colors.white,
+                    ),
                   ),
                 ),
               ],
@@ -439,7 +511,10 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Category', style: TextStyle(fontWeight: FontWeight.w600)),
+            const Text(
+              'Category',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -456,7 +531,10 @@ class _HomeScreenState extends State<HomeScreen> {
               }).toList(),
             ),
             const SizedBox(height: 16),
-            const Text('Conservation Status', style: TextStyle(fontWeight: FontWeight.w600)),
+            const Text(
+              'Conservation Status',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -474,7 +552,10 @@ class _HomeScreenState extends State<HomeScreen> {
               }).toList(),
             ),
             const SizedBox(height: 16),
-            const Text('Shooting Difficulty Level', style: TextStyle(fontWeight: FontWeight.w600)),
+            const Text(
+              'Shooting Difficulty Level',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -534,7 +615,10 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Sort By', style: TextStyle(fontWeight: FontWeight.w600)),
+            const Text(
+              'Sort By',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -546,24 +630,45 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             if (_tempSortBy != _SortBy.none) ...[
               const SizedBox(height: 16),
-              const Text('Order', style: TextStyle(fontWeight: FontWeight.w600)),
+              const Text(
+                'Order',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
                 children: [
                   ChoiceChip(
-                    label: Text(_tempSortBy == _SortBy.difficultyLevel ? 'Ascending (1★ → 5★)' : 'Ascending (Least → Critical)'),
+                    label: Text(
+                      _tempSortBy == _SortBy.difficultyLevel
+                          ? 'Ascending (1★ → 5★)'
+                          : 'Ascending (Least → Critical)',
+                    ),
                     selected: _tempSortOrder == _SortOrder.ascending,
-                    onSelected: (_) => setState(() => _tempSortOrder = _SortOrder.ascending),
+                    onSelected: (_) =>
+                        setState(() => _tempSortOrder = _SortOrder.ascending),
                     selectedColor: AppColors.accent,
-                    labelStyle: TextStyle(color: _tempSortOrder == _SortOrder.ascending ? Colors.white : null),
+                    labelStyle: TextStyle(
+                      color: _tempSortOrder == _SortOrder.ascending
+                          ? Colors.white
+                          : null,
+                    ),
                   ),
                   ChoiceChip(
-                    label: Text(_tempSortBy == _SortBy.difficultyLevel ? 'Descending (5★ → 1★)' : 'Descending (Critical → Least)'),
+                    label: Text(
+                      _tempSortBy == _SortBy.difficultyLevel
+                          ? 'Descending (5★ → 1★)'
+                          : 'Descending (Critical → Least)',
+                    ),
                     selected: _tempSortOrder == _SortOrder.descending,
-                    onSelected: (_) => setState(() => _tempSortOrder = _SortOrder.descending),
+                    onSelected: (_) =>
+                        setState(() => _tempSortOrder = _SortOrder.descending),
                     selectedColor: AppColors.accent,
-                    labelStyle: TextStyle(color: _tempSortOrder == _SortOrder.descending ? Colors.white : null),
+                    labelStyle: TextStyle(
+                      color: _tempSortOrder == _SortOrder.descending
+                          ? Colors.white
+                          : null,
+                    ),
                   ),
                 ],
               ),
@@ -573,7 +678,9 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Expanded(
                   child: FilledButton(
-                    style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                    ),
                     onPressed: () {
                       setState(() {
                         _sortBy = _tempSortBy;
@@ -617,7 +724,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }) {
     if (!hasResults) return SizedBox(height: 100 * scale);
     return Padding(
-      padding: EdgeInsets.fromLTRB(16 * scale, 12 * scale, 16 * scale, 100 * scale),
+      padding: EdgeInsets.fromLTRB(
+        16 * scale,
+        12 * scale,
+        16 * scale,
+        100 * scale,
+      ),
       child: _paginationControls(page: page, totalPages: totalPages),
     );
   }
@@ -652,7 +764,9 @@ class _HomeScreenState extends State<HomeScreen> {
           spacing: 8,
           runSpacing: 8,
           alignment: WrapAlignment.center,
-          children: _buildPageTokens(page: page, totalPages: totalPages).map((token) {
+          children: _buildPageTokens(page: page, totalPages: totalPages).map((
+            token,
+          ) {
             if (token == null) {
               return Container(
                 width: 44,
@@ -711,8 +825,7 @@ class _HomeScreenState extends State<HomeScreen> {
       page,
       (page - 1).clamp(1, totalPages),
       (page + 1).clamp(1, totalPages),
-    }.toList()
-      ..sort();
+    }.toList()..sort();
 
     final tokens = <int?>[];
     for (var i = 0; i < keep.length; i++) {
@@ -759,28 +872,49 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _speciesCard(Species s, SavedSpeciesProvider saved, {required bool compact}) {
+  Widget _speciesCard(
+    Species s,
+    SavedSpeciesProvider saved, {
+    required bool compact,
+  }) {
     final imgH = compact
         ? Adaptive.clamp(context, 120, min: 92, max: 150)
         : Adaptive.clamp(context, 180, min: 140, max: 240);
     final hasStatus = s.conservationStatus.trim().isNotEmpty;
-    final bg = hasStatus ? statusBackgroundColor(s.conservationStatus) : Colors.grey.shade300;
-    final fg = hasStatus ? statusForegroundColor(s.conservationStatus) : Colors.black54;
+    final bg = hasStatus
+        ? statusBackgroundColor(s.conservationStatus)
+        : Colors.grey.shade300;
+    final fg = hasStatus
+        ? statusForegroundColor(s.conservationStatus)
+        : Colors.black54;
     final statusText = hasStatus
-        ? (compact ? statusAbbreviation(s.conservationStatus) : s.conservationStatus)
+        ? (compact
+              ? statusAbbreviation(s.conservationStatus)
+              : s.conservationStatus)
         : (compact ? 'N/A' : 'Status Unavailable');
-    final commonName = s.commonName.trim().isNotEmpty ? s.commonName : 'Unknown Species';
+    final commonName = s.commonName.trim().isNotEmpty
+        ? s.commonName
+        : 'Unknown Species';
     final scientificName = s.scientificName.trim().isNotEmpty
         ? s.scientificName
         : 'Scientific name unavailable';
-    final categoryText = s.category.trim().isNotEmpty ? s.category : 'Category N/A';
+    final categoryText = s.category.trim().isNotEmpty
+        ? s.category
+        : 'Category N/A';
 
     final scale = Adaptive.scale(context);
-    final tagFontSize =
-        compact ? Adaptive.clamp(context, 10, min: 9, max: 12) : Adaptive.clamp(context, 12, min: 10, max: 14);
-    final tagLabelPadding =
-        EdgeInsets.symmetric(horizontal: 5 * scale, vertical: 2 * scale);
-    final tagTextStyle = TextStyle(fontSize: tagFontSize, fontWeight: FontWeight.w600, height: 1.05);
+    final tagFontSize = compact
+        ? Adaptive.clamp(context, 10, min: 9, max: 12)
+        : Adaptive.clamp(context, 12, min: 10, max: 14);
+    final tagLabelPadding = EdgeInsets.symmetric(
+      horizontal: 5 * scale,
+      vertical: 2 * scale,
+    );
+    final tagTextStyle = TextStyle(
+      fontSize: tagFontSize,
+      fontWeight: FontWeight.w600,
+      height: 1.05,
+    );
     const tagShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(6)),
     );
@@ -823,7 +957,10 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Chip(
-                label: Text(categoryText, style: tagTextStyle.copyWith(color: Colors.black87)),
+                label: Text(
+                  categoryText,
+                  style: tagTextStyle.copyWith(color: Colors.black87),
+                ),
                 labelPadding: tagLabelPadding,
                 visualDensity: tagDensity,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -834,7 +971,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 surfaceTintColor: Colors.transparent,
               ),
               Chip(
-                label: Text(statusText, style: tagTextStyle.copyWith(color: fg)),
+                label: Text(
+                  statusText,
+                  style: tagTextStyle.copyWith(color: fg),
+                ),
                 labelPadding: tagLabelPadding,
                 visualDensity: tagDensity,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -886,17 +1026,23 @@ class _HomeScreenState extends State<HomeScreen> {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Failed to update saved species. Please try again.'),
+                  content: Text(
+                    'Failed to update saved species. Please try again.',
+                  ),
                   backgroundColor: Colors.red,
                 ),
               );
             }
           }
         },
-        icon: Icon(saved.isSaved(s.id) ? Icons.favorite : Icons.favorite_border),
+        icon: Icon(
+          saved.isSaved(s.id) ? Icons.favorite : Icons.favorite_border,
+        ),
         label: Text(saved.isSaved(s.id) ? 'Saved' : 'Save'),
         style: FilledButton.styleFrom(
-          backgroundColor: saved.isSaved(s.id) ? AppColors.primary : Colors.grey.shade200,
+          backgroundColor: saved.isSaved(s.id)
+              ? AppColors.primary
+              : Colors.grey.shade200,
           foregroundColor: saved.isSaved(s.id) ? Colors.white : Colors.black87,
         ),
       ),
@@ -904,7 +1050,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     void openDetail() {
       Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => SpeciesDetailScreen(speciesId: s.id)),
+        MaterialPageRoute<void>(
+          builder: (_) => SpeciesDetailScreen(speciesId: s.id),
+        ),
       );
     }
 
@@ -922,7 +1070,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Expanded(
-                      child: SpeciesNetworkImage(url: s.imageUrl, fit: BoxFit.cover),
+                      child: SpeciesNetworkImage(
+                        url: s.imageUrl,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                     infoColumn,
                   ],
@@ -947,7 +1098,10 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 SizedBox(
                   height: imgH,
-                  child: SpeciesNetworkImage(url: s.imageUrl, fit: BoxFit.cover),
+                  child: SpeciesNetworkImage(
+                    url: s.imageUrl,
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 infoColumn,
               ],

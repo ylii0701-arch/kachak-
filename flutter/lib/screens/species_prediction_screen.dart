@@ -27,12 +27,11 @@ class SpeciesPredictionScreen extends StatefulWidget {
 }
 
 class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
-
   Future<void> _toggleNotif(
-      BuildContext context,
-      SavedSpeciesProvider saved,
-      String commonName,
-      ) async {
+    BuildContext context,
+    SavedSpeciesProvider saved,
+    String commonName,
+  ) async {
     if (!saved.isSaved(widget.speciesId)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -52,7 +51,9 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
     if (!success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Alert could not be enabled. Please allow notifications in settings.'),
+          content: Text(
+            'Alert could not be enabled. Please allow notifications in settings.',
+          ),
         ),
       );
       return;
@@ -137,7 +138,10 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
     if (species == null || prediction == null) {
       return Scaffold(
         backgroundColor: AppColors.detailBackdrop,
-        appBar: AppBar(backgroundColor: Colors.white.withValues(alpha: 0.92), surfaceTintColor: Colors.transparent),
+        appBar: AppBar(
+          backgroundColor: Colors.white.withValues(alpha: 0.92),
+          surfaceTintColor: Colors.transparent,
+        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -153,8 +157,14 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
       );
     }
 
-    final topInset = MediaQuery.paddingOf(context).top + kToolbarHeight + (6 * s);
+    final topInset =
+        MediaQuery.paddingOf(context).top + kToolbarHeight + (6 * s);
     final bottomPad = MediaQuery.paddingOf(context).bottom + (20 * s);
+    final textScale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.5);
+    final heroExpandedHeight =
+        topInset +
+        Adaptive.clamp(context, 170, min: 150, max: 220) +
+        ((textScale - 1.0) * 40);
     final isNotified = saved.isNotified(species.id);
 
     return Scaffold(
@@ -166,7 +176,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
           CustomScrollView(
             slivers: [
               SliverAppBar(
-                expandedHeight: topInset + (88 * s),
+                expandedHeight: heroExpandedHeight,
                 pinned: true,
                 backgroundColor: Colors.white.withValues(alpha: 0.88),
                 surfaceTintColor: Colors.transparent,
@@ -179,7 +189,11 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                       color: Colors.black.withValues(alpha: 0.38),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.arrow_back, color: Colors.white, size: 20 * s),
+                    child: Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 20 * s,
+                    ),
                   ),
                 ),
                 actions: [
@@ -197,8 +211,12 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          saved.isSaved(species.id) ? Icons.favorite : Icons.favorite_border,
-                          color: saved.isSaved(species.id) ? Colors.red.shade200 : Colors.white,
+                          saved.isSaved(species.id)
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: saved.isSaved(species.id)
+                              ? Colors.red.shade200
+                              : Colors.white,
                           size: 20 * s,
                         ),
                       ),
@@ -210,7 +228,10 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                   background: Stack(
                     fit: StackFit.expand,
                     children: [
-                      SpeciesNetworkImage(url: species.imageUrl, fit: BoxFit.cover),
+                      SpeciesNetworkImage(
+                        url: species.imageUrl,
+                        fit: BoxFit.cover,
+                      ),
                       Positioned.fill(
                         child: DecoratedBox(
                           decoration: BoxDecoration(
@@ -228,7 +249,12 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.fromLTRB(16 * s, topInset, 16 * s, 18 * s),
+                        padding: EdgeInsets.fromLTRB(
+                          16 * s,
+                          topInset,
+                          16 * s,
+                          18 * s,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -238,14 +264,22 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
                                         species.commonName,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           color: Colors.white,
-                                          fontSize: Adaptive.clamp(context, 22, min: 17, max: 28),
+                                          fontSize: Adaptive.clamp(
+                                            context,
+                                            22,
+                                            min: 17,
+                                            max: 28,
+                                          ),
                                           fontWeight: FontWeight.w700,
                                           height: 1.15,
                                           shadows: _predictionHeroShadows,
@@ -254,10 +288,19 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                       SizedBox(height: 4 * s),
                                       Text(
                                         species.scientificName,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
-                                          color: Colors.white.withValues(alpha: 0.94),
+                                          color: Colors.white.withValues(
+                                            alpha: 0.94,
+                                          ),
                                           fontStyle: FontStyle.italic,
-                                          fontSize: Adaptive.clamp(context, 14, min: 11, max: 18),
+                                          fontSize: Adaptive.clamp(
+                                            context,
+                                            14,
+                                            min: 11,
+                                            max: 18,
+                                          ),
                                           fontWeight: FontWeight.w500,
                                           height: 1.25,
                                           shadows: _predictionHeroShadows,
@@ -268,7 +311,9 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                         children: [
                                           Icon(
                                             Icons.place_rounded,
-                                            color: Colors.white.withValues(alpha: 0.92),
+                                            color: Colors.white.withValues(
+                                              alpha: 0.92,
+                                            ),
                                             size: 17 * s,
                                             shadows: _predictionHeroShadows,
                                           ),
@@ -277,13 +322,21 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                             child: Text(
                                               '${prediction.locationName} • ${prediction.distance}km away',
                                               style: TextStyle(
-                                                color: Colors.white.withValues(alpha: 0.92),
-                                                fontSize: Adaptive.clamp(context, 13, min: 11, max: 16),
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.92,
+                                                ),
+                                                fontSize: Adaptive.clamp(
+                                                  context,
+                                                  13,
+                                                  min: 11,
+                                                  max: 16,
+                                                ),
                                                 fontWeight: FontWeight.w500,
                                                 height: 1.35,
                                                 shadows: _predictionHeroShadows,
                                               ),
                                               maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
                                         ],
@@ -322,13 +375,19 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                 child: Padding(
                                   padding: EdgeInsets.all(16 * s),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         '🌿 Key Factors',
                                         style: GoogleFonts.plusJakartaSans(
                                           fontWeight: FontWeight.w800,
-                                          fontSize: Adaptive.clamp(context, 17, min: 14, max: 21),
+                                          fontSize: Adaptive.clamp(
+                                            context,
+                                            17,
+                                            min: 14,
+                                            max: 21,
+                                          ),
                                           color: AppColors.textBodyOnFrost,
                                           letterSpacing: -0.1,
                                         ),
@@ -336,78 +395,103 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                       SizedBox(height: 10 * s),
                                       Row(
                                         children:
-                                        [
-                                          'Time',
-                                          'Weather',
-                                          'Humidity',
-                                          'Temperature',
-                                        ].map((factor) {
-                                          final primary =
-                                              factor ==
+                                            [
+                                              'Time',
+                                              'Weather',
+                                              'Humidity',
+                                              'Temperature',
+                                            ].map((factor) {
+                                              final primary =
+                                                  factor ==
                                                   prediction.primaryFactor;
-                                          return Expanded(
-                                            child: Padding(
-                                              padding:
-                                              EdgeInsets.symmetric(
-                                                horizontal: 2 * s,
-                                              ),
-                                              child: Column(
-                                                children: [
-                                                  Container(
-                                                    padding:
-                                                    EdgeInsets.all(8 * s),
-                                                    decoration: BoxDecoration(
-                                                      color: primary
-                                                          ? AppColors.primary
-                                                          : Colors.white.withValues(alpha: 0.38),
-                                                      borderRadius:
-                                                      BorderRadius.circular(
-                                                        10 * s,
-                                                      ),
-                                                      border: primary
-                                                          ? Border.all(
-                                                        color: AppColors
-                                                            .primary,
-                                                        width: 2,
-                                                      )
-                                                          : Border.all(
-                                                        color: Colors.white.withValues(alpha: 0.55),
-                                                        width: 1,
-                                                      ),
-                                                    ),
-                                                    child: Icon(
-                                                      factor == 'Time'
-                                                          ? Icons.schedule
-                                                          : factor == 'Weather'
-                                                          ? Icons.cloud_outlined
-                                                          : factor == 'Humidity'
-                                                          ? Icons
-                                                          .water_drop_outlined
-                                                          : Icons.thermostat,
-                                                      size: 18 * s,
-                                                      color: primary ? Colors.white : AppColors.textSubtitleOnFrost,
-                                                    ),
+                                              return Expanded(
+                                                child: Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: 2 * s,
                                                   ),
-                                                  if (primary)
-                                                    const Text(
-                                                      '⭐',
-                                                      style: TextStyle(
-                                                        fontSize: 10,
+                                                  child: Column(
+                                                    children: [
+                                                      Container(
+                                                        padding: EdgeInsets.all(
+                                                          8 * s,
+                                                        ),
+                                                        decoration: BoxDecoration(
+                                                          color: primary
+                                                              ? AppColors
+                                                                    .primary
+                                                              : Colors.white
+                                                                    .withValues(
+                                                                      alpha:
+                                                                          0.38,
+                                                                    ),
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                10 * s,
+                                                              ),
+                                                          border: primary
+                                                              ? Border.all(
+                                                                  color: AppColors
+                                                                      .primary,
+                                                                  width: 2,
+                                                                )
+                                                              : Border.all(
+                                                                  color: Colors
+                                                                      .white
+                                                                      .withValues(
+                                                                        alpha:
+                                                                            0.55,
+                                                                      ),
+                                                                  width: 1,
+                                                                ),
+                                                        ),
+                                                        child: Icon(
+                                                          factor == 'Time'
+                                                              ? Icons.schedule
+                                                              : factor ==
+                                                                    'Weather'
+                                                              ? Icons
+                                                                    .cloud_outlined
+                                                              : factor ==
+                                                                    'Humidity'
+                                                              ? Icons
+                                                                    .water_drop_outlined
+                                                              : Icons
+                                                                    .thermostat,
+                                                          size: 18 * s,
+                                                          color: primary
+                                                              ? Colors.white
+                                                              : AppColors
+                                                                    .textSubtitleOnFrost,
+                                                        ),
                                                       ),
-                                                    ),
-                                                ],
-                                              ),
-                                            ),
-                                          );
-                                        }).toList(),
+                                                      if (primary)
+                                                        const Text(
+                                                          '⭐',
+                                                          style: TextStyle(
+                                                            fontSize: 10,
+                                                          ),
+                                                        ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            }).toList(),
                                       ),
                                     ],
                                   ),
                                 ),
                               ),
-                              Container(width: 1, color: Colors.white.withValues(alpha: 0.45)),
+                              Container(
+                                width: 1,
+                                color: Colors.white.withValues(alpha: 0.45),
+                              ),
                               SizedBox(
-                                width: Adaptive.clamp(context, 100, min: 80, max: 128),
+                                width: Adaptive.clamp(
+                                  context,
+                                  100,
+                                  min: 80,
+                                  max: 128,
+                                ),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -425,7 +509,9 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                       style: IconButton.styleFrom(
                                         backgroundColor: isNotified
                                             ? AppColors.primary
-                                            : Colors.white.withValues(alpha: 0.4),
+                                            : Colors.white.withValues(
+                                                alpha: 0.4,
+                                              ),
                                         foregroundColor: isNotified
                                             ? Colors.white
                                             : AppColors.textBodyOnFrost,
@@ -434,7 +520,12 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                     Text(
                                       isNotified ? 'Alert On' : 'Alert Off',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: Adaptive.clamp(context, 11, min: 10, max: 13),
+                                        fontSize: Adaptive.clamp(
+                                          context,
+                                          11,
+                                          min: 10,
+                                          max: 13,
+                                        ),
                                         fontWeight: FontWeight.w800,
                                         color: AppColors.textBodyOnFrost,
                                         letterSpacing: 0.1,
@@ -460,13 +551,22 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.trending_up, color: AppColors.iconSectionOnFrost, size: 22 * s),
+                          Icon(
+                            Icons.trending_up,
+                            color: AppColors.iconSectionOnFrost,
+                            size: 22 * s,
+                          ),
                           SizedBox(width: 8 * s),
                           Text(
                             '7-Day Occurrence Forecast',
                             style: GoogleFonts.plusJakartaSans(
                               fontWeight: FontWeight.w800,
-                              fontSize: Adaptive.clamp(context, 17, min: 14, max: 21),
+                              fontSize: Adaptive.clamp(
+                                context,
+                                17,
+                                min: 14,
+                                max: 21,
+                              ),
                               color: AppColors.textBodyOnFrost,
                               height: 1.2,
                               letterSpacing: -0.1,
@@ -498,20 +598,28 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                   ),
                                   decoration: BoxDecoration(
                                     color: first
-                                        ? AppColors.primary.withValues(alpha: 0.12)
+                                        ? AppColors.primary.withValues(
+                                            alpha: 0.12,
+                                          )
                                         : Colors.white.withValues(alpha: 0.42),
                                     borderRadius: BorderRadius.vertical(
                                       top: Radius.circular(14 * s),
                                     ),
                                   ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         _formatDate(day.date),
                                         style: GoogleFonts.plusJakartaSans(
                                           fontWeight: FontWeight.w800,
-                                          fontSize: Adaptive.clamp(context, 15, min: 12, max: 19),
+                                          fontSize: Adaptive.clamp(
+                                            context,
+                                            15,
+                                            min: 12,
+                                            max: 19,
+                                          ),
                                           color: AppColors.textBodyOnFrost,
                                           letterSpacing: -0.05,
                                         ),
@@ -523,7 +631,9 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                         ),
                                         decoration: BoxDecoration(
                                           color: _probBg(day.probability),
-                                          borderRadius: BorderRadius.circular(20 * s),
+                                          borderRadius: BorderRadius.circular(
+                                            20 * s,
+                                          ),
                                           border: Border.all(
                                             color: Colors.grey.shade400,
                                           ),
@@ -531,7 +641,12 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                         child: Text(
                                           '${day.probability} Chance',
                                           style: GoogleFonts.plusJakartaSans(
-                                            fontSize: Adaptive.clamp(context, 11, min: 10, max: 13),
+                                            fontSize: Adaptive.clamp(
+                                              context,
+                                              11,
+                                              min: 10,
+                                              max: 13,
+                                            ),
                                             fontWeight: FontWeight.w800,
                                             color: _probFg(day.probability),
                                             letterSpacing: 0.05,
@@ -546,7 +661,8 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                   child: Column(
                                     children: [
                                       Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Expanded(
                                             child: _forecastCell(
@@ -568,7 +684,8 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                       ),
                                       SizedBox(height: 10 * s),
                                       Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Expanded(
                                             child: _forecastCell(
@@ -643,8 +760,8 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
           ),
           child: emojiChar != null
               ? Center(
-            child: Text(emojiChar, style: const TextStyle(fontSize: 18)),
-          )
+                  child: Text(emojiChar, style: const TextStyle(fontSize: 18)),
+                )
               : Icon(icon, color: tint, size: 20),
         ),
         const SizedBox(width: 10),
