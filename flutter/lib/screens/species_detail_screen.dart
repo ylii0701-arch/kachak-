@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
+import '../data/photography_assistant_data.dart';
 import '../data/map_data.dart';
 import '../data/species_data.dart';
 import '../models/species.dart';
@@ -455,6 +456,15 @@ class SpeciesDetailScreen extends StatelessWidget {
                             ],
                           ),
                         ],
+                      ),
+                    ),
+                    _sectionCard(
+                      context,
+                      title: 'Diet',
+                      icon: Icons.restaurant_menu_outlined,
+                      child: Text(
+                        speciesDietData[species.id] ??
+                            'Diet information is currently unavailable for this species.',
                       ),
                     ),
                     _sectionCard(

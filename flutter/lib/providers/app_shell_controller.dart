@@ -21,7 +21,7 @@ class AppShellController extends ChangeNotifier {
     _mapJump = point;
     _mapJumpZoom = zoom;
     _mapJumpSpeciesId = speciesId;
-    _index = 2;
+    _index = 4;
     notifyListeners();
   }
 
