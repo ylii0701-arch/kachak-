@@ -62,7 +62,7 @@ class _MapScreenState extends State<MapScreen> {
 
   static const double _minZoom = 3;
   static const double _maxZoom = 18;
-  static const double _nearbySpeciesRadiusMeters = 120000;
+  static const double _nearbySpeciesRadiusMeters = 10000;
 
   @override
   void initState() {
