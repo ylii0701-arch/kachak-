@@ -7,8 +7,8 @@ import 'package:provider/provider.dart';
 import '../providers/app_shell_controller.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
+import '../widgets/assistant_overlay_layer.dart';
 import '../widgets/glass.dart';
-import 'assistant_screen.dart';
 import 'home_screen.dart';
 import 'identify_screen.dart';
 import 'map_screen.dart';
@@ -44,7 +44,10 @@ class _GlassBottomNav extends StatelessWidget {
                 Colors.white.withValues(alpha: 0.88),
               ],
             ),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.94), width: 1.2),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.94),
+              width: 1.2,
+            ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.14),
@@ -63,7 +66,13 @@ class _GlassBottomNav extends StatelessWidget {
             child: Row(
               children: [
                 _item(context, 0, Icons.home_outlined, Icons.home, 'Home'),
-                _item(context, 1, Icons.trending_up_outlined, Icons.trending_up, 'Predict'),
+                _item(
+                  context,
+                  1,
+                  Icons.trending_up_outlined,
+                  Icons.trending_up,
+                  'Predict',
+                ),
                 _item(
                   context,
                   2,
@@ -71,7 +80,13 @@ class _GlassBottomNav extends StatelessWidget {
                   Icons.center_focus_strong,
                   'Identify',
                 ),
-                _item(context, 3, Icons.adjust_outlined, Icons.adjust, 'Mission'),
+                _item(
+                  context,
+                  3,
+                  Icons.adjust_outlined,
+                  Icons.adjust,
+                  'Mission',
+                ),
                 _item(context, 4, Icons.map_outlined, Icons.map, 'Map'),
               ],
             ),
@@ -107,7 +122,10 @@ class _GlassBottomNav extends StatelessWidget {
               AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
                 curve: Curves.easeOutCubic,
-                padding: EdgeInsets.symmetric(horizontal: 12 * s, vertical: 5 * s),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 12 * s,
+                  vertical: 5 * s,
+                ),
                 decoration: BoxDecoration(
                   color: selected ? AppColors.primary : Colors.transparent,
                   borderRadius: BorderRadius.circular(999),
@@ -142,12 +160,6 @@ class _GlassBottomNav extends StatelessWidget {
 class MainShell extends StatelessWidget {
   const MainShell({super.key});
 
-  Future<void> _openAssistant(BuildContext context) async {
-    await Navigator.of(
-      context,
-    ).push(MaterialPageRoute<void>(builder: (_) => const AssistantScreen()));
-  }
-
   Future<void> _openSaved(BuildContext context) async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -168,115 +180,89 @@ class MainShell extends StatelessWidget {
     final s = Adaptive.scale(context);
     final topPad = MediaQuery.paddingOf(context).top;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      extendBody: true,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          const MistBackdrop(backgroundBlurSigma: 9),
-          IndexedStack(
-            index: shell.index,
-            children: [
-              const HomeScreen(),
-              const PredictionScreen(),
-              const IdentifyScreen(),
-              const MissionScreen(),
-              const MapScreen(),
-            ],
-          ),
-          Positioned(
-            top: topPad + (10 * s),
-            right: 14 * s,
-            child: PopupMenuButton<String>(
-              tooltip: 'Menu',
-              onSelected: (value) {
-                if (value == 'saved') {
-                  _openSaved(context);
-                }
-              },
-              itemBuilder: (_) => const [
-                PopupMenuItem<String>(
-                  value: 'saved',
-                  child: Row(
-                    children: [
-                      Icon(Icons.favorite_border),
-                      SizedBox(width: 8),
-                      Text('Saved'),
-                    ],
-                  ),
-                ),
+    final navBarHeight = bottom > 0
+        ? bottom + (2 * s) + 64 * s
+        : 6 * s + 64 * s;
+
+    return AssistantOverlayLayer(
+      reservedBottom: navBarHeight,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        extendBody: true,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            const MistBackdrop(backgroundBlurSigma: 9),
+            IndexedStack(
+              index: shell.index,
+              children: const [
+                HomeScreen(),
+                PredictionScreen(),
+                IdentifyScreen(),
+                MissionScreen(),
+                MapScreen(),
               ],
-              child: Container(
-                width: 44 * s,
-                height: 44 * s,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.88),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.94)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.12),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Icon(Icons.menu_rounded, color: AppColors.accent, size: 24 * s),
-              ),
             ),
-          ),
-          Positioned(
-            right: 18 * s,
-            bottom: bottom + (84 * s),
-            child: Semantics(
-              label: 'Open assistant chat',
-              button: true,
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(999),
-                  onTap: () => _openAssistant(context),
-                  child: Container(
-                    width: 62 * s,
-                    height: 62 * s,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.primary,
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.95),
-                        width: 2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.22),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
+            Positioned(
+              top: topPad + (10 * s),
+              right: 14 * s,
+              child: PopupMenuButton<String>(
+                tooltip: 'Menu',
+                onSelected: (value) {
+                  if (value == 'saved') {
+                    _openSaved(context);
+                  }
+                },
+                itemBuilder: (_) => const [
+                  PopupMenuItem<String>(
+                    value: 'saved',
+                    child: Row(
+                      children: [
+                        Icon(Icons.favorite_border),
+                        SizedBox(width: 8),
+                        Text('Saved'),
                       ],
                     ),
-                    child: Icon(
-                      Icons.chat_bubble_outline_rounded,
-                      color: Colors.white,
-                      size: 28 * s,
+                  ),
+                ],
+                child: Container(
+                  width: 44 * s,
+                  height: 44 * s,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.88),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.94),
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.menu_rounded,
+                    color: AppColors.accent,
+                    size: 24 * s,
                   ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.fromLTRB(
-          8 * s,
-          0,
-          8 * s,
-          bottom > 0 ? bottom + (2 * s) : 6 * s,
+          ],
         ),
-        child: _GlassBottomNav(
-          selectedIndex: shell.index,
-          onSelect: (i) => context.read<AppShellController>().selectTab(i),
+        bottomNavigationBar: Padding(
+          padding: EdgeInsets.fromLTRB(
+            8 * s,
+            0,
+            8 * s,
+            bottom > 0 ? bottom + (2 * s) : 6 * s,
+          ),
+          child: _GlassBottomNav(
+            selectedIndex: shell.index,
+            onSelect: (i) => context.read<AppShellController>().selectTab(i),
+          ),
         ),
       ),
     );

@@ -7,6 +7,7 @@ import '../data/species_data.dart';
 import '../providers/saved_species_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
+import '../widgets/assistant_overlay_layer.dart';
 import '../widgets/glass.dart';
 import '../widgets/species_network_image.dart';
 import 'species_detail_screen.dart';
@@ -136,22 +137,24 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
     final saved = context.watch<SavedSpeciesProvider>();
 
     if (species == null || prediction == null) {
-      return Scaffold(
-        backgroundColor: AppColors.detailBackdrop,
-        appBar: AppBar(
-          backgroundColor: Colors.white.withValues(alpha: 0.92),
-          surfaceTintColor: Colors.transparent,
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Species prediction not found'),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Back to Predictions'),
-              ),
-            ],
+      return AssistantOverlayLayer(
+        child: Scaffold(
+          backgroundColor: AppColors.detailBackdrop,
+          appBar: AppBar(
+            backgroundColor: Colors.white.withValues(alpha: 0.92),
+            surfaceTintColor: Colors.transparent,
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('Species prediction not found'),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Back to Predictions'),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -167,544 +170,373 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
         ((textScale - 1.0) * 40);
     final isNotified = saved.isNotified(species.id);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          const MistBackdrop(backgroundBlurSigma: 5),
-          CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                expandedHeight: heroExpandedHeight,
-                pinned: true,
-                backgroundColor: Colors.white.withValues(alpha: 0.88),
-                surfaceTintColor: Colors.transparent,
-                leading: IconButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: Container(
-                    padding: EdgeInsets.all(8 * s),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.38),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
-                      size: 20 * s,
-                    ),
-                  ),
-                ),
-                actions: [
-                  Padding(
-                    padding: EdgeInsets.only(right: 4 * s),
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () async {
-                        await saved.toggleSaved(species.id);
-                      },
-                      icon: Container(
-                        padding: EdgeInsets.all(8 * s),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.38),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          saved.isSaved(species.id)
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          color: saved.isSaved(species.id)
-                              ? Colors.red.shade200
-                              : Colors.white,
-                          size: 20 * s,
-                        ),
+    return AssistantOverlayLayer(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            const MistBackdrop(backgroundBlurSigma: 5),
+            CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  expandedHeight: heroExpandedHeight,
+                  pinned: true,
+                  backgroundColor: Colors.white.withValues(alpha: 0.88),
+                  surfaceTintColor: Colors.transparent,
+                  leading: IconButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: Container(
+                      padding: EdgeInsets.all(8 * s),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.38),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: Colors.white,
+                        size: 20 * s,
                       ),
                     ),
                   ),
-                ],
-                flexibleSpace: FlexibleSpaceBar(
-                  collapseMode: CollapseMode.parallax,
-                  background: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      SpeciesNetworkImage(
-                        url: species.imageUrl,
-                        fit: BoxFit.cover,
-                      ),
-                      Positioned.fill(
-                        child: DecoratedBox(
+                  actions: [
+                    Padding(
+                      padding: EdgeInsets.only(right: 4 * s),
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () async {
+                          await saved.toggleSaved(species.id);
+                        },
+                        icon: Container(
+                          padding: EdgeInsets.all(8 * s),
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              stops: const [0.0, 0.4, 1.0],
-                              colors: [
-                                Colors.black.withValues(alpha: 0.52),
-                                Colors.black.withValues(alpha: 0.18),
-                                Colors.black.withValues(alpha: 0.62),
-                              ],
-                            ),
+                            color: Colors.black.withValues(alpha: 0.38),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            saved.isSaved(species.id)
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: saved.isSaved(species.id)
+                                ? Colors.red.shade200
+                                : Colors.white,
+                            size: 20 * s,
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          16 * s,
-                          topInset,
-                          16 * s,
-                          18 * s,
+                    ),
+                  ],
+                  flexibleSpace: FlexibleSpaceBar(
+                    collapseMode: CollapseMode.parallax,
+                    background: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        SpeciesNetworkImage(
+                          url: species.imageUrl,
+                          fit: BoxFit.cover,
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Spacer(),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        species.commonName,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: Adaptive.clamp(
-                                            context,
-                                            22,
-                                            min: 17,
-                                            max: 28,
-                                          ),
-                                          fontWeight: FontWeight.w700,
-                                          height: 1.15,
-                                          shadows: _predictionHeroShadows,
-                                        ),
-                                      ),
-                                      SizedBox(height: 4 * s),
-                                      Text(
-                                        species.scientificName,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.94,
-                                          ),
-                                          fontStyle: FontStyle.italic,
-                                          fontSize: Adaptive.clamp(
-                                            context,
-                                            14,
-                                            min: 11,
-                                            max: 18,
-                                          ),
-                                          fontWeight: FontWeight.w500,
-                                          height: 1.25,
-                                          shadows: _predictionHeroShadows,
-                                        ),
-                                      ),
-                                      SizedBox(height: 8 * s),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.place_rounded,
-                                            color: Colors.white.withValues(
-                                              alpha: 0.92,
+                        Positioned.fill(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                stops: const [0.0, 0.4, 1.0],
+                                colors: [
+                                  Colors.black.withValues(alpha: 0.52),
+                                  Colors.black.withValues(alpha: 0.18),
+                                  Colors.black.withValues(alpha: 0.62),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            16 * s,
+                            topInset,
+                            16 * s,
+                            18 * s,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Spacer(),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          species.commonName,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: Adaptive.clamp(
+                                              context,
+                                              22,
+                                              min: 17,
+                                              max: 28,
                                             ),
-                                            size: 17 * s,
+                                            fontWeight: FontWeight.w700,
+                                            height: 1.15,
                                             shadows: _predictionHeroShadows,
                                           ),
-                                          SizedBox(width: 5 * s),
-                                          Expanded(
-                                            child: Text(
-                                              '${prediction.locationName} • ${prediction.distance}km away',
-                                              style: TextStyle(
-                                                color: Colors.white.withValues(
-                                                  alpha: 0.92,
-                                                ),
-                                                fontSize: Adaptive.clamp(
-                                                  context,
-                                                  13,
-                                                  min: 11,
-                                                  max: 16,
-                                                ),
-                                                fontWeight: FontWeight.w500,
-                                                height: 1.35,
-                                                shadows: _predictionHeroShadows,
-                                              ),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
+                                        ),
+                                        SizedBox(height: 4 * s),
+                                        Text(
+                                          species.scientificName,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.94,
                                             ),
+                                            fontStyle: FontStyle.italic,
+                                            fontSize: Adaptive.clamp(
+                                              context,
+                                              14,
+                                              min: 11,
+                                              max: 18,
+                                            ),
+                                            fontWeight: FontWeight.w500,
+                                            height: 1.25,
+                                            shadows: _predictionHeroShadows,
                                           ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  // Space below hero — avoid overlapping the app bar.
-                  padding: EdgeInsets.fromLTRB(16 * s, 16 * s, 16 * s, 0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      GlassPanel(
-                        padding: EdgeInsets.zero,
-                        borderRadius: 18 * s,
-                        blurSigma: 14,
-                        fillAlpha: 0.58,
-                        verticalFrostGradient: true,
-                        child: IntrinsicHeight(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Expanded(
-                                child: Padding(
-                                  padding: EdgeInsets.all(16 * s),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '🌿 Key Factors',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: Adaptive.clamp(
-                                            context,
-                                            17,
-                                            min: 14,
-                                            max: 21,
-                                          ),
-                                          color: AppColors.textBodyOnFrost,
-                                          letterSpacing: -0.1,
                                         ),
-                                      ),
-                                      SizedBox(height: 10 * s),
-                                      Row(
-                                        children:
-                                            [
-                                              'Time',
-                                              'Weather',
-                                              'Humidity',
-                                              'Temperature',
-                                            ].map((factor) {
-                                              final primary =
-                                                  factor ==
-                                                  prediction.primaryFactor;
-                                              return Expanded(
-                                                child: Padding(
-                                                  padding: EdgeInsets.symmetric(
-                                                    horizontal: 2 * s,
-                                                  ),
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        padding: EdgeInsets.all(
-                                                          8 * s,
-                                                        ),
-                                                        decoration: BoxDecoration(
-                                                          color: primary
-                                                              ? AppColors
-                                                                    .primary
-                                                              : Colors.white
-                                                                    .withValues(
-                                                                      alpha:
-                                                                          0.38,
-                                                                    ),
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                10 * s,
-                                                              ),
-                                                          border: primary
-                                                              ? Border.all(
-                                                                  color: AppColors
-                                                                      .primary,
-                                                                  width: 2,
-                                                                )
-                                                              : Border.all(
-                                                                  color: Colors
-                                                                      .white
-                                                                      .withValues(
-                                                                        alpha:
-                                                                            0.55,
-                                                                      ),
-                                                                  width: 1,
-                                                                ),
-                                                        ),
-                                                        child: Icon(
-                                                          factor == 'Time'
-                                                              ? Icons.schedule
-                                                              : factor ==
-                                                                    'Weather'
-                                                              ? Icons
-                                                                    .cloud_outlined
-                                                              : factor ==
-                                                                    'Humidity'
-                                                              ? Icons
-                                                                    .water_drop_outlined
-                                                              : Icons
-                                                                    .thermostat,
-                                                          size: 18 * s,
-                                                          color: primary
-                                                              ? Colors.white
-                                                              : AppColors
-                                                                    .textSubtitleOnFrost,
-                                                        ),
-                                                      ),
-                                                      if (primary)
-                                                        const Text(
-                                                          '⭐',
-                                                          style: TextStyle(
-                                                            fontSize: 10,
-                                                          ),
-                                                        ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              );
-                                            }).toList(),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                width: 1,
-                                color: Colors.white.withValues(alpha: 0.45),
-                              ),
-                              SizedBox(
-                                width: Adaptive.clamp(
-                                  context,
-                                  100,
-                                  min: 80,
-                                  max: 128,
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    IconButton.filled(
-                                      onPressed: () => _toggleNotif(
-                                        context,
-                                        saved,
-                                        species.commonName,
-                                      ),
-                                      icon: Icon(
-                                        isNotified
-                                            ? Icons.notifications_active
-                                            : Icons.notifications_off_outlined,
-                                      ),
-                                      style: IconButton.styleFrom(
-                                        backgroundColor: isNotified
-                                            ? AppColors.primary
-                                            : Colors.white.withValues(
-                                                alpha: 0.4,
+                                        SizedBox(height: 8 * s),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.place_rounded,
+                                              color: Colors.white.withValues(
+                                                alpha: 0.92,
                                               ),
-                                        foregroundColor: isNotified
-                                            ? Colors.white
-                                            : AppColors.textBodyOnFrost,
-                                      ),
-                                    ),
-                                    Text(
-                                      isNotified ? 'Alert On' : 'Alert Off',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: Adaptive.clamp(
-                                          context,
-                                          11,
-                                          min: 10,
-                                          max: 13,
+                                              size: 17 * s,
+                                              shadows: _predictionHeroShadows,
+                                            ),
+                                            SizedBox(width: 5 * s),
+                                            Expanded(
+                                              child: Text(
+                                                '${prediction.locationName} • ${prediction.distance}km away',
+                                                style: TextStyle(
+                                                  color: Colors.white
+                                                      .withValues(alpha: 0.92),
+                                                  fontSize: Adaptive.clamp(
+                                                    context,
+                                                    13,
+                                                    min: 11,
+                                                    max: 16,
+                                                  ),
+                                                  fontWeight: FontWeight.w500,
+                                                  height: 1.35,
+                                                  shadows:
+                                                      _predictionHeroShadows,
+                                                ),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        fontWeight: FontWeight.w800,
-                                        color: AppColors.textBodyOnFrost,
-                                        letterSpacing: 0.1,
-                                      ),
+                                      ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         ),
-                      ),
-                      SizedBox(height: 20 * s),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(12 * s, 8 * s, 12 * s, 12 * s),
-                sliver: SliverToBoxAdapter(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.trending_up,
-                            color: AppColors.iconSectionOnFrost,
-                            size: 22 * s,
-                          ),
-                          SizedBox(width: 8 * s),
-                          Text(
-                            '7-Day Occurrence Forecast',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.w800,
-                              fontSize: Adaptive.clamp(
-                                context,
-                                17,
-                                min: 14,
-                                max: 21,
-                              ),
-                              color: AppColors.textBodyOnFrost,
-                              height: 1.2,
-                              letterSpacing: -0.1,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 8 * s),
-                      ...prediction.forecast.asMap().entries.map((e) {
-                        final day = e.value;
-                        final first = e.key == 0;
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: 8 * s),
-                          child: GlassPanel(
-                            padding: EdgeInsets.zero,
-                            borderRadius: 16 * s,
-                            blurSigma: 14,
-                            fillAlpha: 0.56,
-                            verticalFrostGradient: true,
-                            outlineColor: first ? AppColors.primary : null,
-                            outlineWidth: first ? 2 : 1.1,
-                            child: Column(
+                SliverToBoxAdapter(
+                  child: Padding(
+                    // Space below hero — avoid overlapping the app bar.
+                    padding: EdgeInsets.fromLTRB(16 * s, 16 * s, 16 * s, 0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        GlassPanel(
+                          padding: EdgeInsets.zero,
+                          borderRadius: 18 * s,
+                          blurSigma: 14,
+                          fillAlpha: 0.58,
+                          verticalFrostGradient: true,
+                          child: IntrinsicHeight(
+                            child: Row(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 10 * s,
-                                    vertical: 8 * s,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: first
-                                        ? AppColors.primary.withValues(
-                                            alpha: 0.12,
-                                          )
-                                        : Colors.white.withValues(alpha: 0.42),
-                                    borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(14 * s),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        _formatDate(day.date),
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: Adaptive.clamp(
-                                            context,
-                                            15,
-                                            min: 12,
-                                            max: 19,
-                                          ),
-                                          color: AppColors.textBodyOnFrost,
-                                          letterSpacing: -0.05,
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 10 * s,
-                                          vertical: 4 * s,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: _probBg(day.probability),
-                                          borderRadius: BorderRadius.circular(
-                                            20 * s,
-                                          ),
-                                          border: Border.all(
-                                            color: Colors.grey.shade400,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          '${day.probability} Chance',
+                                Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(16 * s),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '🌿 Key Factors',
                                           style: GoogleFonts.plusJakartaSans(
+                                            fontWeight: FontWeight.w800,
                                             fontSize: Adaptive.clamp(
                                               context,
-                                              11,
-                                              min: 10,
-                                              max: 13,
+                                              17,
+                                              min: 14,
+                                              max: 21,
                                             ),
-                                            fontWeight: FontWeight.w800,
-                                            color: _probFg(day.probability),
-                                            letterSpacing: 0.05,
+                                            color: AppColors.textBodyOnFrost,
+                                            letterSpacing: -0.1,
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                        SizedBox(height: 10 * s),
+                                        Row(
+                                          children:
+                                              [
+                                                'Time',
+                                                'Weather',
+                                                'Humidity',
+                                                'Temperature',
+                                              ].map((factor) {
+                                                final primary =
+                                                    factor ==
+                                                    prediction.primaryFactor;
+                                                return Expanded(
+                                                  child: Padding(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                          horizontal: 2 * s,
+                                                        ),
+                                                    child: Column(
+                                                      children: [
+                                                        Container(
+                                                          padding:
+                                                              EdgeInsets.all(
+                                                                8 * s,
+                                                              ),
+                                                          decoration: BoxDecoration(
+                                                            color: primary
+                                                                ? AppColors
+                                                                      .primary
+                                                                : Colors.white
+                                                                      .withValues(
+                                                                        alpha:
+                                                                            0.38,
+                                                                      ),
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  10 * s,
+                                                                ),
+                                                            border: primary
+                                                                ? Border.all(
+                                                                    color: AppColors
+                                                                        .primary,
+                                                                    width: 2,
+                                                                  )
+                                                                : Border.all(
+                                                                    color: Colors
+                                                                        .white
+                                                                        .withValues(
+                                                                          alpha:
+                                                                              0.55,
+                                                                        ),
+                                                                    width: 1,
+                                                                  ),
+                                                          ),
+                                                          child: Icon(
+                                                            factor == 'Time'
+                                                                ? Icons.schedule
+                                                                : factor ==
+                                                                      'Weather'
+                                                                ? Icons
+                                                                      .cloud_outlined
+                                                                : factor ==
+                                                                      'Humidity'
+                                                                ? Icons
+                                                                      .water_drop_outlined
+                                                                : Icons
+                                                                      .thermostat,
+                                                            size: 18 * s,
+                                                            color: primary
+                                                                ? Colors.white
+                                                                : AppColors
+                                                                      .textSubtitleOnFrost,
+                                                          ),
+                                                        ),
+                                                        if (primary)
+                                                          const Text(
+                                                            '⭐',
+                                                            style: TextStyle(
+                                                              fontSize: 10,
+                                                            ),
+                                                          ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                );
+                                              }).toList(),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                                Padding(
-                                  padding: EdgeInsets.all(10 * s),
+                                Container(
+                                  width: 1,
+                                  color: Colors.white.withValues(alpha: 0.45),
+                                ),
+                                SizedBox(
+                                  width: Adaptive.clamp(
+                                    context,
+                                    100,
+                                    min: 80,
+                                    max: 128,
+                                  ),
                                   child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(
-                                            child: _forecastCell(
-                                              icon: Icons.schedule,
-                                              label: 'Best Time',
-                                              value: day.timeOfDay,
-                                              iconColor: AppColors.primary,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 10),
-                                          Expanded(
-                                            child: _forecastCell(
-                                              label: 'Weather',
-                                              value: day.weather,
-                                              emoji: _weatherEmoji(day.weather),
-                                            ),
-                                          ),
-                                        ],
+                                      IconButton.filled(
+                                        onPressed: () => _toggleNotif(
+                                          context,
+                                          saved,
+                                          species.commonName,
+                                        ),
+                                        icon: Icon(
+                                          isNotified
+                                              ? Icons.notifications_active
+                                              : Icons
+                                                    .notifications_off_outlined,
+                                        ),
+                                        style: IconButton.styleFrom(
+                                          backgroundColor: isNotified
+                                              ? AppColors.primary
+                                              : Colors.white.withValues(
+                                                  alpha: 0.4,
+                                                ),
+                                          foregroundColor: isNotified
+                                              ? Colors.white
+                                              : AppColors.textBodyOnFrost,
+                                        ),
                                       ),
-                                      SizedBox(height: 10 * s),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(
-                                            child: _forecastCell(
-                                              icon: Icons.thermostat,
-                                              label: 'Temperature',
-                                              value: '${day.temperature}°C',
-                                              iconColor: Colors.orange.shade700,
-                                            ),
+                                      Text(
+                                        isNotified ? 'Alert On' : 'Alert Off',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: Adaptive.clamp(
+                                            context,
+                                            11,
+                                            min: 10,
+                                            max: 13,
                                           ),
-                                          const SizedBox(width: 10),
-                                          Expanded(
-                                            child: _forecastCell(
-                                              icon: Icons.water_drop,
-                                              label: 'Humidity',
-                                              value: '${day.humidity}%',
-                                              iconColor: Colors.cyan.shade700,
-                                            ),
-                                          ),
-                                        ],
+                                          fontWeight: FontWeight.w800,
+                                          color: AppColors.textBodyOnFrost,
+                                          letterSpacing: 0.1,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -712,29 +544,210 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                               ],
                             ),
                           ),
-                        );
-                      }),
-                      GlassCtaPill(
-                        emphasized: true,
-                        minHeight: 48 * s,
-                        onPressed: () {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute<void>(
-                              builder: (_) =>
-                                  SpeciesDetailScreen(speciesId: species.id),
-                            ),
-                          );
-                        },
-                        child: const Text('View Full Species Details'),
-                      ),
-                      SizedBox(height: bottomPad),
-                    ],
+                        ),
+                        SizedBox(height: 20 * s),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(12 * s, 8 * s, 12 * s, 12 * s),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.trending_up,
+                              color: AppColors.iconSectionOnFrost,
+                              size: 22 * s,
+                            ),
+                            SizedBox(width: 8 * s),
+                            Text(
+                              '7-Day Occurrence Forecast',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontWeight: FontWeight.w800,
+                                fontSize: Adaptive.clamp(
+                                  context,
+                                  17,
+                                  min: 14,
+                                  max: 21,
+                                ),
+                                color: AppColors.textBodyOnFrost,
+                                height: 1.2,
+                                letterSpacing: -0.1,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 8 * s),
+                        ...prediction.forecast.asMap().entries.map((e) {
+                          final day = e.value;
+                          final first = e.key == 0;
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 8 * s),
+                            child: GlassPanel(
+                              padding: EdgeInsets.zero,
+                              borderRadius: 16 * s,
+                              blurSigma: 14,
+                              fillAlpha: 0.56,
+                              verticalFrostGradient: true,
+                              outlineColor: first ? AppColors.primary : null,
+                              outlineWidth: first ? 2 : 1.1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 10 * s,
+                                      vertical: 8 * s,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: first
+                                          ? AppColors.primary.withValues(
+                                              alpha: 0.12,
+                                            )
+                                          : Colors.white.withValues(
+                                              alpha: 0.42,
+                                            ),
+                                      borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(14 * s),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          _formatDate(day.date),
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: Adaptive.clamp(
+                                              context,
+                                              15,
+                                              min: 12,
+                                              max: 19,
+                                            ),
+                                            color: AppColors.textBodyOnFrost,
+                                            letterSpacing: -0.05,
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 10 * s,
+                                            vertical: 4 * s,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: _probBg(day.probability),
+                                            borderRadius: BorderRadius.circular(
+                                              20 * s,
+                                            ),
+                                            border: Border.all(
+                                              color: Colors.grey.shade400,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            '${day.probability} Chance',
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: Adaptive.clamp(
+                                                context,
+                                                11,
+                                                min: 10,
+                                                max: 13,
+                                              ),
+                                              fontWeight: FontWeight.w800,
+                                              color: _probFg(day.probability),
+                                              letterSpacing: 0.05,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.all(10 * s),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Expanded(
+                                              child: _forecastCell(
+                                                icon: Icons.schedule,
+                                                label: 'Best Time',
+                                                value: day.timeOfDay,
+                                                iconColor: AppColors.primary,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: _forecastCell(
+                                                label: 'Weather',
+                                                value: day.weather,
+                                                emoji: _weatherEmoji(
+                                                  day.weather,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 10 * s),
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Expanded(
+                                              child: _forecastCell(
+                                                icon: Icons.thermostat,
+                                                label: 'Temperature',
+                                                value: '${day.temperature}°C',
+                                                iconColor:
+                                                    Colors.orange.shade700,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: _forecastCell(
+                                                icon: Icons.water_drop,
+                                                label: 'Humidity',
+                                                value: '${day.humidity}%',
+                                                iconColor: Colors.cyan.shade700,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
+                        GlassCtaPill(
+                          emphasized: true,
+                          minHeight: 48 * s,
+                          onPressed: () {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute<void>(
+                                builder: (_) =>
+                                    SpeciesDetailScreen(speciesId: species.id),
+                              ),
+                            );
+                          },
+                          child: const Text('View Full Species Details'),
+                        ),
+                        SizedBox(height: bottomPad),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
