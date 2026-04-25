@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../data/photography_assistant_data.dart';
 import '../theme/app_theme.dart';
@@ -54,7 +55,7 @@ class _MissionScreenState extends State<MissionScreen> {
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(16 * s, 24 * s, 16 * s, 8 * s),
+              padding: EdgeInsets.fromLTRB(16 * s, 42 * s, 16 * s, 8 * s),
               child: GlassPanel(
                 padding: EdgeInsets.all(16 * s),
                 borderRadius: 22 * s,
@@ -64,15 +65,24 @@ class _MissionScreenState extends State<MissionScreen> {
                   children: [
                     Text(
                       'Photo Mission',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.accent,
-                          ),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: Adaptive.clamp(context, 28, min: 22, max: 34),
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.6,
+                        height: 1.05,
+                        color: AppColors.accent,
+                      ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Text(
                       'Find your perfect challenge',
-                      style: TextStyle(color: Colors.grey.shade700),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.35,
+                        height: 1.35,
+                        color: const Color(0xFF5C6B63),
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -83,7 +93,9 @@ class _MissionScreenState extends State<MissionScreen> {
                             margin: EdgeInsets.only(right: i == 2 ? 0 : 8),
                             height: 8,
                             decoration: BoxDecoration(
-                              color: i <= _step ? AppColors.primary : Colors.green.shade100,
+                              color: i <= _step
+                                  ? AppColors.primary
+                                  : Colors.green.shade100,
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
@@ -97,9 +109,7 @@ class _MissionScreenState extends State<MissionScreen> {
           ),
           SliverPadding(
             padding: EdgeInsets.fromLTRB(16 * s, 8 * s, 16 * s, 100 * s),
-            sliver: SliverToBoxAdapter(
-              child: _contentByStep(),
-            ),
+            sliver: SliverToBoxAdapter(child: _contentByStep()),
           ),
         ],
       ),
@@ -198,9 +208,15 @@ class _MissionScreenState extends State<MissionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Your Photography Mission', style: TextStyle(fontWeight: FontWeight.w700)),
+          const Text(
+            'Your Photography Mission',
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 10),
-          Text(mission.title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+          Text(
+            mission.title,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 10),
           Text('Location hint: ${mission.locationHint}'),
           const SizedBox(height: 8),
@@ -247,7 +263,13 @@ class _MissionScreenState extends State<MissionScreen> {
   }) {
     return Column(
       children: [
-        Text(title, style: const TextStyle(fontSize: 34 / 1.5, fontWeight: FontWeight.w700)),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 34 / 1.5,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         const SizedBox(height: 6),
         Text(subtitle, style: TextStyle(color: Colors.grey.shade700)),
         const SizedBox(height: 14),
@@ -296,9 +318,18 @@ class _MissionScreenState extends State<MissionScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(option.title, style: const TextStyle(fontSize: 22 / 1.5, fontWeight: FontWeight.w700)),
+                    Text(
+                      option.title,
+                      style: const TextStyle(
+                        fontSize: 22 / 1.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 2),
-                    Text(option.subtitle, style: TextStyle(color: Colors.grey.shade700)),
+                    Text(
+                      option.subtitle,
+                      style: TextStyle(color: Colors.grey.shade700),
+                    ),
                   ],
                 ),
               ),

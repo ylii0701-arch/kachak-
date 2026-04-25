@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../data/photography_assistant_data.dart';
@@ -75,7 +76,7 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(16 * s, 24 * s, 16 * s, 8 * s),
+              padding: EdgeInsets.fromLTRB(16 * s, 42 * s, 16 * s, 8 * s),
               child: GlassPanel(
                 padding: EdgeInsets.all(16 * s),
                 borderRadius: 22 * s,
@@ -83,32 +84,26 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: const Icon(Icons.camera_alt_outlined),
-                        ),
-                        SizedBox(width: 10 * s),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Species Recognition',
-                              style: Theme.of(context).textTheme.headlineSmall
-                                  ?.copyWith(fontWeight: FontWeight.w700),
-                            ),
-                            Text(
-                              'Identify wildlife from photos',
-                              style: TextStyle(color: Colors.grey.shade700),
-                            ),
-                          ],
-                        ),
-                      ],
+                    Text(
+                      'Species Recognition',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: Adaptive.clamp(context, 28, min: 22, max: 34),
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.6,
+                        height: 1.05,
+                        color: AppColors.accent,
+                      ),
+                    ),
+                    SizedBox(height: 4 * s),
+                    Text(
+                      'Identify wildlife from photos',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.35,
+                        height: 1.35,
+                        color: const Color(0xFF5C6B63),
+                      ),
                     ),
                     SizedBox(height: 12 * s),
                     Container(
@@ -159,7 +154,10 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
                       child: _imageBytes != null
                           ? Image.memory(_imageBytes!, fit: BoxFit.cover)
                           : (!kIsWeb
-                                ? Image.file(File(_imageFile!.path), fit: BoxFit.cover)
+                                ? Image.file(
+                                    File(_imageFile!.path),
+                                    fit: BoxFit.cover,
+                                  )
                                 : const ColoredBox(color: Colors.black12)),
                     ),
                   ),
@@ -214,7 +212,10 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
               const SizedBox(height: 12),
               Text(
                 title,
-                style: const TextStyle(fontSize: 30 / 1.5, fontWeight: FontWeight.w700),
+                style: const TextStyle(
+                  fontSize: 30 / 1.5,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 4),
               Text(subtitle, style: TextStyle(color: Colors.grey.shade700)),
@@ -237,7 +238,10 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: const [
-          Text('Tips for Best Results', style: TextStyle(fontWeight: FontWeight.w700)),
+          Text(
+            'Tips for Best Results',
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
           SizedBox(height: 8),
           Text('• Ensure the animal is clearly visible and in focus'),
           Text('• Use good lighting conditions'),
@@ -256,29 +260,42 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: uncertain ? Colors.orange.shade300 : Colors.green.shade300),
+        border: Border.all(
+          color: uncertain ? Colors.orange.shade300 : Colors.green.shade300,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Prediction', style: TextStyle(fontWeight: FontWeight.w700)),
+          const Text(
+            'Prediction',
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 6),
-          Text(_predicted!.commonName, style: const TextStyle(fontWeight: FontWeight.w700)),
-          Text(_predicted!.scientificName, style: const TextStyle(fontStyle: FontStyle.italic)),
+          Text(
+            _predicted!.commonName,
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          Text(
+            _predicted!.scientificName,
+            style: const TextStyle(fontStyle: FontStyle.italic),
+          ),
           const SizedBox(height: 6),
-          Text(_predicted!.description, maxLines: 2, overflow: TextOverflow.ellipsis),
+          Text(
+            _predicted!.description,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
           const SizedBox(height: 6),
           Text('Confidence: ${((_confidence ?? 0) * 100).toStringAsFixed(0)}%'),
-          if (_message != null) ...[
-            const SizedBox(height: 4),
-            Text(_message!),
-          ],
+          if (_message != null) ...[const SizedBox(height: 4), Text(_message!)],
           const SizedBox(height: 10),
           FilledButton(
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => SpeciesDetailScreen(speciesId: _predicted!.id),
+                  builder: (_) =>
+                      SpeciesDetailScreen(speciesId: _predicted!.id),
                 ),
               );
             },

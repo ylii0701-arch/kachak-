@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../data/species_data.dart';
@@ -36,7 +37,7 @@ class SavedScreen extends StatelessWidget {
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(
                       16 * scale,
-                      28 * scale,
+                      42 * scale,
                       16 * scale,
                       12 * scale,
                     ),
@@ -89,8 +90,18 @@ class SavedScreen extends StatelessWidget {
                             children: [
                               Text(
                                 'Saved Species',
-                                style: Theme.of(context).textTheme.headlineSmall
-                                    ?.copyWith(color: AppColors.accent),
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: Adaptive.clamp(
+                                    context,
+                                    28,
+                                    min: 22,
+                                    max: 34,
+                                  ),
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.6,
+                                  height: 1.05,
+                                  color: AppColors.accent,
+                                ),
                               ),
                               Text(
                                 '${list.length} species',

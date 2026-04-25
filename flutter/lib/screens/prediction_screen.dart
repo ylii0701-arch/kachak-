@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../data/malaysia_cities.dart';
 import '../data/predictions_data.dart';
@@ -92,7 +93,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(16 * s, 28 * s, 16 * s, 10 * s),
+              padding: EdgeInsets.fromLTRB(16 * s, 42 * s, 16 * s, 10 * s),
               child: GlassPanel(
                 padding: EdgeInsets.fromLTRB(20 * s, 22 * s, 20 * s, 22 * s),
                 borderRadius: 26 * s,
@@ -100,18 +101,15 @@ class _PredictionScreenState extends State<PredictionScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Icon(Icons.trending_up, color: AppColors.primary, size: 34 * s),
-                        SizedBox(width: 12 * s),
-                        Text(
-                          'Predictions',
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                color: AppColors.accent,
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                      ],
+                    Text(
+                      'Predictions',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: Adaptive.clamp(context, 28, min: 22, max: 34),
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.6,
+                        height: 1.05,
+                        color: AppColors.accent,
+                      ),
                     ),
                     SizedBox(height: 10 * s),
                     Text(
@@ -141,7 +139,13 @@ class _PredictionScreenState extends State<PredictionScreen> {
                       children: [
                         const Icon(Icons.place, color: AppColors.primary),
                         SizedBox(width: 8 * s),
-                        const Text('Select Region', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        const Text(
+                          'Select Region',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                       ],
                     ),
                     SizedBox(height: 12 * s),
@@ -152,14 +156,23 @@ class _PredictionScreenState extends State<PredictionScreen> {
                         borderRadius: BorderRadius.circular(12),
                         child: InputDecorator(
                           decoration: InputDecoration(
-                            contentPadding:
-                                EdgeInsets.symmetric(horizontal: 16 * s, vertical: 14 * s),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16 * s,
+                              vertical: 14 * s,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey.shade300),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                              ),
                             ),
-                            suffixIcon: Icon(Icons.arrow_drop_down_rounded, size: 28 * s),
+                            suffixIcon: Icon(
+                              Icons.arrow_drop_down_rounded,
+                              size: 28 * s,
+                            ),
                           ),
                           child: Row(
                             children: [
@@ -171,7 +184,12 @@ class _PredictionScreenState extends State<PredictionScreen> {
                                     Text(
                                       _selectedCity,
                                       style: TextStyle(
-                                        fontSize: Adaptive.clamp(context, 16, min: 14, max: 19),
+                                        fontSize: Adaptive.clamp(
+                                          context,
+                                          16,
+                                          min: 14,
+                                          max: 19,
+                                        ),
                                         fontWeight: FontWeight.w600,
                                       ),
                                       maxLines: 1,
@@ -180,7 +198,12 @@ class _PredictionScreenState extends State<PredictionScreen> {
                                     Text(
                                       'Tap to search all cities',
                                       style: TextStyle(
-                                        fontSize: Adaptive.clamp(context, 12, min: 10, max: 14),
+                                        fontSize: Adaptive.clamp(
+                                          context,
+                                          12,
+                                          min: 10,
+                                          max: 14,
+                                        ),
                                         color: Colors.grey.shade600,
                                       ),
                                     ),
@@ -197,11 +220,10 @@ class _PredictionScreenState extends State<PredictionScreen> {
               ),
             ),
           ),
-        SliverPadding(
-          padding: EdgeInsets.fromLTRB(16 * s, 8 * s, 16 * s, 100 * s),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(16 * s, 8 * s, 16 * s, 100 * s),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
                 if (index == 0) {
                   return Padding(
                     padding: EdgeInsets.only(bottom: 12 * s),
@@ -214,7 +236,12 @@ class _PredictionScreenState extends State<PredictionScreen> {
                             'Top Predictions for $_selectedCity',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: Adaptive.clamp(context, 18, min: 15, max: 22),
+                              fontSize: Adaptive.clamp(
+                                context,
+                                18,
+                                min: 15,
+                                max: 22,
+                              ),
                             ),
                           ),
                         ),
@@ -229,12 +256,16 @@ class _PredictionScreenState extends State<PredictionScreen> {
                   padding: EdgeInsets.only(bottom: 10 * s),
                   child: Card(
                     clipBehavior: Clip.antiAlias,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade200)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(color: Colors.grey.shade200),
+                    ),
                     child: InkWell(
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute<void>(
-                            builder: (_) => SpeciesPredictionScreen(speciesId: species.id),
+                            builder: (_) =>
+                                SpeciesPredictionScreen(speciesId: species.id),
                           ),
                         );
                       },
@@ -247,9 +278,22 @@ class _PredictionScreenState extends State<PredictionScreen> {
                             ClipRRect(
                               borderRadius: BorderRadius.circular(12 * s),
                               child: SizedBox(
-                                width: Adaptive.clamp(context, 96, min: 76, max: 124),
-                                height: Adaptive.clamp(context, 96, min: 76, max: 124),
-                                child: SpeciesNetworkImage(url: species.imageUrl, fit: BoxFit.cover),
+                                width: Adaptive.clamp(
+                                  context,
+                                  96,
+                                  min: 76,
+                                  max: 124,
+                                ),
+                                height: Adaptive.clamp(
+                                  context,
+                                  96,
+                                  min: 76,
+                                  max: 124,
+                                ),
+                                child: SpeciesNetworkImage(
+                                  url: species.imageUrl,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                             ),
                             SizedBox(width: 12 * s),
@@ -259,14 +303,22 @@ class _PredictionScreenState extends State<PredictionScreen> {
                                 children: [
                                   Text(
                                     species.commonName,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primary,
+                                    ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   Text(
                                     species.scientificName,
                                     style: TextStyle(
-                                      fontSize: Adaptive.clamp(context, 12, min: 10, max: 14),
+                                      fontSize: Adaptive.clamp(
+                                        context,
+                                        12,
+                                        min: 10,
+                                        max: 14,
+                                      ),
                                       fontStyle: FontStyle.italic,
                                       color: Colors.grey.shade600,
                                     ),
@@ -275,26 +327,44 @@ class _PredictionScreenState extends State<PredictionScreen> {
                                   ),
                                   SizedBox(height: 6 * s),
                                   Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 10 * s, vertical: 6 * s),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 10 * s,
+                                      vertical: 6 * s,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: _probabilityColors(pred.probability),
-                                      borderRadius: BorderRadius.circular(10 * s),
-                                      border: Border.all(color: Colors.grey.shade400),
+                                      color: _probabilityColors(
+                                        pred.probability,
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                        10 * s,
+                                      ),
+                                      border: Border.all(
+                                        color: Colors.grey.shade400,
+                                      ),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Icon(
                                           Icons.trending_up,
-                                          size: Adaptive.clamp(context, 16, min: 13, max: 20),
-                                          color: _probabilityOnColor(pred.probability),
+                                          size: Adaptive.clamp(
+                                            context,
+                                            16,
+                                            min: 13,
+                                            max: 20,
+                                          ),
+                                          color: _probabilityOnColor(
+                                            pred.probability,
+                                          ),
                                         ),
                                         SizedBox(width: 4 * s),
                                         Text(
                                           '${pred.probabilityPercent}% ${pred.probability}',
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            color: _probabilityOnColor(pred.probability),
+                                            color: _probabilityOnColor(
+                                              pred.probability,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -303,12 +373,20 @@ class _PredictionScreenState extends State<PredictionScreen> {
                                   SizedBox(height: 8 * s),
                                   Row(
                                     children: [
-                                      Text('⏰ ', style: TextStyle(fontSize: 14 * s)),
+                                      Text(
+                                        '⏰ ',
+                                        style: TextStyle(fontSize: 14 * s),
+                                      ),
                                       Expanded(
                                         child: Text(
                                           pred.bestTime,
                                           style: TextStyle(
-                                            fontSize: Adaptive.clamp(context, 12, min: 10, max: 14),
+                                            fontSize: Adaptive.clamp(
+                                              context,
+                                              12,
+                                              min: 10,
+                                              max: 14,
+                                            ),
                                             color: Colors.grey.shade700,
                                           ),
                                         ),
@@ -318,7 +396,12 @@ class _PredictionScreenState extends State<PredictionScreen> {
                                       Text(
                                         pred.bestWeather,
                                         style: TextStyle(
-                                          fontSize: Adaptive.clamp(context, 12, min: 10, max: 14),
+                                          fontSize: Adaptive.clamp(
+                                            context,
+                                            12,
+                                            min: 10,
+                                            max: 14,
+                                          ),
                                           color: Colors.grey.shade700,
                                         ),
                                       ),
@@ -333,12 +416,10 @@ class _PredictionScreenState extends State<PredictionScreen> {
                     ),
                   ),
                 );
-              },
-              childCount: predictions.length + 1,
+              }, childCount: predictions.length + 1),
             ),
           ),
-        ),
-      ],
+        ],
       ),
     );
   }
@@ -396,10 +477,19 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
                 const Expanded(
                   child: Padding(
                     padding: EdgeInsets.only(left: 8),
-                    child: Text('Select city', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      'Select city',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
-                IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close),
+                ),
               ],
             ),
           ),
@@ -411,7 +501,9 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
               decoration: InputDecoration(
                 hintText: 'Search city or state…',
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),
@@ -430,10 +522,14 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
                       final sel = c.name == widget.initialCity;
                       return ListTile(
                         selected: sel,
-                        selectedTileColor: AppColors.primary.withValues(alpha: 0.12),
+                        selectedTileColor: AppColors.primary.withValues(
+                          alpha: 0.12,
+                        ),
                         title: Text(c.name),
                         subtitle: Text(c.state),
-                        trailing: sel ? const Icon(Icons.check, color: AppColors.primary) : null,
+                        trailing: sel
+                            ? const Icon(Icons.check, color: AppColors.primary)
+                            : null,
                         onTap: () => Navigator.pop(context, c.name),
                       );
                     },

@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
@@ -550,40 +549,12 @@ class _MapScreenState extends State<MapScreen> {
         ),
         SafeArea(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(16 * s, 12 * s, 16 * s, 0),
+            padding: EdgeInsets.fromLTRB(16 * s, 62 * s, 16 * s, 0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   children: [
-                    SizedBox(
-                      width: Adaptive.clamp(context, 126, min: 106, max: 150),
-                      child: _buildGlassCard(
-                        scale: s,
-                        radius: 18,
-                        child: SizedBox(
-                          height: Adaptive.clamp(context, 52, min: 46, max: 60),
-                          child: Center(
-                            child: Text(
-                              'Wildlife Map',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: Adaptive.clamp(
-                                  context,
-                                  18,
-                                  min: 15,
-                                  max: 22,
-                                ),
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.accent,
-                                letterSpacing: -0.2,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 8 * s),
                     Expanded(
                       child: _buildGlassCard(
                         scale: s,
@@ -612,7 +583,7 @@ class _MapScreenState extends State<MapScreen> {
                                   controller: _speciesSearchController,
                                   onChanged: _onSpeciesQueryChanged,
                                   textInputAction: TextInputAction.search,
-                                  textAlign: TextAlign.center,
+                                  textAlign: TextAlign.left,
                                   style: TextStyle(
                                     color: AppColors.accent,
                                     fontWeight: FontWeight.w700,
@@ -668,83 +639,71 @@ class _MapScreenState extends State<MapScreen> {
                 ),
                 if (showSuggestionList) ...[
                   SizedBox(height: 8 * s),
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: Adaptive.clamp(context, 160, min: 138, max: 200),
-                      ),
-                      Expanded(
-                        child: _buildGlassCard(
-                          scale: s,
-                          radius: 16,
-                          alpha: 0.86,
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxHeight: Adaptive.clamp(
-                                context,
-                                230,
-                                min: 180,
-                                max: 260,
-                              ),
-                            ),
-                            child: ListView.separated(
-                              padding: EdgeInsets.symmetric(vertical: 6 * s),
-                              shrinkWrap: true,
-                              itemCount: suggestions.length,
-                              separatorBuilder: (_, _) => Divider(
-                                height: 1,
-                                thickness: 1,
-                                color: Colors.white.withValues(alpha: 0.7),
-                              ),
-                              itemBuilder: (context, index) {
-                                final species = suggestions[index];
-                                return ListTile(
-                                  dense: true,
-                                  leading: const Icon(
-                                    Icons.pets,
-                                    color: AppColors.primary,
-                                  ),
-                                  title: Text(
-                                    species.commonName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: AppColors.accent,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: Adaptive.clamp(
-                                        context,
-                                        14,
-                                        min: 12,
-                                        max: 16,
-                                      ),
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    species.scientificName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: AppColors.accent.withValues(
-                                        alpha: 0.76,
-                                      ),
-                                      fontSize: Adaptive.clamp(
-                                        context,
-                                        12,
-                                        min: 10,
-                                        max: 14,
-                                      ),
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                                  ),
-                                  onTap: () =>
-                                      _selectSpeciesSuggestion(species),
-                                );
-                              },
-                            ),
-                          ),
+                  _buildGlassCard(
+                    scale: s,
+                    radius: 16,
+                    alpha: 0.86,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: Adaptive.clamp(
+                          context,
+                          230,
+                          min: 180,
+                          max: 260,
                         ),
                       ),
-                    ],
+                      child: ListView.separated(
+                        padding: EdgeInsets.symmetric(vertical: 6 * s),
+                        shrinkWrap: true,
+                        itemCount: suggestions.length,
+                        separatorBuilder: (_, _) => Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: Colors.white.withValues(alpha: 0.7),
+                        ),
+                        itemBuilder: (context, index) {
+                          final species = suggestions[index];
+                          return ListTile(
+                            dense: true,
+                            leading: const Icon(
+                              Icons.pets,
+                              color: AppColors.primary,
+                            ),
+                            title: Text(
+                              species.commonName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: AppColors.accent,
+                                fontWeight: FontWeight.w700,
+                                fontSize: Adaptive.clamp(
+                                  context,
+                                  14,
+                                  min: 12,
+                                  max: 16,
+                                ),
+                              ),
+                            ),
+                            subtitle: Text(
+                              species.scientificName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: AppColors.accent.withValues(alpha: 0.76),
+                                fontSize: Adaptive.clamp(
+                                  context,
+                                  12,
+                                  min: 10,
+                                  max: 14,
+                                ),
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                            onTap: () => _selectSpeciesSuggestion(species),
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 ],
               ],
