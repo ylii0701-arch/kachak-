@@ -139,31 +139,16 @@ const List<MalaysianCity> kMalaysianCities = [
   ),
 ];
 
-/// Maps selected city to existing [locationPredictions] key (demo data buckets).
+/// Maps selected city directly to its own name.
 Region predictionRegionForCity(MalaysianCity city) {
-  switch (city.state) {
-    case 'Johor':
-    case 'Melaka':
-      return 'Johor';
-    case 'Sabah':
-    case 'Sarawak':
-    case 'Labuan':
-      return 'Sabah & Sarawak';
-    case 'Pulau Pinang':
-    case 'Kedah':
-    case 'Perlis':
-    case 'Perak':
-      return 'Penang';
-    default:
-      return 'Kuala Lumpur';
-  }
+  return city.name;
 }
 
 Region predictionRegionForCityName(String cityName) {
   for (final c in kMalaysianCities) {
-    if (c.name == cityName) return predictionRegionForCity(c);
+    if (c.name == cityName) return c.name;
   }
-  return 'Kuala Lumpur';
+  return 'Kuala Lumpur'; // Fallback
 }
 
 bool cityMatchesQuery(MalaysianCity city, String query) {
