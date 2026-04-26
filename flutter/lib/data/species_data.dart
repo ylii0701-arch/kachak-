@@ -991,7 +991,7 @@ const List<Species> speciesData = [
   ),
   // --- TEST DUMMY SPECIES (Trigger Fallbacks) ---
   Species(
-    id: '99',
+    id: '101',
     commonName: '', // Tests "Unknown Species"
     scientificName: '', // Tests "Scientific name unavailable" (space trimming)
     category: '', // Tests "Category N/A"
@@ -1007,28 +1007,6 @@ const List<Species> speciesData = [
     activityPattern: '', // Tests "Activity N/A"
     bestSeasons: [], // Tests hiding the best seasons row
     difficultyLevel: 0, // Fallback difficulty
-  ),
-  // --- EASTER EGG / DUMMY SPECIES ---
-  Species(
-    id: '100',
-    commonName: 'Patrick Star',
-    scientificName: 'Asterias patricius',
-    category: Species.mammals,
-    conservationStatus: Species.criticallyEndangered,
-    habitat: 'Under a rock, Bikini Bottom, Pacific Ocean',
-    imageUrl: 'https://a1cf74336522e87f135f-2f21ace9a6cf0052456644b80fa06d4f.ssl.cf2.rackcdn.com/images/characters/large/800/Patrick-Star.SpongeBob-SquarePants.webp',
-    description: 'A pink, somewhat dim-witted starfish. Renowned for asking deep philosophical questions such as, "Is mayonnaise an instrument?"',
-    behaviorNotes: 'Spends the vast majority of his time sleeping attached to his ceiling, eating, or jellyfishing with his best friend.',
-    photographyConditions: 'An extremely cooperative subject. He rarely moves from his rock and can be easily lured into the perfect lighting using a Krabby Patty.',
-    recommendedGear: [
-      'Underwater camera housing',
-      'Krabby Patty (for bait)',
-      'Mayonnaise (instrument)',
-      'Jellyfishing net',
-    ],
-    activityPattern: 'Day-active (Mostly sleeping)',
-    bestSeasons: ['Jellyfishing Season'],
-    difficultyLevel: 5,
   ),
 ];
 

@@ -1,4 +1,5 @@
 import 'package:latlong2/latlong.dart';
+import 'site_data.dart';
 
 class SpeciesLocation {
   const SpeciesLocation({
@@ -119,80 +120,21 @@ const List<SpeciesLocation> speciesLocations = [
   SpeciesLocation(id: 'loc24', speciesId: '17', lat: 4.0480, lng: 114.8800, lastSeen: '2026-04-02'),
 ];
 
-final List<PhotographySpot> photographySpots = [
-  PhotographySpot(
-    id: 'spot1',
-    name: 'Bukit Nanas Forest Reserve',
-    lat: 3.1590,
-    lng: 101.6990,
-    habitatType: 'Primary Rainforest',
-    accessibility: 'Easy',
-    publicAccess: true,
-    speciesIds: ['3', '8', '11'],
-    description:
-        'Excellent for bird photography. Well-maintained trails with good accessibility. Best visited early morning.',
-  ),
-  PhotographySpot(
-    id: 'spot2',
-    name: 'FRIM (Forest Research Institute Malaysia)',
-    lat: 3.2350,
-    lng: 101.6350,
-    habitatType: 'Secondary Rainforest',
-    accessibility: 'Easy',
-    publicAccess: true,
-    speciesIds: ['1', '3', '8'],
-    description:
-        'Popular spot with canopy walkway. Great for hornbills and small mammals. Requires entry permit.',
-  ),
-  PhotographySpot(
-    id: 'spot3',
-    name: 'Taman Negara National Park Entrance',
-    lat: 3.2050,
-    lng: 101.7290,
-    habitatType: 'Primary Rainforest',
-    accessibility: 'Moderate',
-    publicAccess: true,
-    speciesIds: ['1', '4', '6', '7', '12'],
-    description:
-        'Prime wildlife habitat. Requires guide for deep forest access. Best for multi-day trips.',
-  ),
-  PhotographySpot(
-    id: 'spot4',
-    name: 'Sungai Congkak Recreational Forest',
-    lat: 3.2650,
-    lng: 101.8450,
-    habitatType: 'Riverine Forest',
-    accessibility: 'Moderate',
-    publicAccess: true,
-    speciesIds: ['5', '8', '9'],
-    description:
-        'River-based photography. Good for primates and reptiles. Can be challenging during wet season.',
-  ),
-  PhotographySpot(
-    id: 'spot5',
-    name: 'Kuala Selangor Nature Park',
-    lat: 3.3390,
-    lng: 101.2450,
-    habitatType: 'Mangrove & Coastal',
-    accessibility: 'Easy',
-    publicAccess: true,
-    speciesIds: ['3', '5', '8'],
-    description:
-        'Excellent for bird photography and coastal species. Boardwalks provide easy access.',
-  ),
-  PhotographySpot(
-    id: 'spot6',
-    name: 'Ulu Gombak Wildlife Corridor',
-    lat: 3.3190,
-    lng: 101.7590,
-    habitatType: 'Secondary Forest',
-    accessibility: 'Difficult',
-    publicAccess: false,
-    speciesIds: ['4', '6', '11', '12', '13'],
-    description:
-        'Remote area with rare species. Permit required. Suitable for experienced photographers only.',
-  ),
-];
+// Dynamically generate map markers directly from siteData
+// This ensures the map and the prediction engine share the exact same locations
+final List<PhotographySpot> photographySpots = siteData.map((site) {
+  return PhotographySpot(
+    id: site.id,
+    name: site.name,
+    lat: site.lat,
+    lng: site.lng,
+    habitatType: site.type,
+    accessibility: site.accessibility,
+    publicAccess: !site.isCaptive, // Captive sites (Zoos) require tickets, treated as non-public access here
+    speciesIds: site.supportedSpeciesIds,
+    description: site.description,
+  );
+}).toList();
 
 List<LatLng> _ring(List<List<double>> pairs) =>
     pairs.map((p) => LatLng(p[0], p[1])).toList();
@@ -236,7 +178,7 @@ final List<RestrictedZone> restrictedZones = [
     type: 'Unsafe',
     reason: 'Landslide Risk',
     description:
-        'High landslide risk area, especially during rainy season. Entry not recommended.',
+    'High landslide risk area, especially during rainy season. Entry not recommended.',
   ),
   RestrictedZone(
     id: 'zone4',
@@ -265,7 +207,7 @@ final List<ProtectedArea> protectedAreas = [
     ]),
     type: 'National Park',
     description:
-        'One of the oldest rainforests in the world. Home to diverse wildlife including elephants, tigers, and hornbills.',
+    'One of the oldest rainforests in the world. Home to diverse wildlife including elephants, tigers, and hornbills.',
     established: '1938',
   ),
   ProtectedArea(
@@ -279,7 +221,7 @@ final List<ProtectedArea> protectedAreas = [
     ]),
     type: 'Forest Reserve',
     description:
-        'Urban forest reserve in the heart of Kuala Lumpur. Excellent for birdwatching and small mammals.',
+    'Urban forest reserve in the heart of Kuala Lumpur. Excellent for birdwatching and small mammals.',
     established: '1906',
   ),
   ProtectedArea(
@@ -293,7 +235,7 @@ final List<ProtectedArea> protectedAreas = [
     ]),
     type: 'Wildlife Reserve',
     description:
-        'Research forest with canopy walkway. Important habitat for hornbills and primates.',
+    'Research forest with canopy walkway. Important habitat for hornbills and primates.',
     established: '1929',
   ),
   ProtectedArea(
@@ -307,7 +249,7 @@ final List<ProtectedArea> protectedAreas = [
     ]),
     type: 'Forest Reserve',
     description:
-        'Riverine forest with recreational facilities. Popular for eco-tourism and wildlife observation.',
+    'Riverine forest with recreational facilities. Popular for eco-tourism and wildlife observation.',
     established: '1964',
   ),
 ];
