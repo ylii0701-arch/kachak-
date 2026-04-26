@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../data/photography_assistant_data.dart';
 import '../data/map_data.dart';
+import '../data/predictions_data.dart';
 import '../data/species_data.dart';
 import '../models/species.dart';
 import '../providers/app_shell_controller.dart';
@@ -15,6 +16,7 @@ import '../widgets/assistant_overlay_layer.dart';
 import '../widgets/difficulty_stars.dart';
 import '../widgets/glass.dart';
 import '../widgets/species_network_image.dart';
+import 'species_prediction_screen.dart';
 
 class SpeciesDetailScreen extends StatelessWidget {
   const SpeciesDetailScreen({super.key, required this.speciesId});
@@ -65,6 +67,7 @@ class SpeciesDetailScreen extends StatelessWidget {
     final saved = context.watch<SavedSpeciesProvider>();
     final isFav = saved.isSaved(species.id);
     final isNotified = saved.isNotified(species.id);
+    final speciesPrediction = speciesPredictions[species.id];
 
     return AssistantOverlayLayer(
       child: Scaffold(
@@ -399,6 +402,12 @@ class SpeciesDetailScreen extends StatelessWidget {
                         icon: Icons.info_outline,
                         child: Text(species.description),
                       ),
+                      if (speciesPrediction != null)
+                        _predictionSnapshotCard(
+                          context,
+                          species: species,
+                          prediction: speciesPrediction,
+                        ),
                       _sectionCard(
                         context,
                         title: 'Habitat',
@@ -793,6 +802,265 @@ class SpeciesDetailScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Color _probabilityBg(String probability) {
+    switch (probability) {
+      case 'High':
+        return Colors.green.shade100;
+      case 'Medium':
+        return Colors.amber.shade100;
+      case 'Low':
+        return Colors.red.shade100;
+      default:
+        return Colors.grey.shade200;
+    }
+  }
+
+  Color _probabilityFg(String probability) {
+    switch (probability) {
+      case 'High':
+        return Colors.green.shade900;
+      case 'Medium':
+        return Colors.amber.shade900;
+      case 'Low':
+        return Colors.red.shade900;
+      default:
+        return Colors.black87;
+    }
+  }
+
+  IconData _weatherIcon(String weather) {
+    switch (weather) {
+      case 'Sunny':
+        return Icons.wb_sunny_rounded;
+      case 'Partly Cloudy':
+        return Icons.wb_cloudy_rounded;
+      case 'Cloudy':
+        return Icons.cloud_rounded;
+      case 'Rainy':
+        return Icons.umbrella_rounded;
+      default:
+        return Icons.wb_cloudy_rounded;
+    }
+  }
+
+  Widget _predictionSnapshotCard(
+    BuildContext context, {
+    required Species species,
+    required SpeciesPrediction prediction,
+  }) {
+    final s = Adaptive.scale(context);
+    final currentForecast = prediction.forecast.isNotEmpty
+        ? prediction.forecast.first
+        : null;
+    if (currentForecast == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: GlassPanel(
+        padding: const EdgeInsets.all(20),
+        borderRadius: 20,
+        blurSigma: 14,
+        fillAlpha: 0.62,
+        verticalFrostGradient: true,
+        child: _innerInfoCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.trending_up_rounded,
+                              size: 22 * s,
+                              color: AppColors.iconSectionOnFrost,
+                            ),
+                            SizedBox(width: 8 * s),
+                            Expanded(
+                              child: Text(
+                                'Current Prediction',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: Adaptive.clamp(
+                                    context,
+                                    17,
+                                    min: 14,
+                                    max: 21,
+                                  ),
+                                  color: AppColors.textBodyOnFrost,
+                                  letterSpacing: -0.1,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 6 * s),
+                        Text(
+                          '${prediction.locationName} • ${prediction.distance.toStringAsFixed(1)}km away',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: AppColors.textSubtitleOnFrost,
+                            fontSize: Adaptive.clamp(context, 13, min: 11, max: 15),
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.05,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10 * s,
+                      vertical: 6 * s,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _probabilityBg(currentForecast.probability),
+                      borderRadius: BorderRadius.circular(20 * s),
+                      border: Border.all(color: Colors.grey.shade400),
+                    ),
+                    child: Text(
+                      '${currentForecast.probabilityPercent}% ${currentForecast.probability}',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.w800,
+                        fontSize: Adaptive.clamp(context, 12, min: 10, max: 14),
+                        color: _probabilityFg(currentForecast.probability),
+                        letterSpacing: 0.05,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12 * s),
+              Row(
+                children: [
+                  Expanded(
+                    child: _predictionMiniFact(
+                      context,
+                      icon: Icons.schedule_rounded,
+                      iconColor: AppColors.primary,
+                      label: 'Best Time',
+                      value: currentForecast.timeOfDay,
+                    ),
+                  ),
+                  SizedBox(width: 8 * s),
+                  Expanded(
+                    child: _predictionMiniFact(
+                      context,
+                      icon: _weatherIcon(currentForecast.weather),
+                      iconColor: Colors.orange.shade700,
+                      label: 'Weather',
+                      value: currentForecast.weather,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8 * s),
+              Row(
+                children: [
+                  Expanded(
+                    child: _predictionMiniFact(
+                      context,
+                      icon: Icons.thermostat_rounded,
+                      iconColor: Colors.deepOrange.shade700,
+                      label: 'Temp',
+                      value: '${currentForecast.temperature}°C',
+                    ),
+                  ),
+                  SizedBox(width: 8 * s),
+                  Expanded(
+                    child: _predictionMiniFact(
+                      context,
+                      icon: Icons.water_drop_rounded,
+                      iconColor: Colors.cyan.shade700,
+                      label: 'Humidity',
+                      value: '${currentForecast.humidity}%',
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12 * s),
+              GlassCtaPill(
+                emphasized: true,
+                minHeight: 46 * s,
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => SpeciesPredictionScreen(speciesId: species.id),
+                    ),
+                  );
+                },
+                child: const Text('See more prediction details'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _predictionMiniFact(
+    BuildContext context, {
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    required String value,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.86),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.82)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Icon(icon, color: iconColor, size: 18),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.plusJakartaSans(
+                    color: AppColors.textSubtitleOnFrost,
+                    fontSize: Adaptive.clamp(context, 11, min: 10, max: 13),
+                    fontWeight: FontWeight.w700,
+                    height: 1.2,
+                  ),
+                ),
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    color: AppColors.textBodyOnFrost,
+                    fontSize: Adaptive.clamp(context, 13, min: 11, max: 15),
+                    fontWeight: FontWeight.w800,
+                    height: 1.25,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
