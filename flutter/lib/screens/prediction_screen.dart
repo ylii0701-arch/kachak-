@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../data/malaysia_cities.dart';
+import '../data/map_data.dart';
 import '../data/predictions_data.dart';
 import '../data/species_data.dart';
+import '../models/species.dart'; // <--- ADD THIS to fix the "Species isn't a type" error
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
 import '../widgets/glass.dart';
 import '../widgets/species_network_image.dart';
 import 'species_prediction_screen.dart';
+import '../data/site_data.dart';
 
 class PredictionScreen extends StatefulWidget {
   const PredictionScreen({super.key});
@@ -20,8 +23,6 @@ class PredictionScreen extends StatefulWidget {
 class _PredictionScreenState extends State<PredictionScreen> {
   /// Selected Malaysian city (display name).
   String _selectedCity = 'Kuala Lumpur';
-
-  Region get _predictionRegion => predictionRegionForCityName(_selectedCity);
 
   Color _probabilityColors(String p) {
     switch (p) {
@@ -85,173 +86,235 @@ class _PredictionScreenState extends State<PredictionScreen> {
   @override
   Widget build(BuildContext context) {
     final s = Adaptive.scale(context);
-    final predictions = locationPredictions[_predictionRegion] ?? [];
 
-    return Material(
-      color: Colors.transparent,
-      child: CustomScrollView(
-        slivers: [
+    // 1. Get all sites for the selected city
+    final citySites = siteData.where((site) => site.cityName == _selectedCity).toList();
+    citySites.sort((a, b) => a.name.compareTo(b.name));
+
+    // 2. Build the slivers dynamically
+    List<Widget> slivers = [
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16 * s, 42 * s, 16 * s, 10 * s),
+          child: GlassPanel(
+            padding: EdgeInsets.fromLTRB(20 * s, 22 * s, 20 * s, 22 * s),
+            borderRadius: 26 * s,
+            fillAlpha: 0.4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Predictions',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: Adaptive.clamp(context, 28, min: 22, max: 34),
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.6,
+                    height: 1.05,
+                    color: AppColors.accent,
+                  ),
+                ),
+                SizedBox(height: 10 * s),
+                Text(
+                  'Discover which species are most likely to appear in your area',
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                    fontSize: Adaptive.clamp(context, 15, min: 13, max: 18),
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16 * s),
+          child: GlassPanel(
+            padding: EdgeInsets.all(16 * s),
+            borderRadius: 22 * s,
+            fillAlpha: 0.38,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.place, color: AppColors.primary),
+                    SizedBox(width: 8 * s),
+                    const Text(
+                      'Select Region',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12 * s),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _openCityPicker,
+                    borderRadius: BorderRadius.circular(12),
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16 * s,
+                          vertical: 14 * s,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Colors.grey.shade300,
+                          ),
+                        ),
+                        suffixIcon: Icon(
+                          Icons.arrow_drop_down_rounded,
+                          size: 28 * s,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _selectedCity,
+                                  style: TextStyle(
+                                    fontSize: Adaptive.clamp(
+                                      context,
+                                      16,
+                                      min: 14,
+                                      max: 19,
+                                    ),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  'Tap to search all cities',
+                                  style: TextStyle(
+                                    fontSize: Adaptive.clamp(
+                                      context,
+                                      12,
+                                      min: 10,
+                                      max: 14,
+                                    ),
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ];
+
+    if (citySites.isEmpty) {
+      slivers.add(
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.all(40 * s),
+            child: Center(
+              child: Text(
+                'No tracked sites or photography spots currently available in $_selectedCity.',
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 16 * s),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      );
+    } else {
+      slivers.add(
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16 * s, 16 * s, 16 * s, 4 * s),
+            child: Row(
+              children: [
+                Text('🎯', style: TextStyle(fontSize: 22 * s)),
+                SizedBox(width: 8 * s),
+                Expanded(
+                  child: Text(
+                    'Top Predictions by Site',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: Adaptive.clamp(context, 18, min: 15, max: 22),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Loop through each site and dynamically build the sorted species list
+      for (final site in citySites) {
+        // Find all valid species for this site
+        final speciesList = site.supportedSpeciesIds
+            .map((id) => speciesById(id))
+            .whereType<Species>()
+            .toList();
+
+        // Sort species descending by their probability
+        speciesList.sort((a, b) {
+          final pA = speciesPredictions[a.id]?.forecast.first.probabilityPercent ?? 0;
+          final pB = speciesPredictions[b.id]?.forecast.first.probabilityPercent ?? 0;
+          return pB.compareTo(pA);
+        });
+
+        // Add Site Header
+        slivers.add(
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(16 * s, 42 * s, 16 * s, 10 * s),
-              child: GlassPanel(
-                padding: EdgeInsets.fromLTRB(20 * s, 22 * s, 20 * s, 22 * s),
-                borderRadius: 26 * s,
-                fillAlpha: 0.4,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Predictions',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: Adaptive.clamp(context, 28, min: 22, max: 34),
+              padding: EdgeInsets.fromLTRB(16 * s, 16 * s, 16 * s, 8 * s),
+              child: Row(
+                children: [
+                  Icon(Icons.park, color: AppColors.primary, size: 20 * s),
+                  SizedBox(width: 8 * s),
+                  Expanded(
+                    child: Text(
+                      site.name,
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        letterSpacing: -0.6,
-                        height: 1.05,
+                        fontSize: Adaptive.clamp(context, 16, min: 14, max: 18),
                         color: AppColors.accent,
                       ),
                     ),
-                    SizedBox(height: 10 * s),
-                    Text(
-                      'Discover which species are most likely to appear in your area',
-                      style: TextStyle(
-                        color: Colors.grey.shade700,
-                        fontSize: Adaptive.clamp(context, 15, min: 13, max: 18),
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16 * s),
-              child: GlassPanel(
-                padding: EdgeInsets.all(16 * s),
-                borderRadius: 22 * s,
-                fillAlpha: 0.38,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.place, color: AppColors.primary),
-                        SizedBox(width: 8 * s),
-                        const Text(
-                          'Select Region',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 12 * s),
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: _openCityPicker,
-                        borderRadius: BorderRadius.circular(12),
-                        child: InputDecorator(
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16 * s,
-                              vertical: 14 * s,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: Colors.grey.shade300,
-                              ),
-                            ),
-                            suffixIcon: Icon(
-                              Icons.arrow_drop_down_rounded,
-                              size: 28 * s,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      _selectedCity,
-                                      style: TextStyle(
-                                        fontSize: Adaptive.clamp(
-                                          context,
-                                          16,
-                                          min: 14,
-                                          max: 19,
-                                        ),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    Text(
-                                      'Tap to search all cities',
-                                      style: TextStyle(
-                                        fontSize: Adaptive.clamp(
-                                          context,
-                                          12,
-                                          min: 10,
-                                          max: 14,
-                                        ),
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+        );
+
+        // Add the sorted Species Cards
+        slivers.add(
           SliverPadding(
-            padding: EdgeInsets.fromLTRB(16 * s, 8 * s, 16 * s, 100 * s),
+            padding: EdgeInsets.symmetric(horizontal: 16 * s),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
-                if (index == 0) {
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: 12 * s),
-                    child: Row(
-                      children: [
-                        Text('🎯', style: TextStyle(fontSize: 22 * s)),
-                        SizedBox(width: 8 * s),
-                        Expanded(
-                          child: Text(
-                            'Top Predictions for $_selectedCity',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: Adaptive.clamp(
-                                context,
-                                18,
-                                min: 15,
-                                max: 22,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-                final pred = predictions[index - 1];
-                final species = speciesById(pred.speciesId);
-                if (species == null) return const SizedBox.shrink();
+                final species = speciesList[index];
+                final pred = speciesPredictions[species.id];
+                if (pred == null) return const SizedBox.shrink();
+
+                final todayForecast = pred.forecast.first;
+
                 return Padding(
                   padding: EdgeInsets.only(bottom: 10 * s),
                   child: Card(
@@ -333,7 +396,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: _probabilityColors(
-                                        pred.probability,
+                                        todayForecast.probability,
                                       ),
                                       borderRadius: BorderRadius.circular(
                                         10 * s,
@@ -354,16 +417,16 @@ class _PredictionScreenState extends State<PredictionScreen> {
                                             max: 20,
                                           ),
                                           color: _probabilityOnColor(
-                                            pred.probability,
+                                            todayForecast.probability,
                                           ),
                                         ),
                                         SizedBox(width: 4 * s),
                                         Text(
-                                          '${pred.probabilityPercent}% ${pred.probability}',
+                                          '${todayForecast.probabilityPercent}% ${todayForecast.probability}',
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             color: _probabilityOnColor(
-                                              pred.probability,
+                                              todayForecast.probability,
                                             ),
                                           ),
                                         ),
@@ -379,7 +442,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                                       ),
                                       Expanded(
                                         child: Text(
-                                          pred.bestTime,
+                                          todayForecast.timeOfDay,
                                           style: TextStyle(
                                             fontSize: Adaptive.clamp(
                                               context,
@@ -391,10 +454,10 @@ class _PredictionScreenState extends State<PredictionScreen> {
                                           ),
                                         ),
                                       ),
-                                      Text(_weatherEmoji(pred.bestWeather)),
+                                      Text(_weatherEmoji(todayForecast.weather)),
                                       SizedBox(width: 4 * s),
                                       Text(
-                                        pred.bestWeather,
+                                        todayForecast.weather,
                                         style: TextStyle(
                                           fontSize: Adaptive.clamp(
                                             context,
@@ -416,11 +479,19 @@ class _PredictionScreenState extends State<PredictionScreen> {
                     ),
                   ),
                 );
-              }, childCount: predictions.length + 1),
+              }, childCount: speciesList.length),
             ),
           ),
-        ],
-      ),
+        );
+      }
+    }
+
+    // Bottom padding for scrolling
+    slivers.add(SliverToBoxAdapter(child: SizedBox(height: 100 * s)));
+
+    return Material(
+      color: Colors.transparent,
+      child: CustomScrollView(slivers: slivers),
     );
   }
 }
@@ -449,9 +520,11 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
   }
 
   void _filter() {
-    final q = _search.text;
+    final q = _search.text.toLowerCase();
     setState(() {
-      _visible = _sorted.where((c) => cityMatchesQuery(c, q)).toList();
+      _visible = _sorted.where((c) =>
+      c.name.toLowerCase().contains(q) || c.state.toLowerCase().contains(q)
+      ).toList();
     });
   }
 
@@ -510,30 +583,30 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
           Expanded(
             child: _visible.isEmpty
                 ? Center(
-                    child: Text(
-                      'No cities match your search',
-                      style: TextStyle(color: Colors.grey.shade600),
-                    ),
-                  )
+              child: Text(
+                'No cities match your search',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            )
                 : ListView.builder(
-                    itemCount: _visible.length,
-                    itemBuilder: (_, i) {
-                      final c = _visible[i];
-                      final sel = c.name == widget.initialCity;
-                      return ListTile(
-                        selected: sel,
-                        selectedTileColor: AppColors.primary.withValues(
-                          alpha: 0.12,
-                        ),
-                        title: Text(c.name),
-                        subtitle: Text(c.state),
-                        trailing: sel
-                            ? const Icon(Icons.check, color: AppColors.primary)
-                            : null,
-                        onTap: () => Navigator.pop(context, c.name),
-                      );
-                    },
+              itemCount: _visible.length,
+              itemBuilder: (_, i) {
+                final c = _visible[i];
+                final sel = c.name == widget.initialCity;
+                return ListTile(
+                  selected: sel,
+                  selectedTileColor: AppColors.primary.withValues(
+                    alpha: 0.12,
                   ),
+                  title: Text(c.name),
+                  subtitle: Text(c.state),
+                  trailing: sel
+                      ? const Icon(Icons.check, color: AppColors.primary)
+                      : null,
+                  onTap: () => Navigator.pop(context, c.name),
+                );
+              },
+            ),
           ),
         ],
       ),
