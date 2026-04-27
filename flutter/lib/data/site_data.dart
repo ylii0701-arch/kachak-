@@ -40,7 +40,7 @@ const List<Site> siteData = [
     lng: 102.4000,
     accessibility: 'Difficult',
     description: 'Ancient primary rainforest. Requires a guide for deep forest access.',
-    supportedSpeciesIds: ['1', '3', '5', '12', '13', '15', '17', '18', '21', '24', '25', '27', '28', '32', '33', '36', '41', '43', '49', '52', '56', '64', '77', '86', '87', '96', '97', '100'],
+    supportedSpeciesIds: ['1', '3', '5', '6', '8', '11', '12', '13', '15', '16', '17', '18', '19', '20', '21', '22', '24', '25', '27', '28', '31', '32', '33', '35', '36', '37', '43', '49', '50', '52', '61', '62', '63', '64', '77', '78', '86', '87', '96', '97', '99', '100'],
   ),
   Site(
     id: 'site02',
@@ -52,7 +52,7 @@ const List<Site> siteData = [
     lng: 101.4400,
     accessibility: 'Moderate',
     description: 'Pristine forest known for hornbills and large mammals. Boat access required.',
-    supportedSpeciesIds: ['5', '6', '7', '10', '12', '13', '15', '16', '17', '21', '24', '25', '31', '33', '36', '40', '43', '47', '52', '77', '86', '89', '96', '97', '99', '100'],
+    supportedSpeciesIds: ['1', '3', '5', '6', '8', '12', '13', '18', '19', '20', '21', '24', '25', '35', '36', '37', '38', '52', '61', '62', '63', '64', '78', '86'],
   ),
   Site(
     id: 'site03',
@@ -64,7 +64,7 @@ const List<Site> siteData = [
     lng: 101.6350,
     accessibility: 'Easy',
     description: 'Popular research forest with a canopy walkway. Entry permit required.',
-    supportedSpeciesIds: ['19', '44', '45', '47', '63', '64', '84', '88', '90', '91', '92'],
+    supportedSpeciesIds: ['19', '21', '38', '44', '45', '49', '50', '51', '62', '63', '84', '88', '91', '92'],
   ),
   Site(
     id: 'site04',
@@ -76,7 +76,7 @@ const List<Site> siteData = [
     lng: 101.2450,
     accessibility: 'Easy',
     description: 'Excellent coastal trails and boardwalks. Great for wetland birds and monitors.',
-    supportedSpeciesIds: ['9', '26', '30', '39', '51', '54', '58', '59', '66', '67', '76', '82', '83'],
+    supportedSpeciesIds: ['26', '30', '38', '54', '59', '63', '65', '66', '67', '69', '83'],
   ),
   Site(
     id: 'site05',
@@ -88,7 +88,7 @@ const List<Site> siteData = [
     lng: 101.7590,
     accessibility: 'Moderate',
     description: 'Dense forest edge habitat rich in insect and amphibian life.',
-    supportedSpeciesIds: ['11', '22', '37', '38', '44', '45', '55', '63', '84', '88', '90', '91', '92'],
+    supportedSpeciesIds: ['16', '17', '19', '20', '21', '40', '43', '44', '45', '49', '50', '62', '63', '80', '84'],
   ),
   Site(
     id: 'site06',
@@ -100,7 +100,7 @@ const List<Site> siteData = [
     lng: 100.2014,
     accessibility: 'Moderate',
     description: 'Malaysia\'s smallest national park. Great for coastal raptors, primates, and unique beach habitats.',
-    supportedSpeciesIds: ['9', '51', '53', '54', '59', '65', '67', '75', '76', '79', '82', '83'],
+    supportedSpeciesIds: ['9', '19', '26', '38', '51', '54', '63', '65', '66', '88'],
   ),
   Site(
     id: 'site07',
@@ -112,7 +112,7 @@ const List<Site> siteData = [
     lng: 99.8569,
     accessibility: 'Easy',
     description: 'Boat-accessed mangrove park in Langkawi. Perfect for eagles, kingfishers, and mangrove snakes.',
-    supportedSpeciesIds: ['9', '30', '51', '54', '63', '66', '67', '68', '69', '75', '76', '82', '83'],
+    supportedSpeciesIds: ['8', '26', '38', '63', '65', '66', '83', '88'],
   ),
   Site(
     id: 'site08',
@@ -124,7 +124,7 @@ const List<Site> siteData = [
     lng: 101.1166,
     accessibility: 'Easy',
     description: 'The largest heronry in Malaysia, right outside Ipoh. A haven for waterbirds and migratory species.',
-    supportedSpeciesIds: ['38', '53', '75', '79'],
+    supportedSpeciesIds: ['26', '38', '45', '54', '68', '69'],
   ),
   Site(
     id: 'site09',
@@ -136,7 +136,7 @@ const List<Site> siteData = [
     lng: 102.2985,
     accessibility: 'Easy',
     description: 'A very accessible park in Melaka offering excellent opportunities to practice shooting common urban wildlife.',
-    supportedSpeciesIds: ['22', '37', '40', '44', '45', '48', '63', '88', '89', '90', '91', '92', '99'],
+    supportedSpeciesIds: ['38', '44', '45', '62', '63', '84', '91'],
   ),
   Site(
     id: 'site10',
@@ -148,7 +148,7 @@ const List<Site> siteData = [
     lng: 102.0461,
     accessibility: 'Moderate',
     description: 'A hidden gem in Negeri Sembilan. Dense, dark trails excellent for macro photography and forest floor species.',
-    supportedSpeciesIds: ['5', '6', '7', '10', '12', '13', '15', '16', '17', '18', '19', '21', '24', '27', '31', '36', '41', '43', '47', '50', '52', '55', '61', '77', '78', '86', '87', '96', '100'],
+    supportedSpeciesIds: ['15', '16', '17', '40', '49', '50', '100'],
   ),
   Site(
     id: 'site11',
@@ -160,7 +160,7 @@ const List<Site> siteData = [
     lng: 103.2505,
     accessibility: 'Difficult',
     description: 'Rugged terrain protecting the southern stronghold of Malaysia\'s large terrestrial mammals.',
-    supportedSpeciesIds: ['1', '5', '7', '8', '10', '12', '13', '15', '16', '21', '32', '33', '36', '38', '43', '49', '50', '52', '56', '61', '62', '77', '78', '100'],
+    supportedSpeciesIds: ['1', '3', '5', '6', '8', '11', '12', '15', '38', '52', '61', '64', '96'],
   ),
   Site(
     id: 'site12',
@@ -172,7 +172,7 @@ const List<Site> siteData = [
     lng: 103.5456,
     accessibility: 'Moderate',
     description: 'Crucial wetland habitat in southern Johor. Explored via boat, excellent for mangrove specialists.',
-    supportedSpeciesIds: ['9', '26', '30', '39', '51', '53', '58', '59', '63', '65', '66', '67', '79', '82'],
+    supportedSpeciesIds: ['26', '30', '38', '39', '54', '63', '66', '67', '83'],
   ),
   Site(
     id: 'site13',
@@ -184,7 +184,7 @@ const List<Site> siteData = [
     lng: 102.7845,
     accessibility: 'Moderate',
     description: 'Southeast Asia\'s largest man-made lake. Houseboat trips are the best way to spot lakeside wildlife.',
-    supportedSpeciesIds: ['53', '68', '69', '75', '76'],
+    supportedSpeciesIds: ['3', '6', '25', '26', '38', '53', '54', '79'],
   ),
   Site(
     id: 'site14',
@@ -196,7 +196,7 @@ const List<Site> siteData = [
     lng: 101.9700,
     accessibility: 'Difficult',
     description: 'Famous for its massive waterfall and steep treks. Holds unique upland species and vibrant insect life.',
-    supportedSpeciesIds: ['20', '29', '38', '70', '71', '72', '80', '93', '98'],
+    supportedSpeciesIds: ['17', '62', '63', '70', '71', '72'],
   ),
   Site(
     id: 'site15',
@@ -208,7 +208,7 @@ const List<Site> siteData = [
     lng: 101.7345,
     accessibility: 'Easy',
     description: 'The bird-watching capital of Peninsular Malaysia. Cool weather and extremely accessible roadside photography.',
-    supportedSpeciesIds: ['20', '29', '38', '63', '70', '71', '72', '80', '93', '98'],
+    supportedSpeciesIds: ['16', '20', '28', '29', '70', '71', '72', '80', '93'],
   ),
 
   // ==========================================
@@ -224,7 +224,7 @@ const List<Site> siteData = [
     lng: 118.2500,
     accessibility: 'Easy',
     description: 'World-class river safaris. Prime spotting for endemic Borneo species.',
-    supportedSpeciesIds: ['53', '58', '75'],
+    supportedSpeciesIds: ['2', '3', '4', '7', '8', '23', '30', '34', '38', '39', '55', '58', '59', '63', '65', '75', '76', '78', '79', '83'],
   ),
   Site(
     id: 'site17',
@@ -236,7 +236,7 @@ const List<Site> siteData = [
     lng: 117.0830,
     accessibility: 'Difficult',
     description: 'Highly regulated commercial forest reserve known for night safaris and wild cats.',
-    supportedSpeciesIds: ['1', '2', '3', '6', '7', '14', '16', '22', '23', '24', '25', '27', '28', '32', '33', '34', '35', '42', '46', '49', '50', '55', '57', '60', '61', '62', '63', '64', '81', '85', '86', '87', '94', '96', '97'],
+    supportedSpeciesIds: ['1', '2', '10', '14', '18', '21', '23', '55', '56', '57', '58', '61', '64'],
   ),
   Site(
     id: 'site18',
@@ -248,7 +248,7 @@ const List<Site> siteData = [
     lng: 110.4400,
     accessibility: 'Moderate',
     description: 'Coastal rainforest accessed via boat. Famous for Proboscis monkeys and pit vipers.',
-    supportedSpeciesIds: ['4', '26', '38', '39', '54', '59', '67', '68', '69', '79', '82', '83'],
+    supportedSpeciesIds: ['4', '38', '39', '40', '59', '63', '78', '82'],
   ),
   Site(
     id: 'site19',
@@ -260,7 +260,7 @@ const List<Site> siteData = [
     lng: 117.9400,
     accessibility: 'Easy',
     description: 'Features a massive steel canopy walkway ideal for birdwatching.',
-    supportedSpeciesIds: ['8', '38', '40', '42', '45', '84', '90'],
+    supportedSpeciesIds: ['2', '3', '10', '34', '65', '78', '81'],
   ),
   Site(
     id: 'site20',
@@ -272,7 +272,7 @@ const List<Site> siteData = [
     lng: 118.6200,
     accessibility: 'Moderate',
     description: 'World-renowned diving site for marine turtles and pelagics.',
-    supportedSpeciesIds: ['4', '9', '26', '30', '39', '58', '63', '65', '66', '68', '76', '83'],
+    supportedSpeciesIds: ['9', '66'],
   ),
   Site(
     id: 'site21',
@@ -284,7 +284,7 @@ const List<Site> siteData = [
     lng: 116.5441,
     accessibility: 'Moderate',
     description: 'UNESCO World Heritage site. The higher altitudes are home to Borneo\'s most famous endemic birds and amphibians.',
-    supportedSpeciesIds: ['29', '70', '71', '73', '74', '80', '95', '98'],
+    supportedSpeciesIds: ['29', '73', '74', '95', '98'],
   ),
   Site(
     id: 'site22',
@@ -296,7 +296,7 @@ const List<Site> siteData = [
     lng: 117.8041,
     accessibility: 'Moderate',
     description: 'Pristine, untouched Borneo jungle. One of the highest biodiversity densities on the planet.',
-    supportedSpeciesIds: ['2', '7', '10', '11', '14', '17', '18', '23', '28', '31', '32', '34', '35', '36', '40', '41', '42', '46', '48', '56', '57', '60', '61', '81', '85', '86', '94'],
+    supportedSpeciesIds: ['1', '2', '3', '10', '11', '14', '23', '34', '36', '41', '42', '56', '57', '81', '94'],
   ),
   Site(
     id: 'site23',
@@ -308,7 +308,7 @@ const List<Site> siteData = [
     lng: 113.7635,
     accessibility: 'Moderate',
     description: 'Famous for massive caves. The surrounding forest holds highly specialized limestone-dwelling species.',
-    supportedSpeciesIds: ['1', '2', '3', '6', '10', '14', '18', '23', '25', '27', '28', '31', '33', '34', '35', '37', '41', '42', '48', '49', '50', '56', '57', '60', '62', '64', '81', '85', '94', '96', '97', '100'],
+    supportedSpeciesIds: ['38', '49', '50', '60', '63', '85'],
   ),
 
   // ==========================================
@@ -324,7 +324,13 @@ const List<Site> siteData = [
     lng: 101.7560,
     accessibility: 'Easy',
     description: 'National zoo featuring expansive enclosures for local and exotic species.',
-    supportedSpeciesIds: ['3', '5', '6', '8', '12', '13', '15', '16', '18', '20', '21', '22', '27', '28', '29', '30', '31', '32', '39', '41', '43', '44', '46', '47', '49', '50', '51', '52', '54', '55', '56', '58', '59', '61', '62', '65', '66', '68', '69', '70', '71', '72', '77', '78', '79', '80', '84', '88', '91', '92', '93', '98', '99'],
+    // Corrected: Removed impossible Bornean endemics (Proboscis Monkey, Pygmy Elephant).
+    // Kept Orangutan, Sun Bear, and Peninsular/Malayan species.
+    supportedSpeciesIds: [
+      '1', '2', '5', '6', '8', '12', '13', '18', '20',
+      '21', '22', '37', '38', '39', '51', '52', '53', '54',
+      '61', '62', '63', '79', '87', '88'
+    ],
   ),
   Site(
     id: 'site25',
@@ -336,7 +342,10 @@ const List<Site> siteData = [
     lng: 101.6880,
     accessibility: 'Easy',
     description: 'World\'s largest free-flight walk-in aviary.',
-    supportedSpeciesIds: ['3', '11', '19', '24', '25', '26', '37', '40', '44', '45', '46', '47', '48', '65', '69', '78', '84', '88', '89', '90', '91', '92', '99'],
+    // Corrected: Removed ultra-rare Bornean endemics. Focused on realistic captive birds and urban intruders.
+    supportedSpeciesIds: [
+      '3', '24', '25', '26', '38', '63', '65', '68', '69', '76'
+    ],
   ),
   Site(
     id: 'site26',
@@ -348,7 +357,8 @@ const List<Site> siteData = [
     lng: 117.9500,
     accessibility: 'Easy',
     description: 'Dedicated to the rescue and rehabilitation of orphaned orangutans and sun bears.',
-    supportedSpeciesIds: ['1', '2', '11', '19', '37', '38', '42', '44', '45', '48', '62', '84', '88', '89', '90', '91', '92', '99'],
+    // Specialized sanctuary (not a general zoo), kept strictly to local rescued fauna and local intruders
+    supportedSpeciesIds: ['1', '2', '62', '63'],
   ),
   Site(
     id: 'site27',
@@ -360,7 +370,8 @@ const List<Site> siteData = [
     lng: 100.2150,
     accessibility: 'Easy',
     description: 'Massive glasshouse habitat showcasing butterflies and bizarre insects.',
-    supportedSpeciesIds: ['8', '17', '44', '45', '46', '78', '84', '87', '88', '89', '90', '91', '92', '97', '98'],
+    // Exclusively invertebrates
+    supportedSpeciesIds: ['17', '46', '47', '48', '49', '50', '97', '98', '99', '100'],
   ),
   Site(
     id: 'site28',
@@ -372,7 +383,23 @@ const List<Site> siteData = [
     lng: 101.5880,
     accessibility: 'Easy',
     description: 'Recreational city parks bordering residential zones. Good for common wildlife.',
-    supportedSpeciesIds: ['8', '11', '19', '22', '44', '45', '55', '64', '84', '87', '88', '90', '91', '92'],
+    // Highly adaptable suburban wildlife
+    supportedSpeciesIds: ['8', '26', '38', '44', '45', '63', '84', '88', '90', '91', '92'],
+  ),
+  Site(
+    id: 'site29',
+    name: 'Kuala Lumpur Butterfly Park',
+    cityName: 'Kuala Lumpur',
+    type: 'Insectarium',
+    isCaptive: true,
+    lat: 3.1433,
+    lng: 101.6892,
+    accessibility: 'Easy',
+    description: 'A beautiful landscaped garden housing thousands of butterflies and a gallery of exotic insects.',
+    // Captive butterflies/insects + realistic wild intruders (tree frogs, garden lizards, macaques)
+    supportedSpeciesIds: [
+      '17', '44', '46', '47', '48', '49', '50', '63', '84', '91', '97', '98', '99', '100'
+    ],
   ),
 ];
 

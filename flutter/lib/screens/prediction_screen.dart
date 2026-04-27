@@ -5,7 +5,7 @@ import '../data/malaysia_cities.dart';
 import '../data/map_data.dart';
 import '../data/predictions_data.dart';
 import '../data/species_data.dart';
-import '../models/species.dart'; // <--- ADD THIS to fix the "Species isn't a type" error
+import '../models/species.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
 import '../widgets/glass.dart';
@@ -327,8 +327,10 @@ class _PredictionScreenState extends State<PredictionScreen> {
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute<void>(
-                            builder: (_) =>
-                                SpeciesPredictionScreen(speciesId: species.id),
+                            builder: (_) => SpeciesPredictionScreen(
+                              speciesId: species.id,
+                              siteName: site.name, // <--- PASS THE SITE NAME HERE
+                            ),
                           ),
                         );
                       },

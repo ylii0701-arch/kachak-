@@ -18,9 +18,14 @@ const _predictionHeroShadows = <Shadow>[
 ];
 
 class SpeciesPredictionScreen extends StatefulWidget {
-  const SpeciesPredictionScreen({super.key, required this.speciesId});
+  const SpeciesPredictionScreen({
+    super.key,
+    required this.speciesId,
+    this.siteName,
+  });
 
   final String speciesId;
+  final String? siteName;
 
   @override
   State<SpeciesPredictionScreen> createState() =>
@@ -324,7 +329,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                             SizedBox(width: 5 * s),
                                             Expanded(
                                               child: Text(
-                                                '${prediction.locationName} • ${prediction.distance}km away',
+                                                '${widget.siteName ?? prediction.locationName} • ${prediction.distance}km away',
                                                 style: TextStyle(
                                                   color: Colors.white
                                                       .withValues(alpha: 0.92),
