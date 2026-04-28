@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../data/malaysia_cities.dart';
-import '../data/map_data.dart';
 import '../data/predictions_data.dart';
 import '../data/species_data.dart';
 import '../models/species.dart';

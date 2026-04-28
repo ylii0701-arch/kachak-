@@ -1,5 +1,3 @@
-import 'package:intl/intl.dart';
-
 /// Represents a single day's forecast within a prediction sequence.
 class DailyPrediction {
   const DailyPrediction({

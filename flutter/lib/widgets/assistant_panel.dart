@@ -305,7 +305,7 @@ ${checklist.weatherNotice}
               final suggestionIndex = index - 2;
               if (suggestionIndex < _suggestions.length) {
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.only(bottom: 6),
                   child: _suggestionCard(_suggestions[suggestionIndex]),
                 );
               }
@@ -361,20 +361,27 @@ ${checklist.weatherNotice}
   }
 
   Widget _suggestionCard(String text) {
+    final s = Adaptive.scale(context);
     return Material(
       color: Colors.white.withValues(alpha: 0.9),
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(12 * s),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12 * s),
         onTap: () => _submitQuestion(text),
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          padding: EdgeInsets.symmetric(horizontal: 12 * s, vertical: 10 * s),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12 * s),
             border: Border.all(color: Colors.green.shade100),
           ),
-          child: Text(text, style: const TextStyle(fontSize: 17)),
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: Adaptive.clamp(context, 14, min: 12, max: 16),
+              height: 1.25,
+            ),
+          ),
         ),
       ),
     );
@@ -382,35 +389,56 @@ ${checklist.weatherNotice}
 
   Widget _chatCard(_ChatMessage message, {bool showTime = false}) {
     final isUser = message.isUser;
+    final maxBubbleWidth = MediaQuery.sizeOf(context).width * 0.76;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: isUser
-              ? AppColors.primary.withValues(alpha: 0.12)
-              : Colors.white.withValues(alpha: 0.92),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isUser
-                ? AppColors.primary.withValues(alpha: 0.35)
-                : Colors.green.shade100,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(message.text, style: const TextStyle(height: 1.45)),
-            if (showTime) ...[
-              const SizedBox(height: 6),
-              Text(
-                '17:38',
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        mainAxisAlignment: isUser
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
+        children: [
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxBubbleWidth),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+              decoration: BoxDecoration(
+                color: isUser
+                    ? AppColors.primary.withValues(alpha: 0.22)
+                    : Colors.white.withValues(alpha: 0.94),
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(16),
+                  topRight: const Radius.circular(16),
+                  bottomLeft: Radius.circular(isUser ? 16 : 4),
+                  bottomRight: Radius.circular(isUser ? 4 : 16),
+                ),
+                border: Border.all(
+                  color: isUser
+                      ? AppColors.primary.withValues(alpha: 0.42)
+                      : Colors.green.shade100,
+                ),
               ),
-            ],
-          ],
-        ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    message.text,
+                    style: TextStyle(
+                      height: 1.45,
+                      color: isUser ? Colors.black87 : Colors.black87,
+                    ),
+                  ),
+                  if (showTime) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      '17:38',
+                      style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
