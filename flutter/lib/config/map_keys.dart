@@ -13,3 +13,8 @@ const String openWeatherApiKey = String.fromEnvironment(
   'OPENWEATHER_API_KEY',
   defaultValue: '',
 );
+
+const String geminiApiKey = String.fromEnvironment(
+  'GEMINI_API_KEY',
+  defaultValue: '',
+);
