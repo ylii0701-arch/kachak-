@@ -12,6 +12,8 @@ import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
 import '../widgets/glass.dart';
 import 'species_detail_screen.dart';
+import '../utils/image_validator.dart';
+import '../services/gemini_recognition_service.dart';
 
 class IdentifyScreen extends StatefulWidget {
   const IdentifyScreen({super.key});
@@ -29,6 +31,10 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
   String? _message;
   bool _isLoading = false;
 
+  // --- DEBUG TOGGLE ---
+  // Set to true to test internet images. ALWAYS set to false for production!
+  final bool _bypassExifCheck = true;
+
   Future<void> _pick(ImageSource source) async {
     final file = await _picker.pickImage(source: source, imageQuality: 85);
     if (file == null) return;
@@ -42,28 +48,70 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
     });
 
     final bytes = await file.readAsBytes();
-    final matched = predictSpeciesFromImagePath(file.path, speciesData);
+    setState(() {
+      _imageBytes = bytes;
+    });
+
+    final imageFile = File(file.path);
+
+    // 1. EXIF Validation (Respects Debug Toggle)
+    if (!_bypassExifCheck) {
+      bool isValid = await validateLocalPhoto(imageFile);
+      if (!isValid) {
+        setState(() {
+          _message = 'Please capture a real photo using your device camera within Malaysia.';
+          _isLoading = false;
+        });
+        return;
+      }
+    }
+
+    // 2. Call Gemini
+    final result = await identifySpecies(imageFile);
     if (!mounted) return;
 
-    if (matched != null) {
+    if (result['status'] == "ERROR") {
       setState(() {
-        _imageBytes = bytes;
-        _predicted = matched;
-        _confidence = 0.9;
-        _message = 'Identification completed successfully.';
+        _message = "Failed to connect to AI. Please try again.";
         _isLoading = false;
       });
       return;
     }
 
-    final fallback = speciesData[file.path.hashCode.abs() % speciesData.length];
+    // 3. Handle the 3 specific cases
     setState(() {
-      _imageBytes = bytes;
-      _predicted = fallback;
-      _confidence = 0.45;
-      _message =
-          'Result is uncertain. Please upload a clearer, closer, and better-lit photo.';
       _isLoading = false;
+
+      // Case 3: Not an animal
+      if (result['status'] == "NOT_ANIMAL") {
+        _message = "Please do not upload unrelated images. Please upload a clear photo of an animal.";
+      }
+      // Case 2: Blurry or uncertain
+      else if (result['status'] == "UNCLEAR") {
+        _message = "Cannot identify the exact species due to blur or low quality. Please provide a better quality photo.";
+      }
+      // Successful AI identification, now check local DB
+      else if (result['status'] == "SUCCESS") {
+        final geminiCommonName = result['commonName']?.toString().toLowerCase() ?? '';
+
+        Species? matchedSpecies;
+        try {
+          matchedSpecies = speciesData.firstWhere(
+                (s) => s.commonName.toLowerCase() == geminiCommonName,
+          );
+        } catch (e) {
+          matchedSpecies = null;
+        }
+
+        if (matchedSpecies != null) {
+          _predicted = matchedSpecies;
+          _confidence = 0.95;
+          _message = 'Identification completed successfully.';
+        } else {
+          // Case 1: Identified, but not in our database
+          _message = "Sorry, I cannot identify this as a supported wildlife species in our database. Please try a different photo.";
+        }
+      }
     });
   }
 
@@ -140,10 +188,13 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
                   highlighted: true,
                   onTap: () => _pick(ImageSource.gallery),
                 ),
+
+                // NEW: Clear Loading Card
                 if (_isLoading) ...[
                   SizedBox(height: 12 * s),
-                  const LinearProgressIndicator(),
+                  _loadingCard(),
                 ],
+
                 if (_imageFile != null) ...[
                   SizedBox(height: 12 * s),
                   ClipRRect(
@@ -154,18 +205,27 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
                       child: _imageBytes != null
                           ? Image.memory(_imageBytes!, fit: BoxFit.cover)
                           : (!kIsWeb
-                                ? Image.file(
-                                    File(_imageFile!.path),
-                                    fit: BoxFit.cover,
-                                  )
-                                : const ColoredBox(color: Colors.black12)),
+                          ? Image.file(
+                        File(_imageFile!.path),
+                        fit: BoxFit.cover,
+                      )
+                          : const ColoredBox(color: Colors.black12)),
                     ),
                   ),
                 ],
+
+                // NEW: Show rejection/error messages when prediction fails
+                if (!_isLoading && _message != null && _predicted == null) ...[
+                  SizedBox(height: 12 * s),
+                  _statusCard(),
+                ],
+
+                // SUCCESS: Show the recognized species
                 if (_predicted != null && _confidence != null) ...[
                   SizedBox(height: 12 * s),
                   _resultCard(context),
                 ],
+
                 SizedBox(height: 12 * s),
                 _tipsCard(),
               ]),
@@ -222,6 +282,71 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // --- NEW WIDGET: Replaces the subtle LinearProgressIndicator ---
+  Widget _loadingCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.blue.shade200),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.5,
+              color: Colors.blue.shade700,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              'Analyzing image with KaChak AI...',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Colors.blue.shade900,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- NEW WIDGET: Shows Rejections and Errors ---
+  Widget _statusCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.red.shade200),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.error_outline, color: Colors.red.shade400),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              _message ?? 'An error occurred.',
+              style: TextStyle(
+                color: Colors.red.shade900,
+                height: 1.4,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -283,12 +408,9 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
           const SizedBox(height: 6),
           Text(
             _predicted!.description,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 6),
-          Text('Confidence: ${((_confidence ?? 0) * 100).toStringAsFixed(0)}%'),
-          if (_message != null) ...[const SizedBox(height: 4), Text(_message!)],
+
+          if (_message != null) ...[const SizedBox(height: 8), Text(_message!)],
           const SizedBox(height: 10),
           FilledButton(
             onPressed: () {

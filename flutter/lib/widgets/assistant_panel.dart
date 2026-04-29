@@ -267,6 +267,7 @@ If user mentions phone/digicam/compact camera, give practical advice for that ge
     };
 
     const models = <String>[
+      'gemini-3.1-flash-lite-preview',
       'gemini-2.5-flash',
       'gemini-1.5-flash',
     ];
