@@ -41,12 +41,20 @@ MissionRecommendation buildMissionRecommendation({
     ('Birds', 'Casual') => 'Backyard Bird Focus Practice',
     ('Birds', 'Standard') => 'Forest Edge Bird Series',
     ('Birds', _) => 'High-speed Bird Action Session',
+    ('Reptiles', 'Casual') => 'Trailside Reptile Spotting',
+    ('Reptiles', 'Standard') => 'Reptile Texture & Behavior Set',
+    ('Reptiles', _) => 'Advanced Reptile Action Watch',
+    ('Amphibians', 'Casual') => 'After-Rain Amphibian Walk',
+    ('Amphibians', 'Standard') => 'Night Amphibian Macro Story',
+    ('Amphibians', _) => 'Low-Light Amphibian Challenge',
     _ => 'Beginner Wildlife Mission',
   };
 
   final location = switch (subject) {
     'Insects' => 'Shaded trail near water or leaf litter',
     'Mammals' => 'River edges, boardwalks, or open forest clearings',
+    'Reptiles' => 'Warm rocks, mangrove edges, or sunlit riverbanks',
+    'Amphibians' => 'Damp stream edges and shaded forest floor after rain',
     _ => 'Forest edge or canopy opening before sunrise',
   };
 
