@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../data/photography_assistant_data.dart';
 import '../data/species_data.dart';
 import '../models/species.dart';
+import 'identify_screen.dart';
 import 'species_detail_screen.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
@@ -25,6 +26,7 @@ class _MissionScreenState extends State<MissionScreen> {
   String? _subject;
   String? _timePeriod;
   MissionRecommendation? _mission;
+  Species? _proofSpecies;
 
   void _startQuiz() {
     setState(() {
@@ -48,11 +50,13 @@ class _MissionScreenState extends State<MissionScreen> {
       _subject = null;
       _timePeriod = null;
       _mission = null;
+      _proofSpecies = null;
     });
   }
 
   void _selectAnswer(String value) {
     setState(() {
+      _proofSpecies = null;
       if (_step == 0) {
         _gear = value;
         _step = 1;
@@ -79,10 +83,60 @@ class _MissionScreenState extends State<MissionScreen> {
     });
   }
 
+  Future<void> _uploadMissionProof() async {
+    final expectedCategory = _subject;
+    if (expectedCategory == null) return;
+    final result = await Navigator.of(context).push<Species>(
+      MaterialPageRoute<Species>(
+        builder: (_) => IdentifyScreen(
+          expectedCategory: expectedCategory,
+          allowMissionProofReturn: true,
+        ),
+      ),
+    );
+    if (!mounted || result == null) return;
+    setState(() {
+      _proofSpecies = result;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Proof submitted with ${result.commonName}. Great work!'),
+      ),
+    );
+  }
+
+  Future<void> _confirmResetFromTaskList() async {
+    final shouldReset = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Reset choices?'),
+          content: const Text(
+            'This will clear your current mission setup and uploaded proof.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Reset'),
+            ),
+          ],
+        );
+      },
+    );
+    if (shouldReset == true && mounted) {
+      _startOver();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = Adaptive.scale(context);
     final media = MediaQuery.of(context);
+    final topInset = media.padding.top;
     final bottomInset = media.padding.bottom;
     final navBarHeight = bottomInset > 0
         ? bottomInset + (2 * s) + 64 * s
@@ -91,7 +145,12 @@ class _MissionScreenState extends State<MissionScreen> {
     return Material(
       color: Colors.transparent,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(16 * s, 42 * s, 16 * s, navBarHeight + 12 * s),
+        padding: EdgeInsets.fromLTRB(
+          16 * s,
+          topInset + 8 * s,
+          16 * s,
+          navBarHeight + 8 * s,
+        ),
         child: Column(
           children: [
             if (_started) ...[
@@ -99,11 +158,23 @@ class _MissionScreenState extends State<MissionScreen> {
               SizedBox(height: 10 * s),
             ],
             Expanded(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 560),
-                  child: _contentByStep(),
-                ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    padding: EdgeInsets.only(bottom: 4 * s),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 560),
+                          child: _contentByStep(),
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -284,10 +355,7 @@ class _MissionScreenState extends State<MissionScreen> {
       return _missionSummaryCard(mission);
     }
     if (_step >= 5) {
-      return Align(
-        alignment: Alignment.topCenter,
-        child: _taskListCard(),
-      );
+      return _taskListCard();
     }
 
     return const SizedBox.shrink();
@@ -379,18 +447,17 @@ class _MissionScreenState extends State<MissionScreen> {
       ),
     ];
 
-    return SingleChildScrollView(
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.92),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           const Text(
             'Weekly Task',
             style: TextStyle(
@@ -414,7 +481,11 @@ class _MissionScreenState extends State<MissionScreen> {
                 stars,
                 (_) => const Padding(
                   padding: EdgeInsets.only(right: 2),
-                  child: Icon(Icons.star_rounded, size: 16, color: Colors.amber),
+                  child: Icon(
+                    Icons.star_rounded,
+                    size: 16,
+                    color: Colors.amber,
+                  ),
                 ),
               ),
             ],
@@ -454,29 +525,60 @@ class _MissionScreenState extends State<MissionScreen> {
               child: _taskProgressCard(task),
             ),
           ),
-          const SizedBox(height: 4),
+          if (_proofSpecies != null) ...[
+            const SizedBox(height: 2),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.green.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.verified_rounded, color: Colors.green.shade700),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Proof uploaded: ${_proofSpecies!.commonName}',
+                      style: TextStyle(
+                        color: Colors.green.shade900,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+          ] else
+            const SizedBox(height: 4),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: null,
+              onPressed: _uploadMissionProof,
               icon: const Icon(Icons.upload_rounded),
-              label: const Text('Upload proof photo (coming soon)'),
+              label: Text(
+                _proofSpecies == null
+                    ? 'Upload proof photo'
+                    : 'Upload another proof photo',
+              ),
             ),
           ),
           const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.center,
-              child: TextButton.icon(
-                onPressed: _startOver,
-                icon: const Icon(Icons.replay_rounded, size: 18),
-                label: const Text('Reset Choices'),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.grey.shade600,
-                ),
+          Align(
+            alignment: Alignment.center,
+            child: TextButton.icon(
+              onPressed: _confirmResetFromTaskList,
+              icon: const Icon(Icons.replay_rounded, size: 18),
+              label: const Text('Reset Choices'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.grey.shade600,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -506,7 +608,9 @@ class _MissionScreenState extends State<MissionScreen> {
               minHeight: 8,
               value: 0,
               backgroundColor: Colors.green.shade50,
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppColors.primary,
+              ),
             ),
           ),
           const SizedBox(height: 4),
@@ -549,7 +653,10 @@ class _MissionScreenState extends State<MissionScreen> {
               children: [
                 SizedBox(
                   height: 96,
-                  child: SpeciesNetworkImage(url: sp.imageUrl, fit: BoxFit.cover),
+                  child: SpeciesNetworkImage(
+                    url: sp.imageUrl,
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
@@ -601,7 +708,9 @@ class _MissionScreenState extends State<MissionScreen> {
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: statusBackgroundColor(sp.conservationStatus),
+                              color: statusBackgroundColor(
+                                sp.conservationStatus,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -652,15 +761,15 @@ class _MissionScreenState extends State<MissionScreen> {
 
   String _gearSpecificTask({required String gear, required String subject}) {
     if (gear == 'Smartphone') {
-      return 'Use 0.5x wide shot + one close-up tap-focus photo for $subject.';
+      return 'Take one wide-context shot and one clear close-up of $subject.';
     }
     if (gear == 'Digicam') {
-      return 'Use auto mode and capture one clear centered shot of $subject.';
+      return 'Capture one clear centered shot of $subject with steady framing.';
     }
     if (gear == 'Fixed Lens Compact') {
-      return 'Use burst mode and one portrait-style shot with natural light for $subject.';
+      return 'Capture one sharp close-up of $subject with clean background separation.';
     }
-    return 'Use your longest suitable lens and capture one detail-focused shot of $subject.';
+    return 'Capture one detail-focused shot of $subject with steady focus.';
   }
 
   List<Species> _recommendedSpeciesForSubject({
@@ -674,7 +783,9 @@ class _MissionScreenState extends State<MissionScreen> {
       'Amphibians' => Species.amphibians,
       _ => Species.insects,
     };
-    final inCategory = speciesData.where((s) => s.category == category).toList();
+    final inCategory = speciesData
+        .where((s) => s.category == category)
+        .toList();
     bool matchesDifficulty(Species s) {
       switch (difficulty) {
         case 'Challenging':

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../data/photography_assistant_data.dart';
 import '../data/species_data.dart';
 import '../models/species.dart';
 import '../theme/app_theme.dart';
@@ -16,7 +15,14 @@ import '../utils/image_validator.dart';
 import '../services/gemini_recognition_service.dart';
 
 class IdentifyScreen extends StatefulWidget {
-  const IdentifyScreen({super.key});
+  const IdentifyScreen({
+    super.key,
+    this.expectedCategory,
+    this.allowMissionProofReturn = false,
+  });
+
+  final String? expectedCategory;
+  final bool allowMissionProofReturn;
 
   @override
   State<IdentifyScreen> createState() => _IdentifyScreenState();
@@ -59,7 +65,8 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
       bool isValid = await validateLocalPhoto(imageFile);
       if (!isValid) {
         setState(() {
-          _message = 'Please capture a real photo using your device camera within Malaysia.';
+          _message =
+              'Please capture a real photo using your device camera within Malaysia.';
           _isLoading = false;
         });
         return;
@@ -84,32 +91,44 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
 
       // Case 3: Not an animal
       if (result['status'] == "NOT_ANIMAL") {
-        _message = "Please do not upload unrelated images. Please upload a clear photo of an animal.";
+        _message =
+            "Please do not upload unrelated images. Please upload a clear photo of an animal.";
       }
       // Case 2: Blurry or uncertain
       else if (result['status'] == "UNCLEAR") {
-        _message = "Cannot identify the exact species due to blur or low quality. Please provide a better quality photo.";
+        _message =
+            "Cannot identify the exact species due to blur or low quality. Please provide a better quality photo.";
       }
       // Successful AI identification, now check local DB
       else if (result['status'] == "SUCCESS") {
-        final geminiCommonName = result['commonName']?.toString().toLowerCase() ?? '';
+        final geminiCommonName =
+            result['commonName']?.toString().toLowerCase() ?? '';
 
         Species? matchedSpecies;
         try {
           matchedSpecies = speciesData.firstWhere(
-                (s) => s.commonName.toLowerCase() == geminiCommonName,
+            (s) => s.commonName.toLowerCase() == geminiCommonName,
           );
         } catch (e) {
           matchedSpecies = null;
         }
 
         if (matchedSpecies != null) {
+          final expectedCategory = widget.expectedCategory;
+          if (expectedCategory != null &&
+              matchedSpecies.category.toLowerCase() !=
+                  expectedCategory.toLowerCase()) {
+            _message =
+                'This looks like ${matchedSpecies.category}, but your mission requires $expectedCategory. Please upload a matching species photo.';
+            return;
+          }
           _predicted = matchedSpecies;
           _confidence = 0.95;
           _message = 'Identification completed successfully.';
         } else {
           // Case 1: Identified, but not in our database
-          _message = "Sorry, I cannot identify this as a supported wildlife species in our database. Please try a different photo.";
+          _message =
+              "Sorry, I cannot identify this as a supported wildlife species in our database. Please try a different photo.";
         }
       }
     });
@@ -118,8 +137,9 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
   @override
   Widget build(BuildContext context) {
     final s = Adaptive.scale(context);
+    final canPop = Navigator.of(context).canPop();
     return Material(
-      color: Colors.transparent,
+      color: AppColors.detailBackdrop,
       child: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
@@ -132,6 +152,19 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                      if (canPop)
+                        IconButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          icon: const Icon(Icons.arrow_back_rounded),
+                          tooltip: 'Back',
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 32,
+                            minHeight: 32,
+                          ),
+                        ),
+                      if (canPop) SizedBox(height: 4 * s),
                     Text(
                       'Species Recognition',
                       style: GoogleFonts.plusJakartaSans(
@@ -190,10 +223,7 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
                 ),
 
                 // NEW: Clear Loading Card
-                if (_isLoading) ...[
-                  SizedBox(height: 12 * s),
-                  _loadingCard(),
-                ],
+                if (_isLoading) ...[SizedBox(height: 12 * s), _loadingCard()],
 
                 if (_imageFile != null) ...[
                   SizedBox(height: 12 * s),
@@ -205,11 +235,11 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
                       child: _imageBytes != null
                           ? Image.memory(_imageBytes!, fit: BoxFit.cover)
                           : (!kIsWeb
-                          ? Image.file(
-                        File(_imageFile!.path),
-                        fit: BoxFit.cover,
-                      )
-                          : const ColoredBox(color: Colors.black12)),
+                                ? Image.file(
+                                    File(_imageFile!.path),
+                                    fit: BoxFit.cover,
+                                  )
+                                : const ColoredBox(color: Colors.black12)),
                     ),
                   ),
                 ],
@@ -406,9 +436,7 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
             style: const TextStyle(fontStyle: FontStyle.italic),
           ),
           const SizedBox(height: 6),
-          Text(
-            _predicted!.description,
-          ),
+          Text(_predicted!.description),
 
           if (_message != null) ...[const SizedBox(height: 8), Text(_message!)],
           const SizedBox(height: 10),
@@ -423,6 +451,17 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
             },
             child: const Text('Open species details'),
           ),
+          if (widget.allowMissionProofReturn) ...[
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => Navigator.of(context).pop(_predicted),
+                icon: const Icon(Icons.verified_rounded),
+                label: const Text('Use as mission proof'),
+              ),
+            ),
+          ],
         ],
       ),
     );
