@@ -5,6 +5,11 @@ import 'package:http/http.dart' as http;
 import '../config/map_keys.dart';
 
 Future<Map<String, dynamic>> identifySpecies(File imageFile) async {
+  final bytes = await imageFile.readAsBytes();
+  return identifySpeciesFromBytes(bytes);
+}
+
+Future<Map<String, dynamic>> identifySpeciesFromBytes(Uint8List bytes) async {
   if (geminiApiKey.isEmpty) {
     return {
       "status": "ERROR",
@@ -12,7 +17,6 @@ Future<Map<String, dynamic>> identifySpecies(File imageFile) async {
           "Gemini API key is missing. Rebuild with --dart-define=GEMINI_API_KEY=...",
     };
   }
-  final bytes = await imageFile.readAsBytes();
   final base64Image = base64Encode(bytes);
 
   // Hidden Instruction for Gemini
@@ -61,6 +65,8 @@ RULES:
 
   // Primary + fallback model strategy.
   const models = <String>['gemini-3.1-flash-lite-preview', 'gemini-2.5-flash'];
+  final stopwatch = Stopwatch()..start();
+  const maxTotalDuration = Duration(seconds: 25);
 
   String? lastError;
   for (final model in models) {
@@ -71,13 +77,21 @@ RULES:
     try {
       http.Response? response;
       for (var attempt = 0; attempt < 2; attempt++) {
+        final remaining = maxTotalDuration - stopwatch.elapsed;
+        if (remaining <= Duration.zero) {
+          return {
+            "status": "ERROR",
+            "message":
+                "Recognition request timed out after 25 seconds. Please try again.",
+          };
+        }
         response = await http
             .post(
               uri,
               headers: {'Content-Type': 'application/json'},
               body: jsonEncode(payload),
             )
-            .timeout(const Duration(seconds: 25));
+            .timeout(remaining);
         if (response.statusCode == 503 && attempt == 0) {
           await Future<void>.delayed(const Duration(milliseconds: 800));
           continue;

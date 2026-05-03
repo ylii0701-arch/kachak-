@@ -58,83 +58,94 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
       _imageBytes = bytes;
     });
 
-    final imageFile = File(file.path);
+    try {
+      // 1. EXIF Validation (Respects Debug Toggle, mobile only)
+      if (!_bypassExifCheck && !kIsWeb) {
+        final imageFile = File(file.path);
+        final isValid = await validateLocalPhoto(imageFile);
+        if (!isValid) {
+          setState(() {
+            _message =
+                'Please capture a real photo using your device camera within Malaysia.';
+            _isLoading = false;
+          });
+          return;
+        }
+      }
 
-    // 1. EXIF Validation (Respects Debug Toggle)
-    if (!_bypassExifCheck) {
-      bool isValid = await validateLocalPhoto(imageFile);
-      if (!isValid) {
+      // 2. Call Gemini
+      final result = kIsWeb
+          ? await identifySpeciesFromBytes(bytes)
+          : await identifySpecies(File(file.path));
+
+      if (!mounted) return;
+
+      if (result['status'] == "ERROR") {
+        final errorMessage = result['message']?.toString().trim();
         setState(() {
-          _message =
-              'Please capture a real photo using your device camera within Malaysia.';
+          _message = (errorMessage != null && errorMessage.isNotEmpty)
+              ? errorMessage
+              : "Failed to connect to AI. Please try again.";
           _isLoading = false;
         });
         return;
       }
-    }
 
-    // 2. Call Gemini
-    final result = await identifySpecies(imageFile);
-    if (!mounted) return;
-
-    if (result['status'] == "ERROR") {
-      final errorMessage = result['message']?.toString().trim();
+      // 3. Handle the 3 specific cases
       setState(() {
-        _message = (errorMessage != null && errorMessage.isNotEmpty)
-            ? errorMessage
-            : "Failed to connect to AI. Please try again.";
+        _isLoading = false;
+
+        // Case 3: Not an animal
+        if (result['status'] == "NOT_ANIMAL") {
+          _message =
+              "Please do not upload unrelated images. Please upload a clear photo of an animal.";
+        }
+        // Case 2: Blurry or uncertain
+        else if (result['status'] == "UNCLEAR") {
+          _message =
+              "Cannot identify the exact species due to blur or low quality. Please provide a better quality photo.";
+        }
+        // Successful AI identification, now check local DB
+        else if (result['status'] == "SUCCESS") {
+          final geminiCommonName =
+              result['commonName']?.toString().toLowerCase() ?? '';
+
+          Species? matchedSpecies;
+          try {
+            matchedSpecies = speciesData.firstWhere(
+              (s) => s.commonName.toLowerCase() == geminiCommonName,
+            );
+          } catch (e) {
+            matchedSpecies = null;
+          }
+
+          if (matchedSpecies != null) {
+            final expectedCategory = widget.expectedCategory;
+            if (expectedCategory != null &&
+                matchedSpecies.category.toLowerCase() !=
+                    expectedCategory.toLowerCase()) {
+              _message =
+                  'This looks like ${matchedSpecies.category}, but your mission requires $expectedCategory. Please upload a matching species photo.';
+              return;
+            }
+            _predicted = matchedSpecies;
+            _confidence = 0.95;
+            _message = 'Identification completed successfully.';
+          } else {
+            // Case 1: Identified, but not in our database
+            _message =
+                "Sorry, I cannot identify this as a supported wildlife species in our database. Please try a different photo.";
+          }
+        }
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _message =
+            'Recognition failed unexpectedly. Please retry with another image.';
         _isLoading = false;
       });
-      return;
     }
-
-    // 3. Handle the 3 specific cases
-    setState(() {
-      _isLoading = false;
-
-      // Case 3: Not an animal
-      if (result['status'] == "NOT_ANIMAL") {
-        _message =
-            "Please do not upload unrelated images. Please upload a clear photo of an animal.";
-      }
-      // Case 2: Blurry or uncertain
-      else if (result['status'] == "UNCLEAR") {
-        _message =
-            "Cannot identify the exact species due to blur or low quality. Please provide a better quality photo.";
-      }
-      // Successful AI identification, now check local DB
-      else if (result['status'] == "SUCCESS") {
-        final geminiCommonName =
-            result['commonName']?.toString().toLowerCase() ?? '';
-
-        Species? matchedSpecies;
-        try {
-          matchedSpecies = speciesData.firstWhere(
-            (s) => s.commonName.toLowerCase() == geminiCommonName,
-          );
-        } catch (e) {
-          matchedSpecies = null;
-        }
-
-        if (matchedSpecies != null) {
-          final expectedCategory = widget.expectedCategory;
-          if (expectedCategory != null &&
-              matchedSpecies.category.toLowerCase() !=
-                  expectedCategory.toLowerCase()) {
-            _message =
-                'This looks like ${matchedSpecies.category}, but your mission requires $expectedCategory. Please upload a matching species photo.';
-            return;
-          }
-          _predicted = matchedSpecies;
-          _confidence = 0.95;
-          _message = 'Identification completed successfully.';
-        } else {
-          // Case 1: Identified, but not in our database
-          _message =
-              "Sorry, I cannot identify this as a supported wildlife species in our database. Please try a different photo.";
-        }
-      }
-    });
   }
 
   @override
