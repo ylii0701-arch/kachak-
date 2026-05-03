@@ -269,7 +269,6 @@ If user mentions phone/digicam/compact camera, give practical advice for that ge
     const models = <String>[
       'gemini-3.1-flash-lite-preview',
       'gemini-2.5-flash',
-      'gemini-1.5-flash',
     ];
 
     String? lastError;
@@ -314,8 +313,9 @@ If user mentions phone/digicam/compact camera, give practical advice for that ge
         }
 
         final content = candidates.first['content'] as Map<String, dynamic>?;
-        final finishReason = (candidates.first as Map<String, dynamic>)['finishReason']
-            as String?;
+        final finishReason =
+            (candidates.first as Map<String, dynamic>)['finishReason']
+                as String?;
         final parts = content?['parts'] as List<dynamic>?;
         if (parts == null || parts.isEmpty) {
           return 'Gemini returned an empty response. Please try again.';
@@ -323,8 +323,7 @@ If user mentions phone/digicam/compact camera, give practical advice for that ge
 
         final text = parts
             .map(
-              (part) =>
-                  (part as Map<String, dynamic>)['text'] as String? ?? '',
+              (part) => (part as Map<String, dynamic>)['text'] as String? ?? '',
             )
             .join('\n')
             .trim();
@@ -626,9 +625,7 @@ Please answer using the preparation checklist template.
   }
 
   Widget _typingCard() {
-    return _chatCard(
-      const _ChatMessage(text: 'Thinking...', isUser: false),
-    );
+    return _chatCard(const _ChatMessage(text: 'Thinking...', isUser: false));
   }
 
   Widget _chatCard(_ChatMessage message, {bool showTime = false}) {
@@ -672,10 +669,7 @@ Please answer using the preparation checklist template.
                       ),
                       children: _inlineMarkdownSpans(
                         message.text,
-                        const TextStyle(
-                          height: 1.45,
-                          color: Colors.black87,
-                        ),
+                        const TextStyle(height: 1.45, color: Colors.black87),
                       ),
                     ),
                   ),
@@ -683,7 +677,10 @@ Please answer using the preparation checklist template.
                     const SizedBox(height: 6),
                     Text(
                       '17:38',
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ],

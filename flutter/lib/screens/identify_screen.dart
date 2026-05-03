@@ -78,8 +78,11 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
     if (!mounted) return;
 
     if (result['status'] == "ERROR") {
+      final errorMessage = result['message']?.toString().trim();
       setState(() {
-        _message = "Failed to connect to AI. Please try again.";
+        _message = (errorMessage != null && errorMessage.isNotEmpty)
+            ? errorMessage
+            : "Failed to connect to AI. Please try again.";
         _isLoading = false;
       });
       return;
@@ -152,19 +155,19 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                      if (canPop)
-                        IconButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          icon: const Icon(Icons.arrow_back_rounded),
-                          tooltip: 'Back',
-                          visualDensity: VisualDensity.compact,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(
-                            minWidth: 32,
-                            minHeight: 32,
-                          ),
+                    if (canPop)
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.arrow_back_rounded),
+                        tooltip: 'Back',
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 32,
+                          minHeight: 32,
                         ),
-                      if (canPop) SizedBox(height: 4 * s),
+                      ),
+                    if (canPop) SizedBox(height: 4 * s),
                     Text(
                       'Species Recognition',
                       style: GoogleFonts.plusJakartaSans(

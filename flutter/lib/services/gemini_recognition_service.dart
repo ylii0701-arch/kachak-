@@ -5,6 +5,13 @@ import 'package:http/http.dart' as http;
 import '../config/map_keys.dart';
 
 Future<Map<String, dynamic>> identifySpecies(File imageFile) async {
+  if (geminiApiKey.isEmpty) {
+    return {
+      "status": "ERROR",
+      "message":
+          "Gemini API key is missing. Rebuild with --dart-define=GEMINI_API_KEY=...",
+    };
+  }
   final bytes = await imageFile.readAsBytes();
   final base64Image = base64Encode(bytes);
 
@@ -30,13 +37,19 @@ RULES:
 ''';
 
   final payload = {
-    'systemInstruction': {'parts': [{'text': systemInstruction}]},
+    'systemInstruction': {
+      'parts': [
+        {'text': systemInstruction},
+      ],
+    },
     'contents': [
       {
         'role': 'user',
         'parts': [
-          {'inlineData': {'mimeType': 'image/jpeg', 'data': base64Image}},
-          {'text': 'Identify this species.'}
+          {
+            'inlineData': {'mimeType': 'image/jpeg', 'data': base64Image},
+          },
+          {'text': 'Identify this species.'},
         ],
       },
     ],
@@ -46,29 +59,105 @@ RULES:
     },
   };
 
-  // Your friend's fallback loop mechanism
-  const models = <String>[
-    'gemini-3.1-flash-lite-preview',
-    'gemini-2.5-flash',
-    'gemini-1.5-flash',
-  ];
+  // Primary + fallback model strategy.
+  const models = <String>['gemini-3.1-flash-lite-preview', 'gemini-2.5-flash'];
 
+  String? lastError;
   for (final model in models) {
-    final uri = Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$geminiApiKey');
+    final uri = Uri.parse(
+      'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$geminiApiKey',
+    );
 
     try {
-      final response = await http.post(uri, headers: {'Content-Type': 'application/json'}, body: jsonEncode(payload));
+      http.Response? response;
+      for (var attempt = 0; attempt < 2; attempt++) {
+        response = await http
+            .post(
+              uri,
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode(payload),
+            )
+            .timeout(const Duration(seconds: 25));
+        if (response.statusCode == 503 && attempt == 0) {
+          await Future<void>.delayed(const Duration(milliseconds: 800));
+          continue;
+        }
+        break;
+      }
+      if (response == null) {
+        return {
+          "status": "ERROR",
+          "message": "Gemini request did not return a response.",
+        };
+      }
 
       if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-        final text = decoded['candidates'][0]['content']['parts'][0]['text'];
-        return jsonDecode(text);
-      } else if (response.statusCode == 404) {
+        final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+        final candidates = decoded['candidates'] as List<dynamic>?;
+        if (candidates == null || candidates.isEmpty) {
+          return {
+            "status": "ERROR",
+            "message": "Gemini returned an empty response.",
+          };
+        }
+        final candidate = candidates.first as Map<String, dynamic>;
+        final content = candidate['content'] as Map<String, dynamic>?;
+        final parts = content?['parts'] as List<dynamic>?;
+        if (parts == null || parts.isEmpty) {
+          return {
+            "status": "ERROR",
+            "message": "Gemini returned empty content.",
+          };
+        }
+        final text = parts
+            .map((p) => (p as Map<String, dynamic>)['text'] as String? ?? '')
+            .join('\n')
+            .trim();
+        if (text.isEmpty) {
+          return {
+            "status": "ERROR",
+            "message": "Gemini returned empty content text.",
+          };
+        }
+        try {
+          return jsonDecode(text) as Map<String, dynamic>;
+        } catch (_) {
+          return {
+            "status": "ERROR",
+            "message": "Gemini response format was invalid. Please retry.",
+          };
+        }
+      }
+
+      lastError = _extractGeminiError(response);
+      if (response.statusCode == 404) {
         continue; // Try next model
       }
+      return {"status": "ERROR", "message": lastError};
     } catch (e) {
       debugPrint('Error with $model: $e');
+      lastError =
+          'Unable to reach Gemini. Please check your network and retry.';
     }
   }
-  return {"status": "ERROR", "message": "Failed to connect to AI."};
+  return {
+    "status": "ERROR",
+    "message":
+        lastError ??
+        "Gemini model is unavailable for this key/project. Check model access and quota.",
+  };
+}
+
+String _extractGeminiError(http.Response response) {
+  try {
+    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    final err = decoded['error'] as Map<String, dynamic>?;
+    final message = (err?['message'] as String?)?.trim();
+    if (message != null && message.isNotEmpty) {
+      return 'Gemini request failed (${response.statusCode}): $message';
+    }
+  } catch (_) {
+    // Fall through to generic status message.
+  }
+  return 'Gemini request failed (${response.statusCode}). Please verify API key, quota, and model access.';
 }
