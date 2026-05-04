@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -27,6 +29,9 @@ class _MissionScreenState extends State<MissionScreen> {
   String? _timePeriod;
   MissionRecommendation? _mission;
   Species? _proofSpecies;
+  final List<_MissionProof> _proofSubmissions = [];
+  List<_TaskCardData> _missionTasks = const [];
+  final Map<String, String> _lastTaskFingerprintByProfile = {};
 
   void _startQuiz() {
     setState(() {
@@ -51,12 +56,15 @@ class _MissionScreenState extends State<MissionScreen> {
       _timePeriod = null;
       _mission = null;
       _proofSpecies = null;
+      _proofSubmissions.clear();
+      _missionTasks = const [];
     });
   }
 
   void _selectAnswer(String value) {
     setState(() {
       _proofSpecies = null;
+      _proofSubmissions.clear();
       if (_step == 0) {
         _gear = value;
         _step = 1;
@@ -79,6 +87,12 @@ class _MissionScreenState extends State<MissionScreen> {
         difficulty: _difficulty ?? 'Casual',
         subject: _subject ?? 'Insects',
       );
+      _missionTasks = _generateTaskChecklist(
+        subject: _subject ?? 'Insects',
+        difficulty: _difficulty ?? 'Casual',
+        gear: _gear ?? 'Smartphone',
+        preferredTime: _timePeriod ?? 'Morning',
+      );
       _step = 4;
     });
   }
@@ -97,6 +111,9 @@ class _MissionScreenState extends State<MissionScreen> {
     if (!mounted || result == null) return;
     setState(() {
       _proofSpecies = result;
+      _proofSubmissions.add(
+        _MissionProof(species: result, submittedAt: DateTime.now()),
+      );
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -160,18 +177,31 @@ class _MissionScreenState extends State<MissionScreen> {
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
+                  final content = Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 560),
+                      child: _contentByStep(),
+                    ),
+                  );
+
+                  // Keep outer scroll for intro/quiz/recommendation, but lock it for
+                  // task list so rounded panel corners are never clipped by viewport.
+                  if (_step >= 5) {
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
+                      child: content,
+                    );
+                  }
+
                   return SingleChildScrollView(
                     padding: EdgeInsets.only(bottom: 4 * s),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
                         minHeight: constraints.maxHeight,
                       ),
-                      child: Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 560),
-                          child: _contentByStep(),
-                        ),
-                      ),
+                      child: content,
                     ),
                   );
                 },
@@ -389,7 +419,11 @@ class _MissionScreenState extends State<MissionScreen> {
             Text('Preferred time: $_timePeriod'),
             const SizedBox(height: 8),
           ],
-          Text('Task: ${mission.task}'),
+          Text(
+            _missionTasks.isNotEmpty
+                ? 'Task preview: ${_missionTasks.first.title}'
+                : 'Task: ${mission.task}',
+          ),
           const SizedBox(height: 8),
           Text('Why this matches: ${mission.explanation}'),
           const SizedBox(height: 14),
@@ -418,172 +452,187 @@ class _MissionScreenState extends State<MissionScreen> {
   }
 
   Widget _taskListCard() {
+    final s = Adaptive.scale(context);
+    final panelHeight = (MediaQuery.sizeOf(context).height * 0.72).clamp(
+      440.0,
+      760.0,
+    );
     final subject = _subject ?? 'Insects';
-    final gear = _gear ?? 'Smartphone';
     final difficulty = _difficulty ?? 'Casual';
-    final time = _timePeriod ?? 'Morning';
     final stars = _difficultyStars(difficulty);
-    final totalShots = _photoTargetCount(difficulty);
     final speciesTargets = _recommendedSpeciesForSubject(
       subject: subject,
       difficulty: difficulty,
     );
-    final taskItems = <_TaskCardData>[
-      _TaskCardData(
-        title:
-            'Capture $totalShots ${subject.toLowerCase()} photo${totalShots > 1 ? 's' : ''}',
-        detail: 'Goal for this week',
-        progressLabel: '0/$totalShots',
-      ),
-      _TaskCardData(
-        title: _gearSpecificTask(gear: gear, subject: subject),
-        detail: 'Gear-specific challenge',
-        progressLabel: '0/1',
-      ),
-      _TaskCardData(
-        title: 'Shoot during $time with stable framing',
-        detail: 'Time window objective',
-        progressLabel: '0/1',
-      ),
-    ];
+    final taskItems = _missionTasks;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Weekly Task',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: AppColors.accent,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Mission: ${_mission?.title ?? '$subject Challenge'}',
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Text(
-                'Difficulty  ',
-                style: TextStyle(color: Colors.grey.shade700),
-              ),
-              ...List.generate(
-                stars,
-                (_) => const Padding(
-                  padding: EdgeInsets.only(right: 2),
-                  child: Icon(
-                    Icons.star_rounded,
-                    size: 16,
-                    color: Colors.amber,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          if (speciesTargets.isNotEmpty) ...[
-            Text(
-              'Target species suggestions',
-              style: TextStyle(
-                color: Colors.grey.shade800,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 208,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: speciesTargets.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 10),
-                itemBuilder: (_, i) => _speciesTaskCard(speciesTargets[i]),
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
-          Text(
-            'Weekly tasks',
-            style: TextStyle(
-              color: Colors.grey.shade800,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ...taskItems.map(
-            (task) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _taskProgressCard(task),
-            ),
-          ),
-          if (_proofSpecies != null) ...[
-            const SizedBox(height: 2),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.green.shade200),
-              ),
-              child: Row(
+    return SizedBox(
+      height: panelHeight,
+      child: Container(
+        width: double.infinity,
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.92),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(16 * s, 16 * s, 16 * s, 10 * s),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.verified_rounded, color: Colors.green.shade700),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Proof uploaded: ${_proofSpecies!.commonName}',
-                      style: TextStyle(
-                        color: Colors.green.shade900,
-                        fontWeight: FontWeight.w600,
-                      ),
+                  const Text(
+                    'Weekly Task',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.accent,
                     ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Mission: ${_mission?.title ?? '$subject Challenge'}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Text(
+                        'Difficulty  ',
+                        style: TextStyle(color: Colors.grey.shade700),
+                      ),
+                      ...List.generate(
+                        stars,
+                        (_) => const Padding(
+                          padding: EdgeInsets.only(right: 2),
+                          child: Icon(
+                            Icons.star_rounded,
+                            size: 16,
+                            color: Colors.amber,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 8),
-          ] else
-            const SizedBox(height: 4),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: _uploadMissionProof,
-              icon: const Icon(Icons.upload_rounded),
-              label: Text(
-                _proofSpecies == null
-                    ? 'Upload proof photo'
-                    : 'Upload another proof photo',
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(16 * s, 0, 16 * s, 12 * s),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 2),
+                    if (speciesTargets.isNotEmpty) ...[
+                      Text(
+                        'Target species suggestions',
+                        style: TextStyle(
+                          color: Colors.grey.shade800,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 208,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: speciesTargets.length,
+                          separatorBuilder: (_, _) => const SizedBox(width: 10),
+                          itemBuilder: (_, i) =>
+                              _speciesTaskCard(speciesTargets[i]),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    Text(
+                      'Weekly tasks',
+                      style: TextStyle(
+                        color: Colors.grey.shade800,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...taskItems.map(
+                      (task) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: _taskProgressCard(task),
+                      ),
+                    ),
+                    if (_proofSpecies != null) ...[
+                      const SizedBox(height: 2),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.green.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.verified_rounded,
+                              color: Colors.green.shade700,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Proof uploaded: ${_proofSpecies!.commonName}',
+                                style: TextStyle(
+                                  color: Colors.green.shade900,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ] else
+                      const SizedBox(height: 4),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _uploadMissionProof,
+                        icon: const Icon(Icons.upload_rounded),
+                        label: Text(
+                          _proofSpecies == null
+                              ? 'Upload proof photo'
+                              : 'Upload another proof photo',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.center,
+                      child: TextButton.icon(
+                        onPressed: _confirmResetFromTaskList,
+                        icon: const Icon(Icons.replay_rounded, size: 18),
+                        label: const Text('Reset Choices'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.grey.shade600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.center,
-            child: TextButton.icon(
-              onPressed: _confirmResetFromTaskList,
-              icon: const Icon(Icons.replay_rounded, size: 18),
-              label: const Text('Reset Choices'),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.grey.shade600,
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _taskProgressCard(_TaskCardData task) {
+    final current = _taskProgressCount(task);
+    final target = task.targetCount;
+    final progress = target == 0 ? 0.0 : (current / target).clamp(0.0, 1.0);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
@@ -606,7 +655,7 @@ class _MissionScreenState extends State<MissionScreen> {
             borderRadius: BorderRadius.circular(20),
             child: LinearProgressIndicator(
               minHeight: 8,
-              value: 0,
+              value: progress,
               backgroundColor: Colors.green.shade50,
               valueColor: const AlwaysStoppedAnimation<Color>(
                 AppColors.primary,
@@ -615,7 +664,7 @@ class _MissionScreenState extends State<MissionScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            task.progressLabel,
+            '$current/$target',
             style: TextStyle(
               color: Colors.grey.shade700,
               fontSize: 12,
@@ -737,17 +786,6 @@ class _MissionScreenState extends State<MissionScreen> {
     );
   }
 
-  int _photoTargetCount(String difficulty) {
-    switch (difficulty) {
-      case 'Challenging':
-        return 3;
-      case 'Standard':
-        return 2;
-      default:
-        return 1;
-    }
-  }
-
   int _difficultyStars(String difficulty) {
     switch (difficulty) {
       case 'Challenging':
@@ -759,17 +797,290 @@ class _MissionScreenState extends State<MissionScreen> {
     }
   }
 
-  String _gearSpecificTask({required String gear, required String subject}) {
+  List<_TaskCardData> _generateTaskChecklist({
+    required String subject,
+    required String difficulty,
+    required String gear,
+    required String preferredTime,
+  }) {
+    final speciesTargets = _recommendedSpeciesForSubject(
+      subject: subject,
+      difficulty: difficulty,
+    );
+    final maxTasks = switch (difficulty) {
+      'Challenging' => 3,
+      'Standard' => 2,
+      _ => 1,
+    };
+    final profileKey = '$subject|$difficulty|$gear|$preferredTime';
+    final baseSeed =
+        DateTime.now().microsecondsSinceEpoch ^
+        profileKey.hashCode ^
+        speciesTargets.length;
+    List<_TaskCardData> generated = const [];
+    for (var attempt = 0; attempt < 6; attempt++) {
+      generated = _buildTaskSet(
+        subject: subject,
+        difficulty: difficulty,
+        gear: gear,
+        preferredTime: preferredTime,
+        speciesTargets: speciesTargets,
+        maxTasks: maxTasks,
+        rng: Random(baseSeed + (attempt * 977)),
+      );
+      final fingerprint = generated.map((t) => t.title).join('|');
+      final previous = _lastTaskFingerprintByProfile[profileKey];
+      if (fingerprint != previous || attempt == 5) {
+        _lastTaskFingerprintByProfile[profileKey] = fingerprint;
+        break;
+      }
+    }
+    return generated;
+  }
+
+  List<_TaskCardData> _buildTaskSet({
+    required String subject,
+    required String difficulty,
+    required String gear,
+    required String preferredTime,
+    required List<Species> speciesTargets,
+    required int maxTasks,
+    required Random rng,
+  }) {
+    final subjectLower = subject.toLowerCase();
+    final singular = _subjectSingular(subject);
+    final categoryTargetCount = _categoryCountTarget(
+      difficulty: difficulty,
+      gear: gear,
+      rng: rng,
+    );
+    final primaryTaskCandidates = <_TaskCardData>[
+      _TaskCardData(
+        title:
+            'Capture $categoryTargetCount $subjectLower photo${categoryTargetCount > 1 ? 's' : ''}',
+        detail: 'Detection and count objective',
+        targetCount: categoryTargetCount,
+        ruleType: _TaskRuleType.categoryCount,
+      ),
+      _TaskCardData(
+        title:
+            'Document $categoryTargetCount $subjectLower sighting${categoryTargetCount > 1 ? 's' : ''}',
+        detail: 'Species detection objective',
+        targetCount: categoryTargetCount,
+        ruleType: _TaskRuleType.categoryCount,
+      ),
+    ];
+    final selected = <_TaskCardData>[
+      primaryTaskCandidates[rng.nextInt(primaryTaskCandidates.length)],
+    ];
+
+    final optional = <_TaskCardData>[];
+
+    final preferredWindow = _timeWindowForLabel(preferredTime);
+    optional.add(
+      _TaskCardData(
+        title: 'Capture 1 $singular during $preferredTime',
+        detail: 'Time-based objective',
+        targetCount: 1,
+        ruleType: _TaskRuleType.timeWindow,
+        timeWindow: preferredWindow,
+      ),
+    );
+
+    if (difficulty == 'Challenging' || gear == 'DSLR / Mirrorless') {
+      optional.add(
+        _TaskCardData(
+          title:
+              'Capture ${difficulty == 'Challenging' ? 3 : 2} different $subjectLower species',
+          detail: 'Variety objective',
+          targetCount: difficulty == 'Challenging' ? 3 : 2,
+          ruleType: _TaskRuleType.uniqueSpeciesCount,
+        ),
+      );
+    } else {
+      optional.add(
+        _TaskCardData(
+          title: 'Capture 2 different $subjectLower species',
+          detail: 'Variety objective',
+          targetCount: 2,
+          ruleType: _TaskRuleType.uniqueSpeciesCount,
+        ),
+      );
+    }
+
     if (gear == 'Smartphone') {
-      return 'Take one wide-context shot and one clear close-up of $subject.';
+      optional.add(
+        _TaskCardData(
+          title: 'Capture 1 $singular during daytime',
+          detail: 'Beginner-friendly time objective',
+          targetCount: 1,
+          ruleType: _TaskRuleType.timeWindow,
+          timeWindow: const _TaskTimeWindow(startHour: 6, endHour: 18),
+        ),
+      );
+    } else if (gear == 'DSLR / Mirrorless') {
+      optional.add(
+        _TaskCardData(
+          title: 'Capture 1 vulnerable-or-higher $singular',
+          detail: 'Conservation objective',
+          targetCount: 1,
+          ruleType: _TaskRuleType.conservationRank,
+          minConservationRank: 2,
+        ),
+      );
     }
-    if (gear == 'Digicam') {
-      return 'Capture one clear centered shot of $subject with steady framing.';
+
+    if (speciesTargets.isNotEmpty) {
+      final shuffledTargets = List<Species>.from(speciesTargets)..shuffle(rng);
+      for (final pick in shuffledTargets.take(2)) {
+        optional.add(
+          _TaskCardData(
+            title: 'Capture 1 ${pick.commonName} photo',
+            detail: 'Target species objective',
+            targetCount: 1,
+            ruleType: _TaskRuleType.specificSpecies,
+            requiredSpeciesId: pick.id,
+          ),
+        );
+      }
     }
-    if (gear == 'Fixed Lens Compact') {
-      return 'Capture one sharp close-up of $subject with clean background separation.';
+
+    final hasVulnerable = speciesTargets.any(
+      (s) => conservationStatusRank(s.conservationStatus) >= 2,
+    );
+    if (hasVulnerable && (difficulty != 'Casual' || rng.nextBool())) {
+      optional.add(
+        _TaskCardData(
+          title: 'Capture 1 vulnerable-or-higher $singular',
+          detail: 'Conservation objective',
+          targetCount: 1,
+          ruleType: _TaskRuleType.conservationRank,
+          minConservationRank: 2,
+        ),
+      );
     }
-    return 'Capture one detail-focused shot of $subject with steady focus.';
+
+    if (speciesTargets.any(
+      (s) => conservationStatusRank(s.conservationStatus) >= 3,
+    )) {
+      optional.add(
+        _TaskCardData(
+          title: 'Capture 1 endangered-or-higher $singular',
+          detail: 'High-priority conservation objective',
+          targetCount: 1,
+          ruleType: _TaskRuleType.conservationRank,
+          minConservationRank: 3,
+        ),
+      );
+    }
+
+    optional.shuffle(rng);
+    for (final candidate in optional) {
+      if (selected.length >= maxTasks) break;
+      if (selected.any((t) => t.title == candidate.title)) continue;
+      selected.add(candidate);
+    }
+
+    // Ensure non-casual missions include at least one time or variety challenge.
+    if (difficulty != 'Casual' &&
+        !selected.any(
+          (t) =>
+              t.ruleType == _TaskRuleType.timeWindow ||
+              t.ruleType == _TaskRuleType.uniqueSpeciesCount,
+        )) {
+      final inject = _TaskCardData(
+        title: 'Capture 1 $singular during $preferredTime',
+        detail: 'Time-based objective',
+        targetCount: 1,
+        ruleType: _TaskRuleType.timeWindow,
+        timeWindow: preferredWindow,
+      );
+      if (selected.length < maxTasks) {
+        selected.add(inject);
+      } else {
+        selected[max(1, selected.length - 1)] = inject;
+      }
+    }
+
+    return selected;
+  }
+
+  int _categoryCountTarget({
+    required String difficulty,
+    required String gear,
+    required Random rng,
+  }) {
+    final base = switch (difficulty) {
+      'Challenging' => 3,
+      'Standard' => 2,
+      _ => 1,
+    };
+    final gearDelta = switch (gear) {
+      'Smartphone' => difficulty == 'Casual' ? 0 : -1,
+      'DSLR / Mirrorless' => 1,
+      _ => 0,
+    };
+    final variation = difficulty == 'Casual' ? 0 : rng.nextInt(2); // 0..1
+    return (base + gearDelta + variation).clamp(1, 4);
+  }
+
+  int _taskProgressCount(_TaskCardData task) {
+    final submissions = _proofSubmissions;
+    switch (task.ruleType) {
+      case _TaskRuleType.categoryCount:
+        return submissions.length.clamp(0, task.targetCount);
+      case _TaskRuleType.uniqueSpeciesCount:
+        return submissions
+            .map((p) => p.species.id)
+            .toSet()
+            .length
+            .clamp(0, task.targetCount);
+      case _TaskRuleType.timeWindow:
+        final window = task.timeWindow;
+        if (window == null) return 0;
+        return submissions
+            .where((p) => window.contains(p.submittedAt))
+            .length
+            .clamp(0, task.targetCount);
+      case _TaskRuleType.specificSpecies:
+        final speciesId = task.requiredSpeciesId;
+        if (speciesId == null) return 0;
+        return submissions
+            .where((p) => p.species.id == speciesId)
+            .length
+            .clamp(0, task.targetCount);
+      case _TaskRuleType.conservationRank:
+        final minRank = task.minConservationRank ?? 2;
+        return submissions
+            .where(
+              (p) =>
+                  conservationStatusRank(p.species.conservationStatus) >=
+                  minRank,
+            )
+            .length
+            .clamp(0, task.targetCount);
+    }
+  }
+
+  String _subjectSingular(String subject) {
+    return switch (subject) {
+      'Birds' => 'bird',
+      'Mammals' => 'mammal',
+      'Reptiles' => 'reptile',
+      'Amphibians' => 'amphibian',
+      _ => 'insect',
+    };
+  }
+
+  _TaskTimeWindow _timeWindowForLabel(String label) {
+    return switch (label) {
+      'Morning' => const _TaskTimeWindow(startHour: 6, endHour: 10),
+      'Afternoon' => const _TaskTimeWindow(startHour: 12, endHour: 17),
+      'Evening' => const _TaskTimeWindow(startHour: 17, endHour: 20),
+      'Night' => const _TaskTimeWindow(startHour: 20, endHour: 24),
+      'Midnight' => const _TaskTimeWindow(startHour: 0, endHour: 5),
+      _ => const _TaskTimeWindow(startHour: 6, endHour: 24),
+    };
   }
 
   List<Species> _recommendedSpeciesForSubject({
@@ -1014,10 +1325,48 @@ class _TaskCardData {
   const _TaskCardData({
     required this.title,
     required this.detail,
-    required this.progressLabel,
+    required this.targetCount,
+    required this.ruleType,
+    this.requiredSpeciesId,
+    this.timeWindow,
+    this.minConservationRank,
   });
 
   final String title;
   final String detail;
-  final String progressLabel;
+  final int targetCount;
+  final _TaskRuleType ruleType;
+  final String? requiredSpeciesId;
+  final _TaskTimeWindow? timeWindow;
+  final int? minConservationRank;
+}
+
+enum _TaskRuleType {
+  categoryCount,
+  uniqueSpeciesCount,
+  timeWindow,
+  specificSpecies,
+  conservationRank,
+}
+
+class _MissionProof {
+  const _MissionProof({required this.species, required this.submittedAt});
+
+  final Species species;
+  final DateTime submittedAt;
+}
+
+class _TaskTimeWindow {
+  const _TaskTimeWindow({required this.startHour, required this.endHour});
+
+  final int startHour;
+  final int endHour;
+
+  bool contains(DateTime time) {
+    final hour = time.hour;
+    if (startHour < endHour) {
+      return hour >= startHour && hour < endHour;
+    }
+    return hour >= startHour || hour < endHour;
+  }
 }
