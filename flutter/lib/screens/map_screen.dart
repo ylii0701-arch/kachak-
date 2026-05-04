@@ -27,6 +27,8 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   static const LatLng _kDefaultCenter = LatLng(3.1390, 101.6869);
+  static const double _kUserFocusZoom = 11.2;
+  static const double _kFallbackFocusZoom = 9.6;
 
   /// All observation data is in Peninsular Malaysia; the map must frame this
   /// region. Auto-panning to the device's GPS (e.g. North America) would move
@@ -58,6 +60,7 @@ class _MapScreenState extends State<MapScreen> {
     apiKey: openWeatherApiKey,
   );
   final Distance _distance = const Distance();
+  bool _didSetInitialViewport = false;
 
   static const double _minZoom = 3;
   static const double _maxZoom = 18;
@@ -68,16 +71,10 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
     _mapOptions = MapOptions(
       initialCenter: _kDefaultCenter,
-      initialZoom: 12,
+      initialZoom: _kFallbackFocusZoom,
       minZoom: _minZoom,
       maxZoom: _maxZoom,
       keepAlive: true,
-      initialCameraFit: CameraFit.bounds(
-        bounds: _wildlifeBounds,
-        padding: const EdgeInsets.fromLTRB(32, 88, 32, 120),
-        maxZoom: 13,
-        minZoom: _minZoom,
-      ),
     );
     _initLocation();
     _loadCityWeather();
@@ -239,6 +236,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _fitWildlifeHotspots() {
+    _didSetInitialViewport = true;
     _mapController.fitCamera(
       CameraFit.bounds(
         bounds: _wildlifeBounds,
@@ -252,7 +250,16 @@ class _MapScreenState extends State<MapScreen> {
   void _goToMyLocation() {
     final u = _user;
     if (u == null) return;
+    _didSetInitialViewport = true;
     _mapController.move(u, 12);
+  }
+
+  void _applyInitialViewport({LatLng? focusPoint}) {
+    if (_didSetInitialViewport) return;
+    _didSetInitialViewport = true;
+    final point = focusPoint ?? _kDefaultCenter;
+    final zoom = focusPoint == null ? _kFallbackFocusZoom : _kUserFocusZoom;
+    _mapController.move(point, zoom);
   }
 
   Future<void> _initLocation() async {
@@ -268,6 +275,9 @@ class _MapScreenState extends State<MapScreen> {
             _locationToast = 'Location permission denied. Using Kuala Lumpur.';
             _loadingLocation = false;
           });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _applyInitialViewport();
+          });
           Future.delayed(const Duration(seconds: 5), () {
             if (mounted) setState(() => _locationToast = null);
           });
@@ -281,6 +291,9 @@ class _MapScreenState extends State<MapScreen> {
           _user = here;
           _loadingLocation = false;
         });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _applyInitialViewport(focusPoint: here);
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -288,6 +301,9 @@ class _MapScreenState extends State<MapScreen> {
           _locationToast =
               'Unable to detect your location. Using Kuala Lumpur.';
           _loadingLocation = false;
+        });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _applyInitialViewport();
         });
         Future.delayed(const Duration(seconds: 5), () {
           if (mounted) setState(() => _locationToast = null);
