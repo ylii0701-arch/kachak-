@@ -69,6 +69,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
+    // Map opens near user (or KL fallback) instead of country-wide zoom-out.
     _mapOptions = MapOptions(
       initialCenter: _kDefaultCenter,
       initialZoom: _kFallbackFocusZoom,
@@ -87,6 +88,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _applyShellMapJump() {
+    // Handles map jump requests from other tabs/screens.
     if (!mounted) return;
     final shell = _shell ?? context.read<AppShellController>();
     if (shell.index != 2) return;
@@ -235,6 +237,7 @@ class _MapScreenState extends State<MapScreen> {
     _mapController.move(cam.center, z);
   }
 
+  /// Fits map to full wildlife hotspot coverage on demand.
   void _fitWildlifeHotspots() {
     _didSetInitialViewport = true;
     _mapController.fitCamera(
@@ -247,6 +250,7 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  /// Centers camera on current user location.
   void _goToMyLocation() {
     final u = _user;
     if (u == null) return;
@@ -254,6 +258,7 @@ class _MapScreenState extends State<MapScreen> {
     _mapController.move(u, 12);
   }
 
+  /// Sets startup viewport once after location bootstrap.
   void _applyInitialViewport({LatLng? focusPoint}) {
     if (_didSetInitialViewport) return;
     _didSetInitialViewport = true;
@@ -262,6 +267,7 @@ class _MapScreenState extends State<MapScreen> {
     _mapController.move(point, zoom);
   }
 
+  /// Gets device location and applies initial camera focus.
   Future<void> _initLocation() async {
     try {
       var perm = await Geolocator.checkPermission();
@@ -312,6 +318,7 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  /// Preloads city weather used by map weather markers.
   Future<void> _loadCityWeather() async {
     setState(() => _loadingCityWeather = true);
 

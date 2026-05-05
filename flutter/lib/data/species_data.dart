@@ -1,5 +1,6 @@
 import '../models/species.dart';
 
+/// Canonical local species catalog used across browse, prediction, and mission flows.
 const List<Species> speciesData = [
   Species(
     id: '1',
@@ -9,13 +10,13 @@ const List<Species> speciesData = [
     conservationStatus: Species.vulnerable,
     habitat: 'Tropical rainforests, lowland areas',
     imageUrl:
-    'https://images.unsplash.com/photo-1575415930355-7289cc848cf1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080&ixlib=rb-4.1.0',
+        'https://images.unsplash.com/photo-1575415930355-7289cc848cf1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080&ixlib=rb-4.1.0',
     description:
-    'The smallest bear species, known for its distinctive chest marking and excellent tree-climbing abilities.',
+        'The smallest bear species, known for its distinctive chest marking and excellent tree-climbing abilities.',
     behaviorNotes:
-    'Diurnal and primarily arboreal. Often forages for honey, insects, and fruits in trees.',
+        'Diurnal and primarily arboreal. Often forages for honey, insects, and fruits in trees.',
     photographyConditions:
-    'Best photographed in early morning or late afternoon in dense forest areas. Requires patience as they are shy.',
+        'Best photographed in early morning or late afternoon in dense forest areas. Requires patience as they are shy.',
     recommendedGear: [
       'Full-frame camera or smartphone',
       'Telephoto lens (200-400mm)',
@@ -35,13 +36,13 @@ const List<Species> speciesData = [
     conservationStatus: Species.criticallyEndangered,
     habitat: 'Primary and secondary rainforests',
     imageUrl:
-    'https://images.unsplash.com/photo-1589446918494-cc44735e6f20?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+        'https://images.unsplash.com/photo-1589446918494-cc44735e6f20?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
     description:
-    'Large arboreal ape with distinctive reddish-brown hair. Highly intelligent and solitary.',
+        'Large arboreal ape with distinctive reddish-brown hair. Highly intelligent and solitary.',
     behaviorNotes:
-    'Spends most time in trees. Builds nests for sleeping. Slow, deliberate movements make them easier to photograph.',
+        'Spends most time in trees. Builds nests for sleeping. Slow, deliberate movements make them easier to photograph.',
     photographyConditions:
-    'Dense canopy requires good lighting. Best during mid-morning when they are most active.',
+        'Dense canopy requires good lighting. Best during mid-morning when they are most active.',
     recommendedGear: [
       'Full-frame camera',
       'Telephoto lens (300-600mm)',
@@ -62,13 +63,13 @@ const List<Species> speciesData = [
     conservationStatus: Species.vulnerable,
     habitat: 'Lowland and montane rainforests',
     imageUrl:
-    'https://images.unsplash.com/photo-1725997415020-5828e023b64e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+        'https://images.unsplash.com/photo-1725997415020-5828e023b64e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
     description:
-    'Large bird with distinctive casque on bill. Known for loud calls and impressive wingspan.',
+        'Large bird with distinctive casque on bill. Known for loud calls and impressive wingspan.',
     behaviorNotes:
-    'Often found in pairs or small groups. Loud wing beats make them easy to locate.',
+        'Often found in pairs or small groups. Loud wing beats make them easy to locate.',
     photographyConditions:
-    'Photograph from forest edges or canopy walkways. Best in early morning light.',
+        'Photograph from forest edges or canopy walkways. Best in early morning light.',
     recommendedGear: [
       'Camera with fast autofocus',
       'Telephoto lens (400-600mm)',
@@ -88,13 +89,13 @@ const List<Species> speciesData = [
     conservationStatus: Species.endangered,
     habitat: 'Mangrove forests and riverine areas',
     imageUrl:
-    'https://images.unsplash.com/photo-1679411784666-711df988aebb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+        'https://images.unsplash.com/photo-1679411784666-711df988aebb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
     description:
-    'Endemic to Borneo. Males have distinctive large noses. Excellent swimmers.',
+        'Endemic to Borneo. Males have distinctive large noses. Excellent swimmers.',
     behaviorNotes:
-    'Live in groups near rivers. Most active in early morning and late afternoon. Often seen jumping between trees.',
+        'Live in groups near rivers. Most active in early morning and late afternoon. Often seen jumping between trees.',
     photographyConditions:
-    'Best photographed from boats on rivers. Early morning provides best lighting and activity.',
+        'Best photographed from boats on rivers. Early morning provides best lighting and activity.',
     recommendedGear: [
       'Weather-sealed camera',
       'Telephoto lens (200-400mm)',
@@ -115,13 +116,13 @@ const List<Species> speciesData = [
     conservationStatus: Species.endangered,
     habitat: 'Lowland rainforests near water sources',
     imageUrl:
-    'https://images.unsplash.com/photo-1771253085305-f90f40feaad6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+        'https://images.unsplash.com/photo-1771253085305-f90f40feaad6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
     description:
-    'Distinctive black and white coloration. Large herbivore with flexible snout.',
+        'Distinctive black and white coloration. Large herbivore with flexible snout.',
     behaviorNotes:
-    'Nocturnal and solitary. Often found near streams and muddy areas for bathing.',
+        'Nocturnal and solitary. Often found near streams and muddy areas for bathing.',
     photographyConditions:
-    'Challenging due to nocturnal habits. Best at dusk near water sources. Requires low-light equipment.',
+        'Challenging due to nocturnal habits. Best at dusk near water sources. Requires low-light equipment.',
     recommendedGear: [
       'Full-frame camera with high ISO',
       'Fast telephoto lens',
@@ -142,13 +143,13 @@ const List<Species> speciesData = [
     conservationStatus: Species.endangered,
     habitat: 'Tropical forests and grasslands',
     imageUrl:
-    'https://images.unsplash.com/photo-1713725589822-2cb49716dc26?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+        'https://images.unsplash.com/photo-1713725589822-2cb49716dc26?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
     description:
-    'Smaller than African elephants with smaller ears. Highly intelligent and social.',
+        'Smaller than African elephants with smaller ears. Highly intelligent and social.',
     behaviorNotes:
-    'Live in matriarchal herds. Active during early morning and late afternoon. Often near water sources.',
+        'Live in matriarchal herds. Active during early morning and late afternoon. Often near water sources.',
     photographyConditions:
-    'Best photographed from safe distance. Early morning at watering holes provides excellent opportunities.',
+        'Best photographed from safe distance. Early morning at watering holes provides excellent opportunities.',
     recommendedGear: [
       'Camera with fast autofocus',
       'Telephoto lens (300-500mm)',
@@ -168,13 +169,13 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Dense lowland forests near streams',
     imageUrl:
-    'https://images.unsplash.com/photo-1762421226157-44c7017b63d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+        'https://images.unsplash.com/photo-1762421226157-44c7017b63d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
     description:
-    'Small, brilliantly colored kingfisher. Vibrant blue, orange, and purple plumage.',
+        'Small, brilliantly colored kingfisher. Vibrant blue, orange, and purple plumage.',
     behaviorNotes:
-    'Sits motionless on low perches waiting for prey. Darts quickly to catch insects.',
+        'Sits motionless on low perches waiting for prey. Darts quickly to catch insects.',
     photographyConditions:
-    'Best near forest streams. Requires patience and good macro/telephoto lens. Soft morning light ideal.',
+        'Best near forest streams. Requires patience and good macro/telephoto lens. Soft morning light ideal.',
     recommendedGear: [
       'Macro lens or telephoto (200-400mm)',
       'Fast shutter speed capability',
@@ -194,13 +195,13 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Rainforests, grasslands, woodlands',
     imageUrl:
-    'https://images.unsplash.com/photo-1727422500803-b79849405145?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+        'https://images.unsplash.com/photo-1727422500803-b79849405145?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
     description:
-    'One of the longest snakes in the world. Complex geometric pattern on scales.',
+        'One of the longest snakes in the world. Complex geometric pattern on scales.',
     behaviorNotes:
-    'Mostly nocturnal. Often found near water. Non-venomous constrictor.',
+        'Mostly nocturnal. Often found near water. Non-venomous constrictor.',
     photographyConditions:
-    'Caution required - maintain safe distance. Best photographed in controlled settings or with guide.',
+        'Caution required - maintain safe distance. Best photographed in controlled settings or with guide.',
     recommendedGear: [
       'Standard zoom lens (24-70mm)',
       'Macro lens for detail shots',
@@ -221,13 +222,13 @@ const List<Species> speciesData = [
     conservationStatus: Species.endangered,
     habitat: 'Coastal waters, coral reefs, seagrass beds',
     imageUrl:
-    'https://images.unsplash.com/photo-1549557143-90d216195a97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+        'https://images.unsplash.com/photo-1549557143-90d216195a97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
     description:
-    'Large marine turtle with distinctive greenish shell. Important for marine ecosystem health.',
+        'Large marine turtle with distinctive greenish shell. Important for marine ecosystem health.',
     behaviorNotes:
-    'Slow moving underwater. Surfaces regularly to breathe. Nests on beaches at night.',
+        'Slow moving underwater. Surfaces regularly to breathe. Nests on beaches at night.',
     photographyConditions:
-    'Best photographed while snorkeling or diving. Requires underwater camera housing. Respectful distance required.',
+        'Best photographed while snorkeling or diving. Requires underwater camera housing. Respectful distance required.',
     recommendedGear: [
       'Underwater camera housing',
       'Wide-angle lens',
@@ -248,13 +249,13 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Tropical and subtropical forests',
     imageUrl:
-    'https://images.unsplash.com/photo-1648916487325-6270176ffd57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmbHlpbmclMjBzcXVpcnJlbCUyMHdpbGRsaWZlfGVufDF8fHx8MTc3NTE0NDczNXww&ixlib=rb-4.1.0&q=80&w=1080',
+        'https://images.unsplash.com/photo-1648916487325-6270176ffd57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmbHlpbmclMjBzcXVpcnJlbCUyMHdpbGRsaWZlfGVufDF8fHx8MTc3NTE0NDczNXww&ixlib=rb-4.1.0&q=80&w=1080',
     description:
-    'Large flying squirrel with reddish-brown fur. Glides between trees using skin membrane.',
+        'Large flying squirrel with reddish-brown fur. Glides between trees using skin membrane.',
     behaviorNotes:
-    'Strictly nocturnal. Glides up to 150 meters between trees. Best spotted with flashlight.',
+        'Strictly nocturnal. Glides up to 150 meters between trees. Best spotted with flashlight.',
     photographyConditions:
-    'Very challenging - nocturnal and fast-moving. Requires night vision or infrared equipment.',
+        'Very challenging - nocturnal and fast-moving. Requires night vision or infrared equipment.',
     recommendedGear: [
       'High ISO camera',
       'Fast telephoto lens',
@@ -275,13 +276,13 @@ const List<Species> speciesData = [
     conservationStatus: Species.criticallyEndangered,
     habitat: 'Primary and secondary forests',
     imageUrl:
-    'https://images.unsplash.com/photo-1634721247018-f014fdc0388f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwYW5nb2xpbiUyMHdpbGRsaWZlJTIwZW5kYW5nZXJlZHxlbnwxfHx8fDE3NzUxNDQ3MzZ8MA&ixlib=rb-4.1.0&q=80&w=1080',
+        'https://images.unsplash.com/photo-1634721247018-f014fdc0388f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwYW5nb2xpbiUyMHdpbGRsaWZlJTIwZW5kYW5nZXJlZHxlbnwxfHx8fDE3NzUxNDQ3MzZ8MA&ixlib=rb-4.1.0&q=80&w=1080',
     description:
-    "Covered in protective keratin scales. Nocturnal insectivore. World's most trafficked mammal.",
+        "Covered in protective keratin scales. Nocturnal insectivore. World's most trafficked mammal.",
     behaviorNotes:
-    'Solitary and nocturnal. Rolls into ball when threatened. Extremely rare to encounter.',
+        'Solitary and nocturnal. Rolls into ball when threatened. Extremely rare to encounter.',
     photographyConditions:
-    'Exceptionally rare sighting. If encountered, photograph from distance without disturbing. Report sighting to authorities.',
+        'Exceptionally rare sighting. If encountered, photograph from distance without disturbing. Report sighting to authorities.',
     recommendedGear: [
       'Low-light camera',
       'Fast lens',
@@ -302,13 +303,13 @@ const List<Species> speciesData = [
     conservationStatus: Species.criticallyEndangered,
     habitat: 'Deep tropical broadleaf forests of Peninsular Malaysia',
     imageUrl:
-    'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+        'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
     description:
-    'The iconic apex predator of Peninsular Malaysia. Known for its striking stripes and highly elusive nature.',
+        'The iconic apex predator of Peninsular Malaysia. Known for its striking stripes and highly elusive nature.',
     behaviorNotes:
-    'Highly territorial and primarily nocturnal. They are excellent swimmers and often use rivers to cool down or travel.',
+        'Highly territorial and primarily nocturnal. They are excellent swimmers and often use rivers to cool down or travel.',
     photographyConditions:
-    'Extremely rare to see on foot. Photography is almost exclusively done via professionally set remote DSLR camera traps.',
+        'Extremely rare to see on foot. Photography is almost exclusively done via professionally set remote DSLR camera traps.',
     recommendedGear: [
       'DSLR/Mirrorless Camera Traps',
       'Infrared motion sensors',
@@ -327,13 +328,13 @@ const List<Species> speciesData = [
     conservationStatus: Species.vulnerable,
     habitat: 'Primary evergreen tropical forests in Peninsular Malaysia',
     imageUrl:
-    'https://images.unsplash.com/photo-1768726649407-4c24eb9102be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjbG91ZGVkJTIwbGVvcGFyZCUyMHdpbGRsaWZlfGVufDF8fHx8MTc3NTE0NDczM3ww&ixlib=rb-4.1.0&q=80&w=1080',
+        'https://images.unsplash.com/photo-1768726649407-4c24eb9102be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjbG91ZGVkJTIwbGVvcGFyZCUyMHdpbGRsaWZlfGVufDF8fHx8MTc3NTE0NDczM3ww&ixlib=rb-4.1.0&q=80&w=1080',
     description:
-    'Found exclusively in Peninsular (West) Malaysia. It features slightly larger "cloud" markings compared to its Bornean cousin.',
+        'Found exclusively in Peninsular (West) Malaysia. It features slightly larger "cloud" markings compared to its Bornean cousin.',
     behaviorNotes:
-    'Highly arboreal and incredibly agile. They can descend trees headfirst and hang upside down from branches.',
+        'Highly arboreal and incredibly agile. They can descend trees headfirst and hang upside down from branches.',
     photographyConditions:
-    'Requires extreme patience. Best photographed at dawn or dusk when they are most active. Often only captured via remote camera traps.',
+        'Requires extreme patience. Best photographed at dawn or dusk when they are most active. Often only captured via remote camera traps.',
     recommendedGear: [
       'Low-light capable telephoto lens (f/2.8 or faster)',
       'Remote camera traps',
@@ -352,13 +353,13 @@ const List<Species> speciesData = [
     conservationStatus: Species.vulnerable,
     habitat: 'Tropical rainforests of Malaysian Borneo',
     imageUrl:
-    'https://images.unsplash.com/photo-1768726649407-4c24eb9102be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjbG91ZGVkJTIwbGVvcGFyZCUyMHdpbGRsaWZlfGVufDF8fHx8MTc3NTE0NDczM3ww&ixlib=rb-4.1.0&q=80&w=1080',
+        'https://images.unsplash.com/photo-1768726649407-4c24eb9102be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjbG91ZGVkJTIwbGVvcGFyZCUyMHdpbGRsaWZlfGVufDF8fHx8MTc3NTE0NDczM3ww&ixlib=rb-4.1.0&q=80&w=1080',
     description:
-    'Found exclusively in Malaysian Borneo. Separated from the mainland species over a million years ago, it features darker fur and tighter spots.',
+        'Found exclusively in Malaysian Borneo. Separated from the mainland species over a million years ago, it features darker fur and tighter spots.',
     behaviorNotes:
-    'A master climber with the longest canine teeth relative to skull size of any living cat.',
+        'A master climber with the longest canine teeth relative to skull size of any living cat.',
     photographyConditions:
-    'Deramakot Forest Reserve in Sabah offers the highest chances of spotting them globally, usually from a 4x4 during guided night safaris.',
+        'Deramakot Forest Reserve in Sabah offers the highest chances of spotting them globally, usually from a 4x4 during guided night safaris.',
     recommendedGear: [
       'Fast telephoto lens (f/2.8)',
       'External spotlight',
@@ -386,13 +387,13 @@ const List<Species> speciesData = [
     conservationStatus: Species.nearThreatened,
     habitat: 'Lowland primary and secondary forests with dense undergrowth',
     imageUrl:
-    'https://upload.wikimedia.org/wikipedia/commons/e/e1/Hydrornis_irena_-_Sri_Phang_Nga.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/e/e1/Hydrornis_irena_-_Sri_Phang_Nga.jpg',
     description:
-    'A "holy grail" bird for local photographers. The male features a stunning combination of deep blue, bright yellow, and fiery orange plumage.',
+        'A "holy grail" bird for local photographers. The male features a stunning combination of deep blue, bright yellow, and fiery orange plumage.',
     behaviorNotes:
-    'Shy, ground-dwelling bird that hops through leaf litter searching for insects and worms.',
+        'Shy, ground-dwelling bird that hops through leaf litter searching for insects and worms.',
     photographyConditions:
-    'Incredibly challenging due to the dark forest floor. Photographers often use camouflage hides and wait for hours.',
+        'Incredibly challenging due to the dark forest floor. Photographers often use camouflage hides and wait for hours.',
     recommendedGear: [
       'Super-telephoto lens (500mm - 600mm)',
       'Sturdy tripod with gimbal head',
@@ -411,13 +412,13 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Damp leaf litter on the forest floor near streams',
     imageUrl:
-    'https://www.nparks.gov.sg/-/media/ffw/migrated/round2/fauna/1236/e63c7d99acf24f6685cf2c8a2d17dacc.jpg',
+        'https://www.nparks.gov.sg/-/media/ffw/migrated/round2/fauna/1236/e63c7d99acf24f6685cf2c8a2d17dacc.jpg',
     description:
-    'A macro photographer’s dream. It possesses incredible camouflage that mimics dead leaves, complete with horn-like projections over its eyes.',
+        'A macro photographer’s dream. It possesses incredible camouflage that mimics dead leaves, complete with horn-like projections over its eyes.',
     behaviorNotes:
-    'An ambush predator that relies entirely on staying completely still until prey walks past.',
+        'An ambush predator that relies entirely on staying completely still until prey walks past.',
     photographyConditions:
-    'They do not move much when spotted, making them excellent, cooperative subjects for focus-stacking and creative macro lighting.',
+        'They do not move much when spotted, making them excellent, cooperative subjects for focus-stacking and creative macro lighting.',
     recommendedGear: [
       'Macro lens (90mm - 105mm)',
       'Off-camera flash with a softbox/diffuser',
@@ -436,13 +437,13 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Rainforests near hot springs or mineral-rich riverbanks',
     imageUrl:
-    'https://www.weather2travel.com/images_blog/rajah-brookes-birdwing.jpg',
+        'https://www.weather2travel.com/images_blog/rajah-brookes-birdwing.jpg',
     description:
-    'The national butterfly of Malaysia. It is massive and striking, featuring jet-black wings with electric green feather-like markings.',
+        'The national butterfly of Malaysia. It is massive and striking, featuring jet-black wings with electric green feather-like markings.',
     behaviorNotes:
-    'Males are famous for "mud-puddling"—gathering in large numbers on wet ground or hot springs to drink minerals.',
+        'Males are famous for "mud-puddling"—gathering in large numbers on wet ground or hot springs to drink minerals.',
     photographyConditions:
-    'Best photographed when puddling. If you approach slowly, they will ignore you while they drink, allowing for spectacular group shots.',
+        'Best photographed when puddling. If you approach slowly, they will ignore you while they drink, allowing for spectacular group shots.',
     recommendedGear: [
       'Tele-macro lens or 300mm telephoto',
       'Circular polarizer (to remove glare)',
@@ -459,10 +460,14 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.vulnerable,
     habitat: 'Canopy of tall primary and secondary forests',
-    imageUrl: 'https://i.natgeofe.com/k/7f3afbf5-27e2-42f6-a724-b0030c9ae7ec/binturong-update_3x2.jpg',
-    description: 'A large, clumsy-looking civet with a prehensile tail. Famous for smelling exactly like hot buttered popcorn.',
-    behaviorNotes: 'Slow-moving and arboreal. Often rests draped over high branches.',
-    photographyConditions: 'Look high up in fruiting fig trees at night. Spotlights are required.',
+    imageUrl:
+        'https://i.natgeofe.com/k/7f3afbf5-27e2-42f6-a724-b0030c9ae7ec/binturong-update_3x2.jpg',
+    description:
+        'A large, clumsy-looking civet with a prehensile tail. Famous for smelling exactly like hot buttered popcorn.',
+    behaviorNotes:
+        'Slow-moving and arboreal. Often rests draped over high branches.',
+    photographyConditions:
+        'Look high up in fruiting fig trees at night. Spotlights are required.',
     recommendedGear: ['Telephoto lens (400mm+)', 'Strong flashlight', 'Tripod'],
     activityPattern: 'Night-active',
     bestSeasons: ['Year-round'],
@@ -475,10 +480,14 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.leastConcern,
     habitat: 'Rainforests, plantations, and sometimes urban parks',
-    imageUrl: 'https://cdn.britannica.com/72/227472-050-B054D646/Malayan-colugo-Galeopterus-variegatus.jpg',
-    description: 'Also known as the flying lemur, though it neither flies nor is a lemur. It glides between trees using a massive skin flap.',
-    behaviorNotes: 'Clings to tree trunks during the day, looking exactly like tree bark due to its mottled fur.',
-    photographyConditions: 'Best shot at dusk right before they leap, or resting on trunks during the day.',
+    imageUrl:
+        'https://cdn.britannica.com/72/227472-050-B054D646/Malayan-colugo-Galeopterus-variegatus.jpg',
+    description:
+        'Also known as the flying lemur, though it neither flies nor is a lemur. It glides between trees using a massive skin flap.',
+    behaviorNotes:
+        'Clings to tree trunks during the day, looking exactly like tree bark due to its mottled fur.',
+    photographyConditions:
+        'Best shot at dusk right before they leap, or resting on trunks during the day.',
     recommendedGear: ['Telephoto lens (300mm)', 'Binoculars for spotting'],
     activityPattern: 'Night-active',
     bestSeasons: ['Year-round'],
@@ -491,10 +500,14 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.endangered,
     habitat: 'Montane and lowland dipterocarp forests',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Symphalangus_syndactylus%2C_Chiba_Zoo%2C_Japan.jpg',
-    description: 'The largest species of gibbon. Known for their throat sacs which inflate to produce incredibly loud, echoing calls.',
-    behaviorNotes: 'Highly acrobatic. They swing through the canopy using their long arms (brachiation).',
-    photographyConditions: 'Follow their loud morning calls to find them. Fast shutter speeds are essential to capture swinging.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/d/de/Symphalangus_syndactylus%2C_Chiba_Zoo%2C_Japan.jpg',
+    description:
+        'The largest species of gibbon. Known for their throat sacs which inflate to produce incredibly loud, echoing calls.',
+    behaviorNotes:
+        'Highly acrobatic. They swing through the canopy using their long arms (brachiation).',
+    photographyConditions:
+        'Follow their loud morning calls to find them. Fast shutter speeds are essential to capture swinging.',
     recommendedGear: ['Fast telephoto lens', 'Monopod', 'Rain cover'],
     activityPattern: 'Day-active',
     bestSeasons: ['April', 'May', 'June', 'July'],
@@ -507,11 +520,18 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.endangered,
     habitat: 'Primary and secondary tropical forests',
-    imageUrl: 'https://d1jyxxz9imt9yb.cloudfront.net/medialib/4673/image/s768x1300/AdobeStock_457246710_543260_reduced.jpg',
-    description: 'A small, slow-moving primate with enormous eyes. It is one of the few venomous mammals in the world.',
-    behaviorNotes: 'Moves deliberately and silently through the understory. Freezes when spotted by light.',
-    photographyConditions: 'Use red light or diffused flash to avoid damaging their sensitive eyes.',
-    recommendedGear: ['Macro or mid-range telephoto lens', 'Diffused off-camera flash'],
+    imageUrl:
+        'https://d1jyxxz9imt9yb.cloudfront.net/medialib/4673/image/s768x1300/AdobeStock_457246710_543260_reduced.jpg',
+    description:
+        'A small, slow-moving primate with enormous eyes. It is one of the few venomous mammals in the world.',
+    behaviorNotes:
+        'Moves deliberately and silently through the understory. Freezes when spotted by light.',
+    photographyConditions:
+        'Use red light or diffused flash to avoid damaging their sensitive eyes.',
+    recommendedGear: [
+      'Macro or mid-range telephoto lens',
+      'Diffused off-camera flash',
+    ],
     activityPattern: 'Night-active',
     bestSeasons: ['Dry season'],
     difficultyLevel: 4,
@@ -523,10 +543,14 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.leastConcern,
     habitat: 'Forest floors, agricultural areas, and rocky crevices',
-    imageUrl: 'https://langkawiwildlifepark.com.my/wp-content/uploads/2024/02/Malayan-Porcupine.jpg',
-    description: 'A large, stout rodent covered in sharp black and white quills used for defense.',
-    behaviorNotes: 'Forages on the ground for roots, tubers, and fallen fruits. Rattles quills when threatened.',
-    photographyConditions: 'Often caught on camera traps, but occasionally seen crossing forest trails at night.',
+    imageUrl:
+        'https://langkawiwildlifepark.com.my/wp-content/uploads/2024/02/Malayan-Porcupine.jpg',
+    description:
+        'A large, stout rodent covered in sharp black and white quills used for defense.',
+    behaviorNotes:
+        'Forages on the ground for roots, tubers, and fallen fruits. Rattles quills when threatened.',
+    photographyConditions:
+        'Often caught on camera traps, but occasionally seen crossing forest trails at night.',
     recommendedGear: ['Wide-angle to mid-zoom lens', 'Flashlight'],
     activityPattern: 'Night-active',
     bestSeasons: ['Year-round'],
@@ -539,10 +563,14 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.endangered,
     habitat: 'Lowland forests and river valleys in Sabah',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/2a/%D0%A1%D0%BB%D0%BE%D0%BD-%D0%BC%D0%B0%D1%8F%D0%BA.jpg',
-    description: 'The smallest elephant subspecies. Known for their oversized ears, long tails, and gentle demeanor.',
-    behaviorNotes: 'Highly social, traveling in herds along the Kinabatangan riverbanks.',
-    photographyConditions: 'Best photographed from a boat safari along the Kinabatangan River in the late afternoon.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/2/2a/%D0%A1%D0%BB%D0%BE%D0%BD-%D0%BC%D0%B0%D1%8F%D0%BA.jpg',
+    description:
+        'The smallest elephant subspecies. Known for their oversized ears, long tails, and gentle demeanor.',
+    behaviorNotes:
+        'Highly social, traveling in herds along the Kinabatangan riverbanks.',
+    photographyConditions:
+        'Best photographed from a boat safari along the Kinabatangan River in the late afternoon.',
     recommendedGear: ['Telephoto lens (200-400mm)', 'Dry bag for boat trips'],
     activityPattern: 'Day & Night-active',
     bestSeasons: ['May', 'June', 'July', 'August', 'September'],
@@ -555,10 +583,14 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.vulnerable,
     habitat: 'Deep primary rainforest floor',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4f/Argusianus_argus%2C_Khao_Sok%2C_Thailand_1.jpg',
-    description: 'A spectacular pheasant. Males have incredibly long tail feathers decorated with eye-spots used in intricate mating dances.',
-    behaviorNotes: 'Males clear a "dancing ring" on the forest floor and call loudly to attract females.',
-    photographyConditions: 'Find a cleared dancing ground and use a camouflage hide. Requires extreme patience.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/4/4f/Argusianus_argus%2C_Khao_Sok%2C_Thailand_1.jpg',
+    description:
+        'A spectacular pheasant. Males have incredibly long tail feathers decorated with eye-spots used in intricate mating dances.',
+    behaviorNotes:
+        'Males clear a "dancing ring" on the forest floor and call loudly to attract females.',
+    photographyConditions:
+        'Find a cleared dancing ground and use a camouflage hide. Requires extreme patience.',
     recommendedGear: ['Camouflage hide', 'Telephoto lens (400mm+)', 'Tripod'],
     activityPattern: 'Day-active',
     bestSeasons: ['March', 'April', 'May', 'June'],
@@ -571,11 +603,18 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.vulnerable,
     habitat: 'Extensive tracts of primary evergreen forest',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/dd/Wreathed_hornbill_%28Rhyticeros_undulatus%29_male_Angkor.jpg',
-    description: 'A massive hornbill with a distinctive yellow gular pouch (in males) and a wreathed casque on its beak.',
-    behaviorNotes: 'Flies great distances over the canopy in search of fruiting trees. Wingbeats sound like a steam engine.',
-    photographyConditions: 'Wait near known fruiting fig trees or canopy walkways. Good lighting is needed for flying shots.',
-    recommendedGear: ['Super-telephoto lens (600mm)', 'Fast continuous shooting camera'],
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/d/dd/Wreathed_hornbill_%28Rhyticeros_undulatus%29_male_Angkor.jpg',
+    description:
+        'A massive hornbill with a distinctive yellow gular pouch (in males) and a wreathed casque on its beak.',
+    behaviorNotes:
+        'Flies great distances over the canopy in search of fruiting trees. Wingbeats sound like a steam engine.',
+    photographyConditions:
+        'Wait near known fruiting fig trees or canopy walkways. Good lighting is needed for flying shots.',
+    recommendedGear: [
+      'Super-telephoto lens (600mm)',
+      'Fast continuous shooting camera',
+    ],
     activityPattern: 'Day-active',
     bestSeasons: ['July', 'August', 'September', 'October'],
     difficultyLevel: 3,
@@ -587,10 +626,14 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.leastConcern,
     habitat: 'Coasts, estuaries, and inland wetlands',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/0d/Haliastur_indus_136698204.jpg',
-    description: 'A highly recognizable medium-sized bird of prey with a striking contrasting chestnut body and white head/breast.',
-    behaviorNotes: 'Often seen soaring in thermals over harbors and beaches hunting for fish and carrion.',
-    photographyConditions: 'Excellent subject for practicing birds-in-flight photography due to their predictable soaring.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/0/0d/Haliastur_indus_136698204.jpg',
+    description:
+        'A highly recognizable medium-sized bird of prey with a striking contrasting chestnut body and white head/breast.',
+    behaviorNotes:
+        'Often seen soaring in thermals over harbors and beaches hunting for fish and carrion.',
+    photographyConditions:
+        'Excellent subject for practicing birds-in-flight photography due to their predictable soaring.',
     recommendedGear: ['Telephoto lens (300-400mm)', 'Circular polarizer'],
     activityPattern: 'Day-active',
     bestSeasons: ['Year-round'],
@@ -603,10 +646,14 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.nearThreatened,
     habitat: 'Lowland swamp and dipterocarp forests',
-    imageUrl: 'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/221922181/900',
-    description: 'A stunning, jewel-like ground bird with a bright red belly, blue wing patches, and a black face.',
-    behaviorNotes: 'Hops along the dark forest floor turning over leaves for insects. Emits a distinct, long whistle.',
-    photographyConditions: 'Extremely dark environment. Requires a steady tripod and a cooperative bird.',
+    imageUrl:
+        'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/221922181/900',
+    description:
+        'A stunning, jewel-like ground bird with a bright red belly, blue wing patches, and a black face.',
+    behaviorNotes:
+        'Hops along the dark forest floor turning over leaves for insects. Emits a distinct, long whistle.',
+    photographyConditions:
+        'Extremely dark environment. Requires a steady tripod and a cooperative bird.',
     recommendedGear: ['Telephoto lens (400mm+)', 'Tripod', 'Patience'],
     activityPattern: 'Day-active',
     bestSeasons: ['May', 'June', 'July'],
@@ -619,10 +666,14 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.leastConcern,
     habitat: 'Canopy of moist broadleaf forests',
-    imageUrl: 'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/609646272/900',
-    description: 'Males are an unmistakable, dazzling combination of shining ultramarine blue and deep velvet black.',
-    behaviorNotes: 'Travels in small flocks through the canopy. Very vocal with liquid, rippling calls.',
-    photographyConditions: 'Often stays high in the canopy. Look for fruiting trees where they gather to feed.',
+    imageUrl:
+        'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/609646272/900',
+    description:
+        'Males are an unmistakable, dazzling combination of shining ultramarine blue and deep velvet black.',
+    behaviorNotes:
+        'Travels in small flocks through the canopy. Very vocal with liquid, rippling calls.',
+    photographyConditions:
+        'Often stays high in the canopy. Look for fruiting trees where they gather to feed.',
     recommendedGear: ['Telephoto lens (400-600mm)', 'Binoculars'],
     activityPattern: 'Day-active',
     bestSeasons: ['February', 'March', 'April'],
@@ -635,10 +686,14 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.leastConcern,
     habitat: 'Canopy of hill and montane forests',
-    imageUrl: 'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/147677091/900',
-    description: 'A slender, long-tailed bird. Males are brilliant red and black, while females are vibrant yellow and grey.',
-    behaviorNotes: 'Flits restlessly among outer canopy leaves in noisy flocks, catching insects on the wing.',
-    photographyConditions: 'Fast and high up. Good tracking autofocus and fast shutter speeds are necessary.',
+    imageUrl:
+        'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/147677091/900',
+    description:
+        'A slender, long-tailed bird. Males are brilliant red and black, while females are vibrant yellow and grey.',
+    behaviorNotes:
+        'Flits restlessly among outer canopy leaves in noisy flocks, catching insects on the wing.',
+    photographyConditions:
+        'Fast and high up. Good tracking autofocus and fast shutter speeds are necessary.',
     recommendedGear: ['Fast telephoto lens (400mm+)', 'High shutter speed'],
     activityPattern: 'Day-active',
     bestSeasons: ['Year-round'],
@@ -651,10 +706,14 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.leastConcern,
     habitat: 'Lowland forest edges, often near water or mangroves',
-    imageUrl: 'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/386854981/1200',
-    description: 'A striking, chunky bird with deep maroon underparts, a black back, and a massive, bright turquoise bill.',
-    behaviorNotes: 'Builds large, messy, pear-shaped nests hanging over water. Sits relatively still while observing for insects.',
-    photographyConditions: 'Fairly approachable compared to other birds. Best photographed from a boat along river edges.',
+    imageUrl:
+        'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/386854981/1200',
+    description:
+        'A striking, chunky bird with deep maroon underparts, a black back, and a massive, bright turquoise bill.',
+    behaviorNotes:
+        'Builds large, messy, pear-shaped nests hanging over water. Sits relatively still while observing for insects.',
+    photographyConditions:
+        'Fairly approachable compared to other birds. Best photographed from a boat along river edges.',
     recommendedGear: ['Mid-range telephoto (300-400mm)'],
     activityPattern: 'Day-active',
     bestSeasons: ['March', 'April', 'May'],
@@ -667,10 +726,14 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.nearThreatened,
     habitat: 'Lower canopy of primary lowland and hill forests',
-    imageUrl: 'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/221912741/900',
-    description: 'A plump, cartoonish bird completely covered in emerald green feathers that perfectly camouflage it in the foliage.',
-    behaviorNotes: 'Sits completely motionless for long periods. Very difficult to spot despite its bright color.',
-    photographyConditions: 'Requires a guide with sharp eyes. Once spotted, they stay still, allowing for low shutter speeds.',
+    imageUrl:
+        'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/221912741/900',
+    description:
+        'A plump, cartoonish bird completely covered in emerald green feathers that perfectly camouflage it in the foliage.',
+    behaviorNotes:
+        'Sits completely motionless for long periods. Very difficult to spot despite its bright color.',
+    photographyConditions:
+        'Requires a guide with sharp eyes. Once spotted, they stay still, allowing for low shutter speeds.',
     recommendedGear: ['Telephoto lens (400mm+)', 'Tripod'],
     activityPattern: 'Day-active',
     bestSeasons: ['Year-round'],
@@ -683,11 +746,18 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.leastConcern,
     habitat: 'Dense, shaded streams in lowland forests',
-    imageUrl: 'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/146286731/900',
-    description: 'A tiny, brilliantly colored kingfisher with deep sapphire blue upperparts and rich rufous underparts.',
-    behaviorNotes: 'Darts low over shaded forest streams. Perches on low branches hanging directly over the water.',
-    photographyConditions: 'Requires setting up near a known fishing perch. Flash is often needed due to the dark forest canopy.',
-    recommendedGear: ['Telephoto lens (400-600mm)', 'Flash with better beamer/diffuser'],
+    imageUrl:
+        'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/146286731/900',
+    description:
+        'A tiny, brilliantly colored kingfisher with deep sapphire blue upperparts and rich rufous underparts.',
+    behaviorNotes:
+        'Darts low over shaded forest streams. Perches on low branches hanging directly over the water.',
+    photographyConditions:
+        'Requires setting up near a known fishing perch. Flash is often needed due to the dark forest canopy.',
+    recommendedGear: [
+      'Telephoto lens (400-600mm)',
+      'Flash with better beamer/diffuser',
+    ],
     activityPattern: 'Day-active',
     bestSeasons: ['Dry season'],
     difficultyLevel: 4,
@@ -699,10 +769,14 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.nearThreatened,
     habitat: 'Mid-story of primary lowland evergreen forests',
-    imageUrl: 'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/220446661/900',
-    description: 'A stunningly beautiful bird. Males have a black head, bright red breast, and a distinctive red patch on the nape.',
-    behaviorNotes: 'Sits very quietly and upright on branches in the shaded mid-story, sallying out to catch insects.',
-    photographyConditions: 'Cooperative once found, as they perch motionless for long periods. Very sensitive to disturbance.',
+    imageUrl:
+        'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/220446661/900',
+    description:
+        'A stunningly beautiful bird. Males have a black head, bright red breast, and a distinctive red patch on the nape.',
+    behaviorNotes:
+        'Sits very quietly and upright on branches in the shaded mid-story, sallying out to catch insects.',
+    photographyConditions:
+        'Cooperative once found, as they perch motionless for long periods. Very sensitive to disturbance.',
     recommendedGear: ['Telephoto lens (400mm+)', 'Monopod'],
     activityPattern: 'Day-active',
     bestSeasons: ['March', 'April', 'May'],
@@ -715,11 +789,19 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.nearThreatened,
     habitat: 'Peat swamp and lowland dipterocarp forests of Borneo',
-    imageUrl: 'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/237713611/900',
-    description: 'A bizarre, highly sought-after endemic bird. Dark grey body with a bright red and yellow bare-skinned head.',
-    behaviorNotes: 'Travels in noisy, slow-moving flocks through the canopy. Very unpredictable in their movements.',
-    photographyConditions: 'A true prize for birders. Rainforest Discovery Centre (RDC) in Sabah is the best place to attempt spotting them.',
-    recommendedGear: ['Telephoto lens (400-600mm)', 'Mosquito spray', 'Good walking shoes'],
+    imageUrl:
+        'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/237713611/900',
+    description:
+        'A bizarre, highly sought-after endemic bird. Dark grey body with a bright red and yellow bare-skinned head.',
+    behaviorNotes:
+        'Travels in noisy, slow-moving flocks through the canopy. Very unpredictable in their movements.',
+    photographyConditions:
+        'A true prize for birders. Rainforest Discovery Centre (RDC) in Sabah is the best place to attempt spotting them.',
+    recommendedGear: [
+      'Telephoto lens (400-600mm)',
+      'Mosquito spray',
+      'Good walking shoes',
+    ],
     activityPattern: 'Day-active',
     bestSeasons: ['August', 'September', 'October'],
     difficultyLevel: 5,
@@ -731,10 +813,14 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.vulnerable,
     habitat: 'Lowland primary forests, often near rivers',
-    imageUrl: 'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/219463011/900',
-    description: 'A spectacular pheasant with a metallic blue body, a coppery-red lower back, and striking blue facial skin.',
-    behaviorNotes: 'Forages on the forest floor in small groups. Surprisingly approachable in protected reserves.',
-    photographyConditions: 'Best photographed early morning when they come out to forest trails to forage.',
+    imageUrl:
+        'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/219463011/900',
+    description:
+        'A spectacular pheasant with a metallic blue body, a coppery-red lower back, and striking blue facial skin.',
+    behaviorNotes:
+        'Forages on the forest floor in small groups. Surprisingly approachable in protected reserves.',
+    photographyConditions:
+        'Best photographed early morning when they come out to forest trails to forage.',
     recommendedGear: ['Mid-range telephoto (200-400mm)', 'Low shooting angle'],
     activityPattern: 'Day-active',
     bestSeasons: ['Year-round'],
@@ -747,11 +833,19 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.criticallyEndangered,
     habitat: 'Pristine lowland and foothill primary forests',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/bb/Helmeted_Hornbill.jpg',
-    description: 'A massive, prehistoric-looking bird with a solid keratin casque. Famous for its echoing, maniacal laughing call.',
-    behaviorNotes: 'Highly elusive. Males engage in dramatic aerial jousting, clashing their solid casques together in mid-air.',
-    photographyConditions: 'Extremely difficult to photograph due to hunting pressures making them shy. Look for them in deep, protected primary jungles.',
-    recommendedGear: ['Super-telephoto lens (600mm+)', 'Tripod', 'Local expert guide'],
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/b/bb/Helmeted_Hornbill.jpg',
+    description:
+        'A massive, prehistoric-looking bird with a solid keratin casque. Famous for its echoing, maniacal laughing call.',
+    behaviorNotes:
+        'Highly elusive. Males engage in dramatic aerial jousting, clashing their solid casques together in mid-air.',
+    photographyConditions:
+        'Extremely difficult to photograph due to hunting pressures making them shy. Look for them in deep, protected primary jungles.',
+    recommendedGear: [
+      'Super-telephoto lens (600mm+)',
+      'Tripod',
+      'Local expert guide',
+    ],
     activityPattern: 'Day-active',
     bestSeasons: ['Dry season'],
     difficultyLevel: 5,
@@ -763,11 +857,18 @@ const List<Species> speciesData = [
     category: Species.reptiles,
     conservationStatus: Species.vulnerable,
     habitat: 'Forests, bamboo thickets, and agricultural areas',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4d/12_-_The_Mystical_King_Cobra_and_Coffee_Forests.jpg',
-    description: 'The longest venomous snake in the world. Highly intelligent and feeds almost exclusively on other snakes.',
-    behaviorNotes: 'Diurnal and terrestrial. Will rear up and flatten its iconic hood when threatened.',
-    photographyConditions: 'Requires extreme caution and a professional guide. Maintain a distance of at least 15 feet at all times.',
-    recommendedGear: ['Telephoto lens (400mm+)', 'Professional guide (Mandatory)'],
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/4/4d/12_-_The_Mystical_King_Cobra_and_Coffee_Forests.jpg',
+    description:
+        'The longest venomous snake in the world. Highly intelligent and feeds almost exclusively on other snakes.',
+    behaviorNotes:
+        'Diurnal and terrestrial. Will rear up and flatten its iconic hood when threatened.',
+    photographyConditions:
+        'Requires extreme caution and a professional guide. Maintain a distance of at least 15 feet at all times.',
+    recommendedGear: [
+      'Telephoto lens (400mm+)',
+      'Professional guide (Mandatory)',
+    ],
     activityPattern: 'Day-active',
     bestSeasons: ['February', 'March', 'April'],
     difficultyLevel: 5,
@@ -779,10 +880,14 @@ const List<Species> speciesData = [
     category: Species.reptiles,
     conservationStatus: Species.leastConcern,
     habitat: 'Mangroves, wetlands, and urban rivers',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/39/Varanus_salvator_-_01.jpg',
-    description: 'One of the largest lizards in the world, capable of growing over 2 meters long. Excellent swimmers.',
-    behaviorNotes: 'Often seen basking on riverbanks or swimming with a snake-like motion. Very adaptable to human environments.',
-    photographyConditions: 'Very easy to photograph in urban parks and mangrove boardwalks. Approach slowly to avoid spooking them.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/3/39/Varanus_salvator_-_01.jpg',
+    description:
+        'One of the largest lizards in the world, capable of growing over 2 meters long. Excellent swimmers.',
+    behaviorNotes:
+        'Often seen basking on riverbanks or swimming with a snake-like motion. Very adaptable to human environments.',
+    photographyConditions:
+        'Very easy to photograph in urban parks and mangrove boardwalks. Approach slowly to avoid spooking them.',
     recommendedGear: ['Standard zoom lens (70-200mm)'],
     activityPattern: 'Day-active',
     bestSeasons: ['Year-round'],
@@ -795,10 +900,14 @@ const List<Species> speciesData = [
     category: Species.reptiles,
     conservationStatus: Species.leastConcern,
     habitat: 'Estuaries, mangrove swamps, and large rivers',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/SaltwaterCrocodile%28%27Maximo%27%29.jpg/1280px-SaltwaterCrocodile%28%27Maximo%27%29.jpg',
-    description: 'The largest living reptile. An apex predator with the strongest bite force of any animal.',
-    behaviorNotes: 'Ambush predator that lurks just beneath the water surface. Frequently seen basking on mudbanks in Borneo.',
-    photographyConditions: 'Photograph exclusively from a safe, sturdy boat. Kinabatangan River is an excellent location.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/SaltwaterCrocodile%28%27Maximo%27%29.jpg/1280px-SaltwaterCrocodile%28%27Maximo%27%29.jpg',
+    description:
+        'The largest living reptile. An apex predator with the strongest bite force of any animal.',
+    behaviorNotes:
+        'Ambush predator that lurks just beneath the water surface. Frequently seen basking on mudbanks in Borneo.',
+    photographyConditions:
+        'Photograph exclusively from a safe, sturdy boat. Kinabatangan River is an excellent location.',
     recommendedGear: ['Telephoto lens (300-500mm)', 'Fast shutter speed'],
     activityPattern: 'Day & Night-active',
     bestSeasons: ['Dry season'],
@@ -811,10 +920,14 @@ const List<Species> speciesData = [
     category: Species.reptiles,
     conservationStatus: Species.leastConcern,
     habitat: 'Lowland forest canopy and mangroves',
-    imageUrl: 'https://madeinthewild.tv/wp-content/uploads/2023/03/waglers-pit-viper-g312c17700_1920-2880x1200-c-default.jpg',
-    description: 'Also known as the Temple Viper. Females are strikingly beautiful with black, yellow, and green banding.',
-    behaviorNotes: 'Extremely sedentary. Will stay coiled in the exact same branch for days or even weeks waiting for prey.',
-    photographyConditions: 'Great for macro photography as they do not easily spook, but respect their strike range (venomous).',
+    imageUrl:
+        'https://madeinthewild.tv/wp-content/uploads/2023/03/waglers-pit-viper-g312c17700_1920-2880x1200-c-default.jpg',
+    description:
+        'Also known as the Temple Viper. Females are strikingly beautiful with black, yellow, and green banding.',
+    behaviorNotes:
+        'Extremely sedentary. Will stay coiled in the exact same branch for days or even weeks waiting for prey.',
+    photographyConditions:
+        'Great for macro photography as they do not easily spook, but respect their strike range (venomous).',
     recommendedGear: ['Macro lens (100mm)', 'Ring flash or diffused lighting'],
     activityPattern: 'Night-active',
     bestSeasons: ['Year-round'],
@@ -827,11 +940,20 @@ const List<Species> speciesData = [
     category: Species.amphibians,
     conservationStatus: Species.leastConcern,
     habitat: 'Canopy of primary rainforests',
-    imageUrl: 'https://critter.science/wp-content/uploads/2021/07/wff1a-scaled.jpg',
-    description: 'A large, bright green tree frog with oversized, black-webbed feet that act as parachutes for gliding.',
-    behaviorNotes: 'Lives high in the canopy and only descends to muddy pools to breed and lay foam nests.',
-    photographyConditions: 'Look for them around forest pools at night after heavy rain. Use macro lenses and external flashes.',
-    recommendedGear: ['Macro lens', 'Off-camera flash', 'Headlamp', 'Rain gear'],
+    imageUrl:
+        'https://critter.science/wp-content/uploads/2021/07/wff1a-scaled.jpg',
+    description:
+        'A large, bright green tree frog with oversized, black-webbed feet that act as parachutes for gliding.',
+    behaviorNotes:
+        'Lives high in the canopy and only descends to muddy pools to breed and lay foam nests.',
+    photographyConditions:
+        'Look for them around forest pools at night after heavy rain. Use macro lenses and external flashes.',
+    recommendedGear: [
+      'Macro lens',
+      'Off-camera flash',
+      'Headlamp',
+      'Rain gear',
+    ],
     activityPattern: 'Night-active',
     bestSeasons: ['Monsoon season'],
     difficultyLevel: 4,
@@ -843,10 +965,14 @@ const List<Species> speciesData = [
     category: Species.amphibians,
     conservationStatus: Species.leastConcern,
     habitat: 'Secondary forests and forest edges in Borneo',
-    imageUrl: 'https://www.ecologyasia.com/images-ef/file-eared-tree-frog_0727.jpg',
-    description: 'A large, yellowish-brown frog with a distinctive sharp, bony ridge behind its eyes that resembles a file.',
-    behaviorNotes: 'Often found resting on broad leaves or branches in low vegetation near water.',
-    photographyConditions: 'Very cooperative macro subject. Easy to find at night by following their loud "tack-tack" calls.',
+    imageUrl:
+        'https://www.ecologyasia.com/images-ef/file-eared-tree-frog_0727.jpg',
+    description:
+        'A large, yellowish-brown frog with a distinctive sharp, bony ridge behind its eyes that resembles a file.',
+    behaviorNotes:
+        'Often found resting on broad leaves or branches in low vegetation near water.',
+    photographyConditions:
+        'Very cooperative macro subject. Easy to find at night by following their loud "tack-tack" calls.',
     recommendedGear: ['Macro lens', 'Flash diffuser'],
     activityPattern: 'Night-active',
     bestSeasons: ['Year-round'],
@@ -859,10 +985,14 @@ const List<Species> speciesData = [
     category: Species.amphibians,
     conservationStatus: Species.nearThreatened,
     habitat: 'Rocky streams in primary and secondary forests',
-    imageUrl: 'https://www.ecologyasia.com/images-mn/malayan-giant-frog_0007.jpg',
-    description: 'One of the largest frogs in Asia. It has powerful legs and a heavy, muscular build.',
-    behaviorNotes: 'Sits quietly on rocks or in shallow water waiting to ambush insects, crabs, or smaller frogs.',
-    photographyConditions: 'Wade into shallow forest streams at night. They are easily spotted by their eye-shine in a flashlight beam.',
+    imageUrl:
+        'https://www.ecologyasia.com/images-mn/malayan-giant-frog_0007.jpg',
+    description:
+        'One of the largest frogs in Asia. It has powerful legs and a heavy, muscular build.',
+    behaviorNotes:
+        'Sits quietly on rocks or in shallow water waiting to ambush insects, crabs, or smaller frogs.',
+    photographyConditions:
+        'Wade into shallow forest streams at night. They are easily spotted by their eye-shine in a flashlight beam.',
     recommendedGear: ['Wide-macro lens', 'Waterproof boots', 'Headlamp'],
     activityPattern: 'Night-active',
     bestSeasons: ['Dry season'],
@@ -875,10 +1005,14 @@ const List<Species> speciesData = [
     category: Species.amphibians,
     conservationStatus: Species.leastConcern,
     habitat: 'Highly adaptable; forests, gardens, and urban areas',
-    imageUrl: 'https://www.ecologyasia.com/images-ef/four-lined-tree-frog_0001a.jpg',
-    description: 'A common, slender frog with four distinct dark stripes running down its back.',
-    behaviorNotes: 'Often found clinging to walls, windows, and potted plants in suburban areas near water sources.',
-    photographyConditions: 'An excellent beginner subject for macro photography as they are abundant and easy to locate.',
+    imageUrl:
+        'https://www.ecologyasia.com/images-ef/four-lined-tree-frog_0001a.jpg',
+    description:
+        'A common, slender frog with four distinct dark stripes running down its back.',
+    behaviorNotes:
+        'Often found clinging to walls, windows, and potted plants in suburban areas near water sources.',
+    photographyConditions:
+        'An excellent beginner subject for macro photography as they are abundant and easy to locate.',
     recommendedGear: ['Macro lens (90mm-100mm)', 'On-camera flash'],
     activityPattern: 'Night-active',
     bestSeasons: ['Year-round'],
@@ -892,9 +1026,12 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Forest edges, clearings, and urban gardens',
     imageUrl: 'https://live.staticflickr.com/7457/9629096240_4646044bff_b.jpg',
-    description: 'Also known as the Asian Common Toad. Features thick, warty skin and black crests around its eyes and snout.',
-    behaviorNotes: 'Slow-moving and terrestrial. Gathers in large numbers around streetlights to hunt insects.',
-    photographyConditions: 'Very easy to find and photograph. Practice getting low to the ground for eye-level perspectives.',
+    description:
+        'Also known as the Asian Common Toad. Features thick, warty skin and black crests around its eyes and snout.',
+    behaviorNotes:
+        'Slow-moving and terrestrial. Gathers in large numbers around streetlights to hunt insects.',
+    photographyConditions:
+        'Very easy to find and photograph. Practice getting low to the ground for eye-level perspectives.',
     recommendedGear: ['Standard or macro lens', 'Knee pads'],
     activityPattern: 'Night-active',
     bestSeasons: ['Year-round'],
@@ -907,11 +1044,19 @@ const List<Species> speciesData = [
     category: Species.insects,
     conservationStatus: Species.leastConcern,
     habitat: 'Rainforest canopy and bushes with flowering plants',
-    imageUrl: 'https://usmantis.com/cdn/shop/articles/794dfac36a56e548dbaa8da595542642_2048x.webp?v=1749202541',
-    description: 'An incredibly beautiful mantis that has evolved to mimic the color and shape of a pink/white orchid flower.',
-    behaviorNotes: 'Lures pollinating insects by mimicking a flower, then strikes with lightning speed.',
-    photographyConditions: 'Extremely hard to spot due to perfect camouflage. Requires a sharp-eyed macro guide.',
-    recommendedGear: ['True macro lens (1:1 or 2:1)', 'Twin flash setup', 'Focus stacking capability'],
+    imageUrl:
+        'https://usmantis.com/cdn/shop/articles/794dfac36a56e548dbaa8da595542642_2048x.webp?v=1749202541',
+    description:
+        'An incredibly beautiful mantis that has evolved to mimic the color and shape of a pink/white orchid flower.',
+    behaviorNotes:
+        'Lures pollinating insects by mimicking a flower, then strikes with lightning speed.',
+    photographyConditions:
+        'Extremely hard to spot due to perfect camouflage. Requires a sharp-eyed macro guide.',
+    recommendedGear: [
+      'True macro lens (1:1 or 2:1)',
+      'Twin flash setup',
+      'Focus stacking capability',
+    ],
     activityPattern: 'Day-active',
     bestSeasons: ['Year-round'],
     difficultyLevel: 5,
@@ -923,11 +1068,17 @@ const List<Species> speciesData = [
     category: Species.insects,
     conservationStatus: Species.leastConcern,
     habitat: 'Secondary forests and shrublands',
-    imageUrl: 'https://cdn.britannica.com/57/177857-050-F917A847/Female-saturniid-moth-atlas-moth.jpg',
-    description: 'One of the largest insects in the world, with a wingspan reaching over 25 centimeters. Wingtips resemble snake heads.',
-    behaviorNotes: 'Adults have no mouths and live only for 1-2 weeks to mate. Very weak, fluttering flyers.',
-    photographyConditions: 'Often found resting on walls near forest edges in the morning after being attracted to lights at night.',
-    recommendedGear: ['Standard zoom lens (Macro is often too tight for their huge size)'],
+    imageUrl:
+        'https://cdn.britannica.com/57/177857-050-F917A847/Female-saturniid-moth-atlas-moth.jpg',
+    description:
+        'One of the largest insects in the world, with a wingspan reaching over 25 centimeters. Wingtips resemble snake heads.',
+    behaviorNotes:
+        'Adults have no mouths and live only for 1-2 weeks to mate. Very weak, fluttering flyers.',
+    photographyConditions:
+        'Often found resting on walls near forest edges in the morning after being attracted to lights at night.',
+    recommendedGear: [
+      'Standard zoom lens (Macro is often too tight for their huge size)',
+    ],
     activityPattern: 'Night-active',
     bestSeasons: ['November', 'December', 'January'],
     difficultyLevel: 2,
@@ -940,9 +1091,12 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Shrubs and trees in tropical rainforests',
     imageUrl: 'https://i.redd.it/dy3ptb18r5w61.jpg',
-    description: 'A massive, robust green mantis characterized by a wide, leaf-like "shield" expanding over its thorax.',
-    behaviorNotes: 'Aggressive ambush predator. Will boldly display and strike at perceived threats if approached too fast.',
-    photographyConditions: 'Excellent, striking subject for macro photography. Approach slowly to avoid defensive displays.',
+    description:
+        'A massive, robust green mantis characterized by a wide, leaf-like "shield" expanding over its thorax.',
+    behaviorNotes:
+        'Aggressive ambush predator. Will boldly display and strike at perceived threats if approached too fast.',
+    photographyConditions:
+        'Excellent, striking subject for macro photography. Approach slowly to avoid defensive displays.',
     recommendedGear: ['Macro lens (90mm-105mm)', 'Diffused flash'],
     activityPattern: 'Day-active',
     bestSeasons: ['Year-round'],
@@ -955,10 +1109,14 @@ const List<Species> speciesData = [
     category: Species.insects,
     conservationStatus: Species.leastConcern,
     habitat: 'Trunks of specific host trees in primary forests',
-    imageUrl: 'https://inaturalist-open-data.s3.amazonaws.com/photos/4880333/large.jpg',
-    description: 'A bizarre, colorful planthopper with an elongated "snout" and vividly spotted wings.',
-    behaviorNotes: 'Sapsuckers that congregate in small groups on the bark of specific forest trees.',
-    photographyConditions: 'Once a host tree is found, they are highly reliable subjects as they rarely move from their spots.',
+    imageUrl:
+        'https://inaturalist-open-data.s3.amazonaws.com/photos/4880333/large.jpg',
+    description:
+        'A bizarre, colorful planthopper with an elongated "snout" and vividly spotted wings.',
+    behaviorNotes:
+        'Sapsuckers that congregate in small groups on the bark of specific forest trees.',
+    photographyConditions:
+        'Once a host tree is found, they are highly reliable subjects as they rarely move from their spots.',
     recommendedGear: ['Macro lens', 'Tripod', 'Ring flash'],
     activityPattern: 'Night-active',
     bestSeasons: ['March', 'April', 'May'],
@@ -971,11 +1129,19 @@ const List<Species> speciesData = [
     category: Species.insects,
     conservationStatus: Species.leastConcern,
     habitat: 'Forest floor and lower canopy of primary rainforests',
-    imageUrl: 'https://t3.ftcdn.net/jpg/03/00/62/76/360_F_300627688_9TUNgwXfRw2BH7sRou5DfvquROdAk2rk.jpg',
-    description: 'One of the largest ant species in the world. Workers can reach nearly 3 centimeters in length.',
-    behaviorNotes: 'Mainly nocturnal foragers. They are fiercely territorial and use their massive mandibles to defend trails.',
-    photographyConditions: 'Constantly moving, making focus difficult. Catch them while they are briefly paused feeding on sap or honeydew.',
-    recommendedGear: ['Macro lens with fast autofocus', 'High shutter speed', 'Flash'],
+    imageUrl:
+        'https://t3.ftcdn.net/jpg/03/00/62/76/360_F_300627688_9TUNgwXfRw2BH7sRou5DfvquROdAk2rk.jpg',
+    description:
+        'One of the largest ant species in the world. Workers can reach nearly 3 centimeters in length.',
+    behaviorNotes:
+        'Mainly nocturnal foragers. They are fiercely territorial and use their massive mandibles to defend trails.',
+    photographyConditions:
+        'Constantly moving, making focus difficult. Catch them while they are briefly paused feeding on sap or honeydew.',
+    recommendedGear: [
+      'Macro lens with fast autofocus',
+      'High shutter speed',
+      'Flash',
+    ],
     activityPattern: 'Day & Night-active',
     bestSeasons: ['Year-round'],
     difficultyLevel: 4,
@@ -987,10 +1153,14 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.endangered,
     habitat: 'Coastal and hill forests',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/05/Dusky_Leaf_Monkey_%28Trachypithecus_obscurus%29.jpg',
-    description: 'Cute, spectacled monkeys with distinctive white rings around their eyes. Babies are born bright orange.',
-    behaviorNotes: 'Travels in troops in the canopy. Much calmer and less aggressive than macaques.',
-    photographyConditions: 'Very photogenic and relatively tolerant of humans in parks like Penang National Park.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/0/05/Dusky_Leaf_Monkey_%28Trachypithecus_obscurus%29.jpg',
+    description:
+        'Cute, spectacled monkeys with distinctive white rings around their eyes. Babies are born bright orange.',
+    behaviorNotes:
+        'Travels in troops in the canopy. Much calmer and less aggressive than macaques.',
+    photographyConditions:
+        'Very photogenic and relatively tolerant of humans in parks like Penang National Park.',
     recommendedGear: ['Mid-range telephoto (200-400mm)'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
@@ -1003,11 +1173,19 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.vulnerable,
     habitat: 'Undisturbed forest clearings and riverbanks',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/0c/Gaur_in_Bandipur.jpg',
-    description: 'The largest extant bovine in the world. Features a massive muscular ridge and white "socks" on its legs.',
-    behaviorNotes: 'Grazes in forest clearings (salt licks) at dawn and dusk. Extremely powerful and shy.',
-    photographyConditions: 'Use hides near natural salt licks in places like Royal Belum or Taman Negara.',
-    recommendedGear: ['Telephoto lens (400-600mm)', 'Tripod', 'Camouflage clothing'],
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/0/0c/Gaur_in_Bandipur.jpg',
+    description:
+        'The largest extant bovine in the world. Features a massive muscular ridge and white "socks" on its legs.',
+    behaviorNotes:
+        'Grazes in forest clearings (salt licks) at dawn and dusk. Extremely powerful and shy.',
+    photographyConditions:
+        'Use hides near natural salt licks in places like Royal Belum or Taman Negara.',
+    recommendedGear: [
+      'Telephoto lens (400-600mm)',
+      'Tripod',
+      'Camouflage clothing',
+    ],
     activityPattern: 'Crepuscular (Dawn/Dusk active)',
     bestSeasons: ['Dry season'],
     difficultyLevel: 4,
@@ -1019,10 +1197,14 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.vulnerable,
     habitat: 'Rivers, lakes, and peat swamp forests',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Aonyx_cinerea_-_Asian_small-clawed_otter_03.jpg',
-    description: 'The smallest otter species in the world. Highly vocal and social.',
-    behaviorNotes: 'Lives in large, playful family groups. They forage with their highly dexterous front paws.',
-    photographyConditions: 'Fast-moving targets. Wait quietly near riverbanks or on a silent boat in Kenyir Lake.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/3/3a/Aonyx_cinerea_-_Asian_small-clawed_otter_03.jpg',
+    description:
+        'The smallest otter species in the world. Highly vocal and social.',
+    behaviorNotes:
+        'Lives in large, playful family groups. They forage with their highly dexterous front paws.',
+    photographyConditions:
+        'Fast-moving targets. Wait quietly near riverbanks or on a silent boat in Kenyir Lake.',
     recommendedGear: ['Fast telephoto lens', 'High shutter speed'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
@@ -1035,10 +1217,14 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.vulnerable,
     habitat: 'Mangroves, large rivers, and urban wetlands',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/ff/Smooth-coated_Otter_%28Lutrogale_perspicillata%29_at_Sungei_Buloh_Wetland_Reserve_-_20120504.jpg',
-    description: 'Larger than the small-clawed otter with a distinctively smooth, velvety coat.',
-    behaviorNotes: 'Often hunts in synchronized groups. Very adaptable to urban environments and parks.',
-    photographyConditions: 'Easy to track if a family is resident in a park. Keep a low angle for dramatic water-level shots.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/f/ff/Smooth-coated_Otter_%28Lutrogale_perspicillata%29_at_Sungei_Buloh_Wetland_Reserve_-_20120504.jpg',
+    description:
+        'Larger than the small-clawed otter with a distinctively smooth, velvety coat.',
+    behaviorNotes:
+        'Often hunts in synchronized groups. Very adaptable to urban environments and parks.',
+    photographyConditions:
+        'Easy to track if a family is resident in a park. Keep a low angle for dramatic water-level shots.',
     recommendedGear: ['Telephoto lens (300mm)', 'Knee pads'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
@@ -1051,10 +1237,14 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.leastConcern,
     habitat: 'Secondary forests, palm oil plantations, and scrub',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4b/Prionailurus_bengalensis_1_%28cropped%29.jpg',
-    description: 'A small wild cat roughly the size of a domestic cat, covered in beautiful leopard-like rosettes.',
-    behaviorNotes: 'Highly nocturnal and adaptable. Often hunts rodents in agricultural areas.',
-    photographyConditions: 'Frequently seen during night drives in palm oil estates bordering rainforests (Kinabatangan).',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/4/4b/Prionailurus_bengalensis_1_%28cropped%29.jpg',
+    description:
+        'A small wild cat roughly the size of a domestic cat, covered in beautiful leopard-like rosettes.',
+    behaviorNotes:
+        'Highly nocturnal and adaptable. Often hunts rodents in agricultural areas.',
+    photographyConditions:
+        'Frequently seen during night drives in palm oil estates bordering rainforests (Kinabatangan).',
     recommendedGear: ['High ISO camera', 'Spotlight', 'Fast telephoto lens'],
     activityPattern: 'Nocturnal (Night-active)',
     bestSeasons: ['Year-round'],
@@ -1067,10 +1257,13 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.nearThreatened,
     habitat: 'Primary evergreen and mixed forests',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Marbled_cat_%28Pardofelis_marmorata%29.jpg',
-    description: 'Resembles a miniature clouded leopard with a massive, bushy tail used for balance.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/e/ea/Marbled_cat_%28Pardofelis_marmorata%29.jpg',
+    description:
+        'Resembles a miniature clouded leopard with a massive, bushy tail used for balance.',
     behaviorNotes: 'Highly arboreal and solitary. Rarely seen on the ground.',
-    photographyConditions: 'An extremely rare sighting. Usually only caught on camera traps in places like Danum Valley.',
+    photographyConditions:
+        'An extremely rare sighting. Usually only caught on camera traps in places like Danum Valley.',
     recommendedGear: ['Remote DSLR Camera Trap', 'Infrared trigger'],
     activityPattern: 'Nocturnal (Night-active)',
     bestSeasons: ['Year-round'],
@@ -1083,10 +1276,14 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.endangered,
     habitat: 'Dipterocarp forests and logged forest clearings',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Banteng_in_Baluran_National_Park.jpg',
-    description: 'A rare species of wild cattle endemic to Borneo. Males are dark chestnut to black; females are reddish-brown.',
-    behaviorNotes: 'Grazes in small herds. Highly dependent on natural salt licks.',
-    photographyConditions: 'Extremely shy. Photographing them requires quiet observation from a hide deep in Sabah\'s forests.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/6/6f/Banteng_in_Baluran_National_Park.jpg',
+    description:
+        'A rare species of wild cattle endemic to Borneo. Males are dark chestnut to black; females are reddish-brown.',
+    behaviorNotes:
+        'Grazes in small herds. Highly dependent on natural salt licks.',
+    photographyConditions:
+        'Extremely shy. Photographing them requires quiet observation from a hide deep in Sabah\'s forests.',
     recommendedGear: ['Super-telephoto lens (500mm+)', 'Camouflage'],
     activityPattern: 'Crepuscular (Dawn/Dusk active)',
     bestSeasons: ['Dry season'],
@@ -1099,10 +1296,14 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.endangered,
     habitat: 'Peat swamp forests and riverbanks',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/91/Flat-headed_Cat_%28Prionailurus_planiceps%29_%288339870505%29.jpg',
-    description: 'A bizarre, semi-aquatic wild cat with a flattened skull and partially webbed toes designed for catching fish.',
-    behaviorNotes: 'Hunts exactly like a raccoon on the muddy banks of rivers. Highly specialized and rare.',
-    photographyConditions: 'Cruising the Kinabatangan River tributaries at night with a spotlight is the best method.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/9/91/Flat-headed_Cat_%28Prionailurus_planiceps%29_%288339870505%29.jpg',
+    description:
+        'A bizarre, semi-aquatic wild cat with a flattened skull and partially webbed toes designed for catching fish.',
+    behaviorNotes:
+        'Hunts exactly like a raccoon on the muddy banks of rivers. Highly specialized and rare.',
+    photographyConditions:
+        'Cruising the Kinabatangan River tributaries at night with a spotlight is the best method.',
     recommendedGear: ['High ISO body', 'Telephoto (400mm)', 'Red flashlight'],
     activityPattern: 'Nocturnal (Night-active)',
     bestSeasons: ['April', 'May', 'June', 'July'],
@@ -1115,10 +1316,14 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.vulnerable,
     habitat: 'Coastal forests, mangroves, and riverine areas',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/18/Silvery_lutong.jpg',
-    description: 'Named for its striking dark grey fur with silver-tipped hairs. Infants are born a brilliant golden-orange.',
-    behaviorNotes: 'Folivorous (leaf-eating) and arboreal. Often feeds quietly in mangrove canopies.',
-    photographyConditions: 'Very accessible at Bako National Park or Kuala Selangor. They are calm subjects if not fed by humans.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/1/18/Silvery_lutong.jpg',
+    description:
+        'Named for its striking dark grey fur with silver-tipped hairs. Infants are born a brilliant golden-orange.',
+    behaviorNotes:
+        'Folivorous (leaf-eating) and arboreal. Often feeds quietly in mangrove canopies.',
+    photographyConditions:
+        'Very accessible at Bako National Park or Kuala Selangor. They are calm subjects if not fed by humans.',
     recommendedGear: ['Mid-range telephoto (200-300mm)'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
@@ -1131,10 +1336,14 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.vulnerable,
     habitat: 'Highland and lowland primary forests of northern Borneo',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/87/Hose%27s_Langur_-_Presbytis_hosei_%2820309995543%29.jpg',
-    description: 'A striking grey langur with a white belly, black crest, and a distinctive pinkish face mask.',
-    behaviorNotes: 'Agile canopy dwellers. Often visits natural salt licks near limestone outcrops.',
-    photographyConditions: 'Requires deep forest treks. Niah National Park in Sarawak is a known habitat.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/8/87/Hose%27s_Langur_-_Presbytis_hosei_%2820309995543%29.jpg',
+    description:
+        'A striking grey langur with a white belly, black crest, and a distinctive pinkish face mask.',
+    behaviorNotes:
+        'Agile canopy dwellers. Often visits natural salt licks near limestone outcrops.',
+    photographyConditions:
+        'Requires deep forest treks. Niah National Park in Sarawak is a known habitat.',
     recommendedGear: ['Telephoto lens (400mm+)', 'Binoculars'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['March', 'April', 'May', 'June'],
@@ -1147,10 +1356,14 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.vulnerable,
     habitat: 'Deep forests, grasslands, and swamps',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/94/Sambar_deer_%28Rusa_unicolor%29_male.jpg',
-    description: 'The largest deer species in Malaysia. Males grow massive, rugged antlers.',
-    behaviorNotes: 'Primarily nocturnal and very alert. They are the main prey species for the Malayan Tiger.',
-    photographyConditions: 'Best spotted on night safaris or early mornings at forest edges in Endau-Rompin or Belum.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/9/94/Sambar_deer_%28Rusa_unicolor%29_male.jpg',
+    description:
+        'The largest deer species in Malaysia. Males grow massive, rugged antlers.',
+    behaviorNotes:
+        'Primarily nocturnal and very alert. They are the main prey species for the Malayan Tiger.',
+    photographyConditions:
+        'Best spotted on night safaris or early mornings at forest edges in Endau-Rompin or Belum.',
     recommendedGear: ['Fast telephoto lens (f/2.8)', 'Spotlight'],
     activityPattern: 'Nocturnal / Crepuscular',
     bestSeasons: ['Year-round'],
@@ -1163,10 +1376,14 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.vulnerable,
     habitat: 'Primary forests and agricultural edges',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/7/77/Southern_pig-tailed_macaque_%28Macaca_nemestrina%29.jpg',
-    description: 'A robust macaque with a distinctively short, curled tail. Very strong and highly intelligent.',
-    behaviorNotes: 'Spends more time on the forest floor than other macaques. Travels in large, hierarchical troops.',
-    photographyConditions: 'Commonly seen on jungle roadsides. Keep a safe distance as large males can be aggressive.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/7/77/Southern_pig-tailed_macaque_%28Macaca_nemestrina%29.jpg',
+    description:
+        'A robust macaque with a distinctively short, curled tail. Very strong and highly intelligent.',
+    behaviorNotes:
+        'Spends more time on the forest floor than other macaques. Travels in large, hierarchical troops.',
+    photographyConditions:
+        'Commonly seen on jungle roadsides. Keep a safe distance as large males can be aggressive.',
     recommendedGear: ['Standard zoom (70-200mm)'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
@@ -1179,10 +1396,14 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.endangered,
     habitat: 'Mangroves, forests, cities, and temples',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/1f/Macaca_fascicularis_-_01.jpg',
-    description: 'The most common primate in Malaysia. Highly adaptable with a tail longer than its body.',
-    behaviorNotes: 'Cheeky, curious, and fearless around humans. Known for raiding bins and stealing food.',
-    photographyConditions: 'Incredibly easy to photograph in any park, but watch your equipment—they are known pickpockets!',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/1/1f/Macaca_fascicularis_-_01.jpg',
+    description:
+        'The most common primate in Malaysia. Highly adaptable with a tail longer than its body.',
+    behaviorNotes:
+        'Cheeky, curious, and fearless around humans. Known for raiding bins and stealing food.',
+    photographyConditions:
+        'Incredibly easy to photograph in any park, but watch your equipment—they are known pickpockets!',
     recommendedGear: ['Any camera or smartphone', 'Secure bag straps'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
@@ -1195,10 +1416,13 @@ const List<Species> speciesData = [
     category: Species.mammals,
     conservationStatus: Species.leastConcern,
     habitat: 'Forest edges and dense undergrowth',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Indian_Muntjac_or_Barking_Deer.jpg',
-    description: 'A small, reddish-brown deer. Named for its loud, dog-like alarm bark used to warn of predators.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/e/ea/Indian_Muntjac_or_Barking_Deer.jpg',
+    description:
+        'A small, reddish-brown deer. Named for its loud, dog-like alarm bark used to warn of predators.',
     behaviorNotes: 'Solitary and secretive. Moves quickly through dense brush.',
-    photographyConditions: 'You will often hear them before seeing them. Requires sitting completely still in a forest hide.',
+    photographyConditions:
+        'You will often hear them before seeing them. Requires sitting completely still in a forest hide.',
     recommendedGear: ['Telephoto lens (400mm)', 'Tripod'],
     activityPattern: 'Diurnal / Crepuscular',
     bestSeasons: ['Dry season'],
@@ -1211,10 +1435,14 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.leastConcern,
     habitat: 'Coastal forests, islands, and secondary woodlands',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/07/Oriental_Pied_Hornbill_%28Anthracoceros_albirostris%29.jpg',
-    description: 'The smallest and most adaptable of Malaysia\'s hornbills. Black and white plumage with a pale yellow bill.',
-    behaviorNotes: 'Highly vocal and social. Tolerant of human disturbance and often visits coastal resorts or villages.',
-    photographyConditions: 'The easiest hornbill to photograph. Very common in Langkawi and Pangkor Island.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/0/07/Oriental_Pied_Hornbill_%28Anthracoceros_albirostris%29.jpg',
+    description:
+        'The smallest and most adaptable of Malaysia\'s hornbills. Black and white plumage with a pale yellow bill.',
+    behaviorNotes:
+        'Highly vocal and social. Tolerant of human disturbance and often visits coastal resorts or villages.',
+    photographyConditions:
+        'The easiest hornbill to photograph. Very common in Langkawi and Pangkor Island.',
     recommendedGear: ['Mid-range telephoto (200-400mm)'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
@@ -1227,11 +1455,18 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.leastConcern,
     habitat: 'Coasts, islands, and large inland lakes',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/White-bellied_sea_eagle.jpg',
-    description: 'A majestic raptor with striking white underparts, grey wings, and a massive wingspan.',
-    behaviorNotes: 'Soars high over water searching for fish, grabbing them from the surface with deadly precision.',
-    photographyConditions: 'Great for action shots. Found circling coastlines like Penang National Park or Kilim Karst.',
-    recommendedGear: ['Telephoto lens (400-600mm)', 'Continuous autofocus mode'],
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/5/5e/White-bellied_sea_eagle.jpg',
+    description:
+        'A majestic raptor with striking white underparts, grey wings, and a massive wingspan.',
+    behaviorNotes:
+        'Soars high over water searching for fish, grabbing them from the surface with deadly precision.',
+    photographyConditions:
+        'Great for action shots. Found circling coastlines like Penang National Park or Kilim Karst.',
+    recommendedGear: [
+      'Telephoto lens (400-600mm)',
+      'Continuous autofocus mode',
+    ],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
     difficultyLevel: 2,
@@ -1243,11 +1478,19 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.nearThreatened,
     habitat: 'Coastal mangroves and Nipa palm swamps',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/30/Mangrove_Pitta.jpg',
-    description: 'A spectacular, vibrant ground-dwelling bird with a massive bill designed for crushing crabs.',
-    behaviorNotes: 'Hops in the dark mud beneath mangrove roots. Highly territorial and responds to playback calls.',
-    photographyConditions: 'Requires shooting from a boat or boardwalk into dark, tangled mangrove roots. Flash often necessary.',
-    recommendedGear: ['Telephoto lens (400mm)', 'Flash with better beamer', 'Mosquito net'],
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/3/30/Mangrove_Pitta.jpg',
+    description:
+        'A spectacular, vibrant ground-dwelling bird with a massive bill designed for crushing crabs.',
+    behaviorNotes:
+        'Hops in the dark mud beneath mangrove roots. Highly territorial and responds to playback calls.',
+    photographyConditions:
+        'Requires shooting from a boat or boardwalk into dark, tangled mangrove roots. Flash often necessary.',
+    recommendedGear: [
+      'Telephoto lens (400mm)',
+      'Flash with better beamer',
+      'Mosquito net',
+    ],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['April', 'May', 'June'],
     difficultyLevel: 4,
@@ -1259,10 +1502,14 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.nearThreatened,
     habitat: 'Freshwater lakes, reservoirs, and slow rivers',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/fe/Oriental_darter_%28Anhinga_melanogaster%29_with_fish.jpg',
-    description: 'Also called the "Snakebird." Swims with its body submerged and only its long, snake-like neck above water.',
-    behaviorNotes: 'Spears fish underwater. Frequently seen perched on dead trees with wings spread wide to dry.',
-    photographyConditions: 'Extremely cooperative when drying its wings. Kinta Nature Park is a premier location for them.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/f/fe/Oriental_darter_%28Anhinga_melanogaster%29_with_fish.jpg',
+    description:
+        'Also called the "Snakebird." Swims with its body submerged and only its long, snake-like neck above water.',
+    behaviorNotes:
+        'Spears fish underwater. Frequently seen perched on dead trees with wings spread wide to dry.',
+    photographyConditions:
+        'Extremely cooperative when drying its wings. Kinta Nature Park is a premier location for them.',
     recommendedGear: ['Telephoto lens (300-500mm)', 'Tripod'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
@@ -1275,10 +1522,14 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.leastConcern,
     habitat: 'Marshes, lakes, and estuaries',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/5/5f/Grey_Heron_%28Ardea_cinerea%29.jpg',
-    description: 'A tall, elegant wading bird with grey plumage and a heavy, dagger-like yellow bill.',
-    behaviorNotes: 'Stands completely motionless in shallow water for long periods waiting for fish to pass.',
-    photographyConditions: 'A great subject for practicing reflections and calm water photography. Common in urban wetlands.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/5/5f/Grey_Heron_%28Ardea_cinerea%29.jpg',
+    description:
+        'A tall, elegant wading bird with grey plumage and a heavy, dagger-like yellow bill.',
+    behaviorNotes:
+        'Stands completely motionless in shallow water for long periods waiting for fish to pass.',
+    photographyConditions:
+        'A great subject for practicing reflections and calm water photography. Common in urban wetlands.',
     recommendedGear: ['Telephoto lens (300mm+)', 'Tripod'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
@@ -1291,10 +1542,14 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.leastConcern,
     habitat: 'Montane and sub-montane broadleaf forests',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b5/Silver-breasted_Broadbill.jpg',
-    description: 'An impossibly cute bird that looks like a plush toy. Features a silver breast, brown back, and a baby-blue eye ring.',
-    behaviorNotes: 'Often found in small, quiet flocks in the middle canopy. They build hanging, purse-like nests.',
-    photographyConditions: 'Fraser\'s Hill is legendary for photographing this species. They are relatively tame and sit still.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/b/b5/Silver-breasted_Broadbill.jpg',
+    description:
+        'An impossibly cute bird that looks like a plush toy. Features a silver breast, brown back, and a baby-blue eye ring.',
+    behaviorNotes:
+        'Often found in small, quiet flocks in the middle canopy. They build hanging, purse-like nests.',
+    photographyConditions:
+        'Fraser\'s Hill is legendary for photographing this species. They are relatively tame and sit still.',
     recommendedGear: ['Telephoto lens (400mm)', 'Monopod'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['March', 'April', 'May'],
@@ -1307,10 +1562,14 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.leastConcern,
     habitat: 'Montane evergreen forests',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/87/Long-tailed_broadbill.jpg',
-    description: 'A striking, colorful bird with a green body, yellow face, and a distinctive black and blue helmet.',
-    behaviorNotes: 'Moves in noisy, hyperactive flocks. Very acrobatic when hunting insects among the leaves.',
-    photographyConditions: 'Listen for their high-pitched whistling calls. A highly sought-after target for birders at Fraser\'s Hill.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/8/87/Long-tailed_broadbill.jpg',
+    description:
+        'A striking, colorful bird with a green body, yellow face, and a distinctive black and blue helmet.',
+    behaviorNotes:
+        'Moves in noisy, hyperactive flocks. Very acrobatic when hunting insects among the leaves.',
+    photographyConditions:
+        'Listen for their high-pitched whistling calls. A highly sought-after target for birders at Fraser\'s Hill.',
     recommendedGear: ['Fast telephoto lens (400-600mm)'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['March', 'April', 'May'],
@@ -1323,10 +1582,14 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.leastConcern,
     habitat: 'Montane dipterocarp forests',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/25/Fire-tufted_Barbet_-_Malaysia_H8O1021_%2823616616474%29.jpg',
-    description: 'A chunky, green bird with a yellow face, maroon throat, and a bright red tuft of feathers over its beak.',
-    behaviorNotes: 'Emits a unique, continuous buzzing call that sounds like a cicada. Loves fruiting fig trees.',
-    photographyConditions: 'Find a fruiting tree at Fraser\'s Hill and wait. They will ignore you while they gorge on fruit.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/2/25/Fire-tufted_Barbet_-_Malaysia_H8O1021_%2823616616474%29.jpg',
+    description:
+        'A chunky, green bird with a yellow face, maroon throat, and a bright red tuft of feathers over its beak.',
+    behaviorNotes:
+        'Emits a unique, continuous buzzing call that sounds like a cicada. Loves fruiting fig trees.',
+    photographyConditions:
+        'Find a fruiting tree at Fraser\'s Hill and wait. They will ignore you while they gorge on fruit.',
     recommendedGear: ['Telephoto lens (400mm+)'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
@@ -1339,11 +1602,19 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.nearThreatened,
     habitat: 'High-altitude montane forests of Borneo',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/90/Whitehead%27s_Trogon_%28Harpactes_whiteheadi%29.jpg',
-    description: 'One of the "holy grail" endemics of Mount Kinabalu. Males are brilliant crimson with a silver frosted back.',
-    behaviorNotes: 'Sits completely motionless in the dark understory, occasionally sallying out to catch insects.',
-    photographyConditions: 'A very challenging bird to find. Requires a local guide in Kinabalu Park and excellent low-light gear.',
-    recommendedGear: ['High ISO camera', 'Fast telephoto (f/2.8 or f/4)', 'Monopod'],
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/9/90/Whitehead%27s_Trogon_%28Harpactes_whiteheadi%29.jpg',
+    description:
+        'One of the "holy grail" endemics of Mount Kinabalu. Males are brilliant crimson with a silver frosted back.',
+    behaviorNotes:
+        'Sits completely motionless in the dark understory, occasionally sallying out to catch insects.',
+    photographyConditions:
+        'A very challenging bird to find. Requires a local guide in Kinabalu Park and excellent low-light gear.',
+    recommendedGear: [
+      'High ISO camera',
+      'Fast telephoto (f/2.8 or f/4)',
+      'Monopod',
+    ],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['March', 'April', 'May', 'June'],
     difficultyLevel: 5,
@@ -1355,10 +1626,14 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.leastConcern,
     habitat: 'Montane rainforests of Borneo',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/30/Whitehead%27s_Broadbill_%28Calyptomena_whiteheadi%29.jpg',
-    description: 'A bizarre, bright emerald-green bird with a black throat and a crest of feathers that entirely hides its beak.',
-    behaviorNotes: 'Camouflages perfectly among leaves. Often located by its harsh, grating call.',
-    photographyConditions: 'Endemic to Borneo\'s highlands. Spotting them in Kinabalu Park requires extreme patience.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/3/30/Whitehead%27s_Broadbill_%28Calyptomena_whiteheadi%29.jpg',
+    description:
+        'A bizarre, bright emerald-green bird with a black throat and a crest of feathers that entirely hides its beak.',
+    behaviorNotes:
+        'Camouflages perfectly among leaves. Often located by its harsh, grating call.',
+    photographyConditions:
+        'Endemic to Borneo\'s highlands. Spotting them in Kinabalu Park requires extreme patience.',
     recommendedGear: ['Telephoto lens (400-600mm)', 'Patience'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['March', 'April', 'May', 'June'],
@@ -1371,11 +1646,18 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.endangered,
     habitat: 'Peat swamps and riverine forests',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Storm%27s_stork.jpg',
-    description: 'One of the rarest storks in the world. Features striking black and white plumage with bright red facial skin.',
-    behaviorNotes: 'Solitary and highly secretive. Forages quietly in muddy forest pools and along river edges.',
-    photographyConditions: 'Best chances are from quiet river cruises along the Kinabatangan River in Sabah.',
-    recommendedGear: ['Telephoto lens (400-600mm)', 'Image stabilization for boat movement'],
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/4/4e/Storm%27s_stork.jpg',
+    description:
+        'One of the rarest storks in the world. Features striking black and white plumage with bright red facial skin.',
+    behaviorNotes:
+        'Solitary and highly secretive. Forages quietly in muddy forest pools and along river edges.',
+    photographyConditions:
+        'Best chances are from quiet river cruises along the Kinabatangan River in Sabah.',
+    recommendedGear: [
+      'Telephoto lens (400-600mm)',
+      'Image stabilization for boat movement',
+    ],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Dry season'],
     difficultyLevel: 5,
@@ -1387,11 +1669,18 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.leastConcern,
     habitat: 'Wooded areas near water, mangroves, and plantations',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/87/Buffy_Fish_Owl.jpg',
-    description: 'A large, yellowish-brown owl with prominent ear tufts. Specially adapted for hunting fish and frogs.',
-    behaviorNotes: 'Roosts in dense foliage over water during the day. Hunts at night by skimming the water surface.',
-    photographyConditions: 'Often spotted roosting silently in trees overhanging the Kinabatangan River during late afternoon cruises.',
-    recommendedGear: ['Telephoto lens (400mm+)', 'Flash (for night shooting, but avoid blinding them)'],
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/8/87/Buffy_Fish_Owl.jpg',
+    description:
+        'A large, yellowish-brown owl with prominent ear tufts. Specially adapted for hunting fish and frogs.',
+    behaviorNotes:
+        'Roosts in dense foliage over water during the day. Hunts at night by skimming the water surface.',
+    photographyConditions:
+        'Often spotted roosting silently in trees overhanging the Kinabatangan River during late afternoon cruises.',
+    recommendedGear: [
+      'Telephoto lens (400mm+)',
+      'Flash (for night shooting, but avoid blinding them)',
+    ],
     activityPattern: 'Nocturnal (Night-active)',
     bestSeasons: ['Year-round'],
     difficultyLevel: 3,
@@ -1403,11 +1692,19 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.vulnerable,
     habitat: 'Lowland primary dipterocarp forests',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/1b/Malaysian_Peacock-Pheasant.jpg',
-    description: 'An incredibly elusive, beautifully patterned ground bird. Males have striking iridescent blue-green eyespots.',
-    behaviorNotes: 'Incredibly shy. Males clear small display courts on the forest floor to attract females.',
-    photographyConditions: 'A "ghost" of the forest. Photography is almost exclusively done using camouflage pop-up hides in Taman Negara.',
-    recommendedGear: ['Camouflage hide', 'Tripod', 'Super-telephoto lens (600mm)'],
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/1/1b/Malaysian_Peacock-Pheasant.jpg',
+    description:
+        'An incredibly elusive, beautifully patterned ground bird. Males have striking iridescent blue-green eyespots.',
+    behaviorNotes:
+        'Incredibly shy. Males clear small display courts on the forest floor to attract females.',
+    photographyConditions:
+        'A "ghost" of the forest. Photography is almost exclusively done using camouflage pop-up hides in Taman Negara.',
+    recommendedGear: [
+      'Camouflage hide',
+      'Tripod',
+      'Super-telephoto lens (600mm)',
+    ],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['March', 'April', 'May'],
     difficultyLevel: 5,
@@ -1419,10 +1716,14 @@ const List<Species> speciesData = [
     category: Species.birds,
     conservationStatus: Species.vulnerable,
     habitat: 'Lowland primary and mature secondary forests',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/ae/Black_Hornbill_%28Anthracoceros_malayanus%29.jpg',
-    description: 'A medium-sized hornbill entirely black except for white tail tips. Males have a pale yellow bill; females have a black bill.',
-    behaviorNotes: 'Often found in the mid-canopy following troops of monkeys to catch insects disturbed by their movement.',
-    photographyConditions: 'Bako National Park is a fantastic location to photograph them as they are accustomed to human presence there.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/a/ae/Black_Hornbill_%28Anthracoceros_malayanus%29.jpg',
+    description:
+        'A medium-sized hornbill entirely black except for white tail tips. Males have a pale yellow bill; females have a black bill.',
+    behaviorNotes:
+        'Often found in the mid-canopy following troops of monkeys to catch insects disturbed by their movement.',
+    photographyConditions:
+        'Bako National Park is a fantastic location to photograph them as they are accustomed to human presence there.',
     recommendedGear: ['Telephoto lens (300-400mm)'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
@@ -1435,10 +1736,14 @@ const List<Species> speciesData = [
     category: Species.reptiles,
     conservationStatus: Species.vulnerable,
     habitat: 'Freshwater swamps, peat bogs, and slow rivers',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/07/Tomistoma_schlegelii_-_01.jpg',
-    description: 'A massive, elusive crocodilian characterized by an extremely long, thin snout filled with needle-like teeth.',
-    behaviorNotes: 'Highly secretive ambush predator. Primarily eats fish and monkeys. Less aggressive to humans than saltwater crocs.',
-    photographyConditions: 'Extremely rare. Best photographed from a boat in the remote tributaries of Kenyir Lake or Sarawak.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/0/07/Tomistoma_schlegelii_-_01.jpg',
+    description:
+        'A massive, elusive crocodilian characterized by an extremely long, thin snout filled with needle-like teeth.',
+    behaviorNotes:
+        'Highly secretive ambush predator. Primarily eats fish and monkeys. Less aggressive to humans than saltwater crocs.',
+    photographyConditions:
+        'Extremely rare. Best photographed from a boat in the remote tributaries of Kenyir Lake or Sarawak.',
     recommendedGear: ['Telephoto lens (400-600mm)', 'Polarizer filter'],
     activityPattern: 'Nocturnal / Diurnal basking',
     bestSeasons: ['Dry season'],
@@ -1451,10 +1756,14 @@ const List<Species> speciesData = [
     category: Species.reptiles,
     conservationStatus: Species.leastConcern,
     habitat: 'Highland and montane tropical forests',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ec/Trimeresurus_sumatranus_%28Sumatran_Pit_Viper%29.jpg',
-    description: 'A stunningly vibrant, emerald green venomous snake with red-tipped tail and red bands.',
-    behaviorNotes: 'Highly arboreal and sedentary. Relies on its incredible camouflage to ambush frogs and small birds.',
-    photographyConditions: 'A legendary macro subject at Fraser\'s Hill. Always maintain a safe strike-distance.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/e/ec/Trimeresurus_sumatranus_%28Sumatran_Pit_Viper%29.jpg',
+    description:
+        'A stunningly vibrant, emerald green venomous snake with red-tipped tail and red bands.',
+    behaviorNotes:
+        'Highly arboreal and sedentary. Relies on its incredible camouflage to ambush frogs and small birds.',
+    photographyConditions:
+        'A legendary macro subject at Fraser\'s Hill. Always maintain a safe strike-distance.',
     recommendedGear: ['Macro lens (105mm)', 'Ring flash', 'Tripod'],
     activityPattern: 'Nocturnal (Night-active)',
     bestSeasons: ['Year-round'],
@@ -1467,10 +1776,14 @@ const List<Species> speciesData = [
     category: Species.reptiles,
     conservationStatus: Species.leastConcern,
     habitat: 'Lowland and mid-hill rainforests of Borneo',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/30/Tropidolaemus_subannulatus.jpg',
-    description: 'A beautiful, stocky viper. Females are bright green with blue and white bands, while males are much smaller and differently patterned.',
-    behaviorNotes: 'An ambush predator that can remain motionless on the exact same branch for weeks.',
-    photographyConditions: 'Excellent, cooperative macro subjects easily spotted during night walks in Danum Valley.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/3/30/Tropidolaemus_subannulatus.jpg',
+    description:
+        'A beautiful, stocky viper. Females are bright green with blue and white bands, while males are much smaller and differently patterned.',
+    behaviorNotes:
+        'An ambush predator that can remain motionless on the exact same branch for weeks.',
+    photographyConditions:
+        'Excellent, cooperative macro subjects easily spotted during night walks in Danum Valley.',
     recommendedGear: ['Macro lens', 'Diffused external flash'],
     activityPattern: 'Nocturnal (Night-active)',
     bestSeasons: ['Year-round'],
@@ -1483,10 +1796,14 @@ const List<Species> speciesData = [
     category: Species.reptiles,
     conservationStatus: Species.leastConcern,
     habitat: 'Mangroves, secondary forests, and urban parks',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ef/Paradise_Tree_Snake_%28Chrysopelea_paradisi%29.jpg',
-    description: 'A vibrant black and green snake with red dorsal spots. Famous for its ability to glide from tree to tree.',
-    behaviorNotes: 'Flattens its body into a "U" shape to parachute through the air to escape predators or catch lizards.',
-    photographyConditions: 'Catching them mid-flight is nearly impossible. Best photographed resting on branches in Bako National Park.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/e/ef/Paradise_Tree_Snake_%28Chrysopelea_paradisi%29.jpg',
+    description:
+        'A vibrant black and green snake with red dorsal spots. Famous for its ability to glide from tree to tree.',
+    behaviorNotes:
+        'Flattens its body into a "U" shape to parachute through the air to escape predators or catch lizards.',
+    photographyConditions:
+        'Catching them mid-flight is nearly impossible. Best photographed resting on branches in Bako National Park.',
     recommendedGear: ['Tele-macro lens (150mm)'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
@@ -1499,10 +1816,14 @@ const List<Species> speciesData = [
     category: Species.reptiles,
     conservationStatus: Species.leastConcern,
     habitat: 'Mangrove swamps and lowland riparian forests',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Boiga_dendrophila.jpg',
-    description: 'A strikingly beautiful, large snake with a glossy black body and bright yellow crossbands.',
-    behaviorNotes: 'Mildly venomous rear-fanged snake. Often found curled tightly in branches overhanging water.',
-    photographyConditions: 'Look for them during low tide boat trips through mangrove roots at night.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/9/9d/Boiga_dendrophila.jpg',
+    description:
+        'A strikingly beautiful, large snake with a glossy black body and bright yellow crossbands.',
+    behaviorNotes:
+        'Mildly venomous rear-fanged snake. Often found curled tightly in branches overhanging water.',
+    photographyConditions:
+        'Look for them during low tide boat trips through mangrove roots at night.',
     recommendedGear: ['Telephoto or Macro lens', 'Spotlight'],
     activityPattern: 'Nocturnal (Night-active)',
     bestSeasons: ['Year-round'],
@@ -1515,10 +1836,14 @@ const List<Species> speciesData = [
     category: Species.reptiles,
     conservationStatus: Species.leastConcern,
     habitat: 'Forests, gardens, and urban bushes',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Oriental_Whip_Snake_%28Ahaetulla_prasina%29.jpg',
-    description: 'An impossibly thin, bright green snake with an elongated, pointed snout and horizontal pupils.',
-    behaviorNotes: 'Sways gently in the breeze to mimic a vine. Feeds almost exclusively on lizards and frogs.',
-    photographyConditions: 'Very common even in city parks. If threatened, they open their mouths to display an intimidating black interior.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/6/6f/Oriental_Whip_Snake_%28Ahaetulla_prasina%29.jpg',
+    description:
+        'An impossibly thin, bright green snake with an elongated, pointed snout and horizontal pupils.',
+    behaviorNotes:
+        'Sways gently in the breeze to mimic a vine. Feeds almost exclusively on lizards and frogs.',
+    photographyConditions:
+        'Very common even in city parks. If threatened, they open their mouths to display an intimidating black interior.',
     recommendedGear: ['Macro lens', 'On-camera flash'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
@@ -1531,10 +1856,14 @@ const List<Species> speciesData = [
     category: Species.reptiles,
     conservationStatus: Species.endangered,
     habitat: 'Clear forest streams in Sarawak',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Lanthanotus_borneensis_01.jpg',
-    description: 'A living fossil endemic to Borneo. Looks like a tiny, subterranean dragon with beaded, crocodilian scales.',
-    behaviorNotes: 'Strictly nocturnal and highly secretive. Spends most of its time buried in mud or beneath rocks in streams.',
-    photographyConditions: 'One of the rarest reptiles to photograph in the wild. Requires extreme luck and wading streams at night.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/7/7b/Lanthanotus_borneensis_01.jpg',
+    description:
+        'A living fossil endemic to Borneo. Looks like a tiny, subterranean dragon with beaded, crocodilian scales.',
+    behaviorNotes:
+        'Strictly nocturnal and highly secretive. Spends most of its time buried in mud or beneath rocks in streams.',
+    photographyConditions:
+        'One of the rarest reptiles to photograph in the wild. Requires extreme luck and wading streams at night.',
     recommendedGear: ['Macro lens', 'Waterproof housing or boots', 'Headlamp'],
     activityPattern: 'Nocturnal (Night-active)',
     bestSeasons: ['Dry season'],
@@ -1547,10 +1876,14 @@ const List<Species> speciesData = [
     category: Species.reptiles,
     conservationStatus: Species.leastConcern,
     habitat: 'Primary and secondary tropical rainforests',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/cf/Rough-necked_Monitor_%28Varanus_rudicollis%29.jpg',
-    description: 'A large, slender monitor lizard with pronounced, enlarged scales on the back of its neck.',
-    behaviorNotes: 'Highly arboreal compared to the common water monitor. Usually found clinging to large tree trunks.',
-    photographyConditions: 'Requires sharp eyes to spot them against bark. Taman Negara and Belum are good spots.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/c/cf/Rough-necked_Monitor_%28Varanus_rudicollis%29.jpg',
+    description:
+        'A large, slender monitor lizard with pronounced, enlarged scales on the back of its neck.',
+    behaviorNotes:
+        'Highly arboreal compared to the common water monitor. Usually found clinging to large tree trunks.',
+    photographyConditions:
+        'Requires sharp eyes to spot them against bark. Taman Negara and Belum are good spots.',
     recommendedGear: ['Telephoto lens (300-400mm)'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
@@ -1563,10 +1896,14 @@ const List<Species> speciesData = [
     category: Species.reptiles,
     conservationStatus: Species.vulnerable,
     habitat: 'Swamps, marshes, and palm oil plantations',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/eb/Python_brongersmai_2.jpg',
-    description: 'A very heavy, thick-bodied snake known for its stunning, deep brick-red and orange coloration.',
-    behaviorNotes: 'An ambush predator that hides under leaf litter. Often encountered by workers in palm oil estates.',
-    photographyConditions: 'Can be highly defensive and strike quickly despite their fat appearance. Keep a respectful distance.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/e/eb/Python_brongersmai_2.jpg',
+    description:
+        'A very heavy, thick-bodied snake known for its stunning, deep brick-red and orange coloration.',
+    behaviorNotes:
+        'An ambush predator that hides under leaf litter. Often encountered by workers in palm oil estates.',
+    photographyConditions:
+        'Can be highly defensive and strike quickly despite their fat appearance. Keep a respectful distance.',
     recommendedGear: ['Standard zoom lens (70-200mm)', 'Flash'],
     activityPattern: 'Nocturnal (Night-active)',
     bestSeasons: ['Wet season'],
@@ -1579,10 +1916,14 @@ const List<Species> speciesData = [
     category: Species.reptiles,
     conservationStatus: Species.leastConcern,
     habitat: 'Forests, mangroves, and urban settlements',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/1a/Equatorial_Spitting_Cobra_%28Naja_sumatrana%29.jpg',
-    description: 'A highly venomous cobra that can be solid black or golden-yellow depending on the region.',
-    behaviorNotes: 'Can accurately spray blinding venom into the eyes of a threat from several meters away.',
-    photographyConditions: 'EXTREME CAUTION. Wear protective eyewear if photographing. Common in Penang.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/1/1a/Equatorial_Spitting_Cobra_%28Naja_sumatrana%29.jpg',
+    description:
+        'A highly venomous cobra that can be solid black or golden-yellow depending on the region.',
+    behaviorNotes:
+        'Can accurately spray blinding venom into the eyes of a threat from several meters away.',
+    photographyConditions:
+        'EXTREME CAUTION. Wear protective eyewear if photographing. Common in Penang.',
     recommendedGear: ['Telephoto lens (300mm+)', 'Safety goggles (Mandatory)'],
     activityPattern: 'Diurnal / Nocturnal',
     bestSeasons: ['Year-round'],
@@ -1595,10 +1936,14 @@ const List<Species> speciesData = [
     category: Species.reptiles,
     conservationStatus: Species.leastConcern,
     habitat: 'Agricultural areas, forests, and near water',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/ae/Banded_krait.jpg',
-    description: 'An unmistakable, highly venomous snake with bold, alternating black and bright yellow bands.',
-    behaviorNotes: 'Extremely sluggish and docile during the day, but actively hunts other snakes at night.',
-    photographyConditions: 'Excellent, striking subject for night photography. Keep a safe distance despite their sluggishness.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/a/ae/Banded_krait.jpg',
+    description:
+        'An unmistakable, highly venomous snake with bold, alternating black and bright yellow bands.',
+    behaviorNotes:
+        'Extremely sluggish and docile during the day, but actively hunts other snakes at night.',
+    photographyConditions:
+        'Excellent, striking subject for night photography. Keep a safe distance despite their sluggishness.',
     recommendedGear: ['Mid-range lens (100-200mm)', 'Flash'],
     activityPattern: 'Nocturnal (Night-active)',
     bestSeasons: ['Wet season'],
@@ -1611,10 +1956,14 @@ const List<Species> speciesData = [
     category: Species.reptiles,
     conservationStatus: Species.leastConcern,
     habitat: 'Rainforests and human habitations',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Tokay_Gecko.jpg',
-    description: 'A large, colorful gecko known for its loud, distinctive "to-kay" call.',
-    behaviorNotes: 'Nocturnal and highly territorial. Often found on walls of buildings near forest edges.',
-    photographyConditions: 'Easy to photograph at night on walls, but can deliver a very strong bite if handled.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/2/2f/Tokay_Gecko.jpg',
+    description:
+        'A large, colorful gecko known for its loud, distinctive "to-kay" call.',
+    behaviorNotes:
+        'Nocturnal and highly territorial. Often found on walls of buildings near forest edges.',
+    photographyConditions:
+        'Easy to photograph at night on walls, but can deliver a very strong bite if handled.',
     recommendedGear: ['Macro lens', 'Flash'],
     activityPattern: 'Nocturnal (Night-active)',
     bestSeasons: ['Year-round'],
@@ -1627,10 +1976,14 @@ const List<Species> speciesData = [
     category: Species.reptiles,
     conservationStatus: Species.leastConcern,
     habitat: 'Urban gardens, parks, and scrublands',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Oriental_garden_lizard_%28Calotes_versicolor%29.jpg',
-    description: 'Also known as the changeable lizard due to its ability to turn bright red during breeding season.',
-    behaviorNotes: 'Diurnal and highly adaptable. Males display by head-bobbing.',
-    photographyConditions: 'Extremely common and approachable in parks and gardens during the day.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/7/7b/Oriental_garden_lizard_%28Calotes_versicolor%29.jpg',
+    description:
+        'Also known as the changeable lizard due to its ability to turn bright red during breeding season.',
+    behaviorNotes:
+        'Diurnal and highly adaptable. Males display by head-bobbing.',
+    photographyConditions:
+        'Extremely common and approachable in parks and gardens during the day.',
     recommendedGear: ['Standard zoom lens'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
@@ -1643,10 +1996,14 @@ const List<Species> speciesData = [
     category: Species.reptiles,
     conservationStatus: Species.leastConcern,
     habitat: 'Secondary forests, parks, and suburban trees',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/cd/Flying_dragon_%28Draco_volans%29.jpg',
-    description: 'A small agamid lizard with extendable ribs connected by skin, creating brightly colored "wings" for gliding.',
-    behaviorNotes: 'Territorial males display a bright yellow dewlap (throat flap). Glides effortlessly between tree trunks.',
-    photographyConditions: 'Common but hard to spot until they move. Wait near a known display tree for them to flash their colors.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/c/cd/Flying_dragon_%28Draco_volans%29.jpg',
+    description:
+        'A small agamid lizard with extendable ribs connected by skin, creating brightly colored "wings" for gliding.',
+    behaviorNotes:
+        'Territorial males display a bright yellow dewlap (throat flap). Glides effortlessly between tree trunks.',
+    photographyConditions:
+        'Common but hard to spot until they move. Wait near a known display tree for them to flash their colors.',
     recommendedGear: ['Tele-macro lens (200-300mm)', 'Fast shutter speed'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
@@ -1659,10 +2016,14 @@ const List<Species> speciesData = [
     category: Species.amphibians,
     conservationStatus: Species.leastConcern,
     habitat: 'Montane and sub-montane forest streams',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Rhacophorus_prominanus_%28Kopstein%27s_Tree_Frog%29.jpg',
-    description: 'A striking green tree frog with purple and orange webbing on its toes.',
-    behaviorNotes: 'Descends from the canopy to breed in quiet pools near forest streams at night.',
-    photographyConditions: 'A prized macro subject at Fraser\'s Hill. Very photogenic and cooperative.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/5/5c/Rhacophorus_prominanus_%28Kopstein%27s_Tree_Frog%29.jpg',
+    description:
+        'A striking green tree frog with purple and orange webbing on its toes.',
+    behaviorNotes:
+        'Descends from the canopy to breed in quiet pools near forest streams at night.',
+    photographyConditions:
+        'A prized macro subject at Fraser\'s Hill. Very photogenic and cooperative.',
     recommendedGear: ['Macro lens', 'Diffused twin-flash'],
     activityPattern: 'Nocturnal (Night-active)',
     bestSeasons: ['Rainy season'],
@@ -1675,10 +2036,14 @@ const List<Species> speciesData = [
     category: Species.amphibians,
     conservationStatus: Species.nearThreatened,
     habitat: 'Primary rainforest canopy in Borneo',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Zhangixalus_dulitensis.jpg',
-    description: 'A bizarre, almost translucent pale-green frog that looks like it is made of smooth jade.',
-    behaviorNotes: 'A canopy dweller that is almost impossible to find outside of heavy breeding rains.',
-    photographyConditions: 'Requires searching temporary rain pools in Danum Valley during heavy monsoons.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/6/6f/Zhangixalus_dulitensis.jpg',
+    description:
+        'A bizarre, almost translucent pale-green frog that looks like it is made of smooth jade.',
+    behaviorNotes:
+        'A canopy dweller that is almost impossible to find outside of heavy breeding rains.',
+    photographyConditions:
+        'Requires searching temporary rain pools in Danum Valley during heavy monsoons.',
     recommendedGear: ['Macro lens', 'Rain gear', 'Headlamp'],
     activityPattern: 'Nocturnal (Night-active)',
     bestSeasons: ['Monsoon season'],
@@ -1691,10 +2056,14 @@ const List<Species> speciesData = [
     category: Species.amphibians,
     conservationStatus: Species.leastConcern,
     habitat: 'High-altitude montane leaf litter',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ec/Megophrys_baluensis.jpg',
-    description: 'A mountain specialist with supreme camouflage, mimicking dead leaves perfectly with "horns" over its eyes.',
-    behaviorNotes: 'Relying entirely on camouflage, it will not hop away even if approached closely.',
-    photographyConditions: 'A fantastic, cooperative subject for focus-stacking if you can manage to spot one in Kinabalu Park.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/e/ec/Megophrys_baluensis.jpg',
+    description:
+        'A mountain specialist with supreme camouflage, mimicking dead leaves perfectly with "horns" over its eyes.',
+    behaviorNotes:
+        'Relying entirely on camouflage, it will not hop away even if approached closely.',
+    photographyConditions:
+        'A fantastic, cooperative subject for focus-stacking if you can manage to spot one in Kinabalu Park.',
     recommendedGear: ['Macro lens', 'Tripod', 'Knee pads'],
     activityPattern: 'Nocturnal (Night-active)',
     bestSeasons: ['Year-round'],
@@ -1707,10 +2076,14 @@ const List<Species> speciesData = [
     category: Species.amphibians,
     conservationStatus: Species.leastConcern,
     habitat: 'Fast-flowing rocky streams in deep forests',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Odorrana_hosii_%28Poisonous_Rock_Frog%29.jpg',
-    description: 'A sleek, bright green frog commonly found clinging to wet boulders in rushing streams.',
-    behaviorNotes: 'Secretes a mild toxin from its skin when stressed. Extremely agile jumpers.',
-    photographyConditions: 'Found in abundance along clear streams in Endau-Rompin or Taman Negara at night.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/5/53/Odorrana_hosii_%28Poisonous_Rock_Frog%29.jpg',
+    description:
+        'A sleek, bright green frog commonly found clinging to wet boulders in rushing streams.',
+    behaviorNotes:
+        'Secretes a mild toxin from its skin when stressed. Extremely agile jumpers.',
+    photographyConditions:
+        'Found in abundance along clear streams in Endau-Rompin or Taman Negara at night.',
     recommendedGear: ['Macro or standard zoom lens', 'Water-resistant boots'],
     activityPattern: 'Nocturnal (Night-active)',
     bestSeasons: ['Dry season'],
@@ -1723,10 +2096,14 @@ const List<Species> speciesData = [
     category: Species.insects,
     conservationStatus: Species.leastConcern,
     habitat: 'Shaded understory of primary and secondary forests',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/5/57/Neorina_lowii.jpg',
-    description: 'A large, dark butterfly with massive eye-spots on its wings that closely resemble the eyes of an owl.',
-    behaviorNotes: 'Flies low to the ground in the dark understory. Attracted to rotting fruit rather than flowers.',
-    photographyConditions: 'Often settles on the forest floor, allowing for careful, low-angle macro shots.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/5/57/Neorina_lowii.jpg',
+    description:
+        'A large, dark butterfly with massive eye-spots on its wings that closely resemble the eyes of an owl.',
+    behaviorNotes:
+        'Flies low to the ground in the dark understory. Attracted to rotting fruit rather than flowers.',
+    photographyConditions:
+        'Often settles on the forest floor, allowing for careful, low-angle macro shots.',
     recommendedGear: ['Macro lens', 'Tripod', 'Reflector'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
@@ -1739,10 +2116,14 @@ const List<Species> speciesData = [
     category: Species.insects,
     conservationStatus: Species.leastConcern,
     habitat: 'Forest canopies and high altitude clearings',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/af/Troides_amphrysus.jpg',
-    description: 'A massive, breathtaking butterfly with striking jet-black forewings and brilliant golden-yellow hindwings.',
-    behaviorNotes: 'Usually flies high in the canopy but will descend early in the morning to feed on flowering bushes.',
-    photographyConditions: 'Wait near flowering plants at forest edges in places like Kinabalu Park. Fast shutter speeds needed.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/a/af/Troides_amphrysus.jpg',
+    description:
+        'A massive, breathtaking butterfly with striking jet-black forewings and brilliant golden-yellow hindwings.',
+    behaviorNotes:
+        'Usually flies high in the canopy but will descend early in the morning to feed on flowering bushes.',
+    photographyConditions:
+        'Wait near flowering plants at forest edges in places like Kinabalu Park. Fast shutter speeds needed.',
     recommendedGear: ['Tele-macro lens (200mm+)', 'Fast shutter speed'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['March', 'April', 'May'],
@@ -1755,10 +2136,14 @@ const List<Species> speciesData = [
     category: Species.insects,
     conservationStatus: Species.leastConcern,
     habitat: 'Sunlit clearings and river edges in rainforests',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ee/Parthenos_sylvia_lilacinus.jpg',
-    description: 'A highly energetic, large butterfly with intricate blue, brown, and white geometric patterns.',
-    behaviorNotes: 'Known for its distinct flight pattern: a few rapid wingbeats followed by a flat, gliding "clip".',
-    photographyConditions: 'Very restless. The best time to photograph them is when they stop to puddle on wet mud near rivers.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/e/ee/Parthenos_sylvia_lilacinus.jpg',
+    description:
+        'A highly energetic, large butterfly with intricate blue, brown, and white geometric patterns.',
+    behaviorNotes:
+        'Known for its distinct flight pattern: a few rapid wingbeats followed by a flat, gliding "clip".',
+    photographyConditions:
+        'Very restless. The best time to photograph them is when they stop to puddle on wet mud near rivers.',
     recommendedGear: ['Standard zoom or macro lens', 'Patience'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Year-round'],
@@ -1771,10 +2156,14 @@ const List<Species> speciesData = [
     category: Species.insects,
     conservationStatus: Species.leastConcern,
     habitat: 'Dense tropical rainforest undergrowth',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/67/Kallima_inachus.jpg',
-    description: 'The master of disguise. When its wings are closed, it looks exactly like a dry, brown autumn leaf.',
-    behaviorNotes: 'When threatened, it drops into the leaf litter and closes its wings, instantly vanishing.',
-    photographyConditions: 'If you spot one resting, you have plenty of time to set up a tripod. Try to capture it partially opening its wings to show the hidden colors inside.',
+    imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/6/67/Kallima_inachus.jpg',
+    description:
+        'The master of disguise. When its wings are closed, it looks exactly like a dry, brown autumn leaf.',
+    behaviorNotes:
+        'When threatened, it drops into the leaf litter and closes its wings, instantly vanishing.',
+    photographyConditions:
+        'If you spot one resting, you have plenty of time to set up a tripod. Try to capture it partially opening its wings to show the hidden colors inside.',
     recommendedGear: ['Macro lens', 'Tripod', 'Off-camera flash'],
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Dry season'],
@@ -1789,12 +2178,12 @@ const List<Species> speciesData = [
     conservationStatus: '', // Tests "Status Unavailable" and Grey Chip
     habitat: '', // Tests section card empty text fallback
     imageUrl:
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Blank_square.svg/800px-Blank_square.svg.png', // Blank image so the network widget doesn't crash
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Blank_square.svg/800px-Blank_square.svg.png', // Blank image so the network widget doesn't crash
     description: '', // Tests section card empty text fallback
     behaviorNotes: '   ', // Tests section card empty text fallback
     photographyConditions: '', // Tests section card empty text fallback
     recommendedGear:
-    [], // Tests "No recommendations currently available" list fallback
+        [], // Tests "No recommendations currently available" list fallback
     activityPattern: '', // Tests "Activity N/A"
     bestSeasons: [], // Tests hiding the best seasons row
     difficultyLevel: 0, // Fallback difficulty

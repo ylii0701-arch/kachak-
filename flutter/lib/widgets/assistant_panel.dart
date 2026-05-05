@@ -126,6 +126,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
     super.dispose();
   }
 
+  /// Sends user message, handles clarification flow, and routes to Gemini.
   Future<void> _submitQuestion() async {
     final question = _inputController.text.trim();
     if (question.isEmpty) return;
@@ -158,6 +159,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
     await _replyWithGemini(question);
   }
 
+  /// Handles tap on starter suggestions and asks follow-up clarification.
   void _onSuggestionTap(String suggestion) {
     setState(() {
       _messages.add(_ChatMessage.user(suggestion));
@@ -186,6 +188,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
     _scrollToBottom();
   }
 
+  /// Calls Gemini and appends assistant response into chat history.
   Future<void> _replyWithGemini(String userPrompt) async {
     setState(() => _isAssistantTyping = true);
     _scrollToBottom();
@@ -202,6 +205,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
     });
   }
 
+  /// Builds Gemini request with model fallback and concise formatting rules.
   Future<String> _fetchGeminiReply(String userPrompt) async {
     if (geminiApiKey.isEmpty) {
       return 'Gemini API key is missing. Please run with --dart-define=GEMINI_API_KEY=...';
@@ -344,6 +348,7 @@ If user mentions phone/digicam/compact camera, give practical advice for that ge
     }
   }
 
+  /// Converts API error payloads to user-readable text.
   String _extractGeminiError(http.Response response) {
     try {
       final decoded = jsonDecode(response.body) as Map<String, dynamic>;
@@ -358,6 +363,7 @@ If user mentions phone/digicam/compact camera, give practical advice for that ge
     return 'Gemini request failed (${response.statusCode}). Please verify key, quota, and model access.';
   }
 
+  /// Removes malformed markdown artifacts returned by model outputs.
   String _normalizeMarkdownArtifacts(String text) {
     final boldCount = RegExp(r'\*\*').allMatches(text).length;
     if (boldCount.isOdd) {
@@ -367,6 +373,7 @@ If user mentions phone/digicam/compact camera, give practical advice for that ge
     return text;
   }
 
+  /// Lightweight relevance filter to keep assistant on app scope.
   bool _isWildlifePhotographyRelevant(String text) {
     final normalized = text.toLowerCase().trim();
     if (normalized.isEmpty) return false;
@@ -386,6 +393,7 @@ If user mentions phone/digicam/compact camera, give practical advice for that ge
     return false;
   }
 
+  /// Builds richer prompt from prior suggested question + user clarification.
   String _composePromptWithClarification({
     required String originalQuestion,
     required String clarification,
@@ -413,6 +421,7 @@ Please answer using the preparation checklist template.
 ''';
   }
 
+  /// Ensures latest message remains visible after dynamic layout updates.
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!_scrollController.hasClients) return;

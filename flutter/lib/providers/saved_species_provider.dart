@@ -7,6 +7,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../main.dart';
 
+/// Stores favorite species and local alert preferences in SharedPreferences.
 class SavedSpeciesProvider extends ChangeNotifier {
   SavedSpeciesProvider(this._prefs) {
     _load();
@@ -21,6 +22,7 @@ class SavedSpeciesProvider extends ChangeNotifier {
 
   Set<String> get savedIds => Set.unmodifiable(_ids);
 
+  /// Hydrates provider state from local storage on startup.
   void _load() {
     final raw = _prefs.getString(_storageKey);
     if (raw != null && raw.isNotEmpty) {
@@ -29,7 +31,9 @@ class SavedSpeciesProvider extends ChangeNotifier {
         _ids
           ..clear()
           ..addAll(list.cast<String>());
-      } catch (_) {}
+      } catch (_) {
+        // Ignore malformed data and fall back to empty set.
+      }
     }
 
     final rawNotif = _prefs.getString(_notifKey);
@@ -39,7 +43,9 @@ class SavedSpeciesProvider extends ChangeNotifier {
         _notifiedIds
           ..clear()
           ..addAll(list.cast<String>());
-      } catch (_) {}
+      } catch (_) {
+        // Ignore malformed data and fall back to empty set.
+      }
     }
   }
 
@@ -47,6 +53,7 @@ class SavedSpeciesProvider extends ChangeNotifier {
 
   bool isNotified(String speciesId) => _notifiedIds.contains(speciesId);
 
+  /// Adds/removes a species from saved list and persists the update.
   Future<void> toggleSaved(String speciesId) async {
     final wasSaved = _ids.contains(speciesId);
     final wasNotified = _notifiedIds.contains(speciesId);
@@ -66,7 +73,10 @@ class SavedSpeciesProvider extends ChangeNotifier {
     notifyListeners();
 
     // Persist; rollback if storage fails.
-    final success = await _prefs.setString(_storageKey, jsonEncode(_ids.toList()));
+    final success = await _prefs.setString(
+      _storageKey,
+      jsonEncode(_ids.toList()),
+    );
     if (!success) {
       if (wasSaved) {
         _ids.add(speciesId);
@@ -82,6 +92,7 @@ class SavedSpeciesProvider extends ChangeNotifier {
     }
   }
 
+  /// Enables/disables local notifications for a saved species.
   Future<bool> toggleNotification(String speciesId) async {
     if (!_ids.contains(speciesId)) return false;
 
@@ -107,6 +118,7 @@ class SavedSpeciesProvider extends ChangeNotifier {
     return true;
   }
 
+  /// Schedules a short-delay demo alert so users can verify notification flow.
   Future<void> _scheduleLocalAlert(String speciesId) async {
     const androidDetails = AndroidNotificationDetails(
       'high_prob_channel',
@@ -125,7 +137,8 @@ class SavedSpeciesProvider extends ChangeNotifier {
           'Optimal Conditions Detected!',
           'High activity expected tomorrow morning in your area.',
           notifDetails,
-          payload: 'Clear skies tomorrow morning. Best time: 06:00 AM. Location: Selangor, Malaysia',
+          payload:
+              'Clear skies tomorrow morning. Best time: 06:00 AM. Location: Selangor, Malaysia',
         );
       }
     });

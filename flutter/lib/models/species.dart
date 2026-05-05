@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 typedef ConservationStatus = String;
 typedef SpeciesCategory = String;
 
+/// Canonical species entity used across browse, detail, mission, and prediction flows.
 class Species {
   const Species({
     required this.id,
@@ -49,6 +50,7 @@ class Species {
   static const String insects = 'Insects';
 }
 
+/// Background tint for conservation status chips.
 Color statusBackgroundColor(String status) {
   switch (status) {
     case Species.leastConcern:
@@ -66,6 +68,7 @@ Color statusBackgroundColor(String status) {
   }
 }
 
+/// Text color paired with [statusBackgroundColor] chip tints.
 Color statusForegroundColor(String status) {
   switch (status) {
     case Species.nearThreatened:
@@ -76,6 +79,7 @@ Color statusForegroundColor(String status) {
   }
 }
 
+/// Sort rank from least concern to critical.
 int conservationStatusRank(String status) {
   const order = [
     Species.leastConcern,
@@ -88,6 +92,7 @@ int conservationStatusRank(String status) {
   return i >= 0 ? i : 0;
 }
 
+/// Builds short labels like "NT", "VU", "CR".
 String statusAbbreviation(String status) {
   return status.split(' ').map((w) => w.isNotEmpty ? w[0] : '').join();
 }

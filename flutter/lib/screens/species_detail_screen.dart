@@ -18,6 +18,7 @@ import '../widgets/glass.dart';
 import '../widgets/species_network_image.dart';
 import 'species_prediction_screen.dart';
 
+/// Species deep-dive page with habitat, tips, map links, and prediction snapshot.
 class SpeciesDetailScreen extends StatelessWidget {
   const SpeciesDetailScreen({super.key, required this.speciesId});
 
@@ -26,7 +27,9 @@ class SpeciesDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = Adaptive.scale(context);
+    // Resolve species + related state payloads once per build.
     final species = speciesById(speciesId);
+    // Fallback page for stale/deleted IDs.
     if (species == null) {
       return AssistantOverlayLayer(
         child: Scaffold(
@@ -64,6 +67,7 @@ class SpeciesDetailScreen extends StatelessWidget {
       );
     }
 
+    // Provider flags drive favorite/notification controls in the header.
     final saved = context.watch<SavedSpeciesProvider>();
     final isFav = saved.isSaved(species.id);
     final isNotified = saved.isNotified(species.id);
@@ -76,6 +80,7 @@ class SpeciesDetailScreen extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             const MistBackdrop(backgroundBlurSigma: 5),
+            // Sliver layout keeps hero + long info sections smooth and performant.
             CustomScrollView(
               slivers: [
                 SliverAppBar(
@@ -396,12 +401,14 @@ class SpeciesDetailScreen extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 12 * s),
+                      // Core species profile cards.
                       _sectionCard(
                         context,
                         title: 'About',
                         icon: Icons.info_outline,
                         child: Text(species.description),
                       ),
+                      // Prediction snapshot appears only when forecast exists.
                       if (speciesPrediction != null)
                         _predictionSnapshotCard(
                           context,
@@ -562,7 +569,9 @@ class SpeciesDetailScreen extends StatelessWidget {
     );
   }
 
+  /// Builds habitat/observation rows and map deep-link affordances.
   Widget _habitatLocationsSection(BuildContext context, Species species) {
+    // Compose a unified list from observation pins + photography spots.
     final locs = speciesLocationsForSpecies(species.id);
     final spots = photographySpotsForSpeciesId(species.id);
     if (locs.isEmpty && spots.isEmpty) return const SizedBox.shrink();
@@ -651,6 +660,7 @@ class SpeciesDetailScreen extends StatelessWidget {
     );
   }
 
+  /// Reusable clickable location row that jumps to Map tab focus.
   Widget _locationMapRow(
     BuildContext context, {
     required int index,
@@ -668,6 +678,7 @@ class SpeciesDetailScreen extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
+          // Jump to map tab, center on pin, then close detail stack.
           context.read<AppShellController>().openMapAt(
             point,
             zoom: 15,
@@ -732,12 +743,14 @@ class SpeciesDetailScreen extends StatelessWidget {
     );
   }
 
+  /// Shared frosted section card wrapper for species info blocks.
   Widget _sectionCard(
     BuildContext context, {
     required String title,
     IconData? icon,
     required Widget child,
   }) {
+    // Gracefully replace blank content with readable placeholders.
     Widget content = child;
     if (child is Text && (child.data == null || child.data!.trim().isEmpty)) {
       content = Text(
@@ -847,11 +860,13 @@ class SpeciesDetailScreen extends StatelessWidget {
     }
   }
 
+  /// Inline prediction summary card shown on detail page before full forecast view.
   Widget _predictionSnapshotCard(
     BuildContext context, {
     required Species species,
     required SpeciesPrediction prediction,
   }) {
+    // Uses first forecast item as "current" snapshot.
     final s = Adaptive.scale(context);
     final currentForecast = prediction.forecast.isNotEmpty
         ? prediction.forecast.first
@@ -908,7 +923,12 @@ class SpeciesDetailScreen extends StatelessWidget {
                           '${prediction.locationName} • ${prediction.distance.toStringAsFixed(1)}km away',
                           style: GoogleFonts.plusJakartaSans(
                             color: AppColors.textSubtitleOnFrost,
-                            fontSize: Adaptive.clamp(context, 13, min: 11, max: 15),
+                            fontSize: Adaptive.clamp(
+                              context,
+                              13,
+                              min: 11,
+                              max: 15,
+                            ),
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.05,
                           ),
@@ -993,7 +1013,8 @@ class SpeciesDetailScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (_) => SpeciesPredictionScreen(speciesId: species.id),
+                      builder: (_) =>
+                          SpeciesPredictionScreen(speciesId: species.id),
                     ),
                   );
                 },
@@ -1006,6 +1027,7 @@ class SpeciesDetailScreen extends StatelessWidget {
     );
   }
 
+  /// Small metric pill used by the prediction summary card.
   Widget _predictionMiniFact(
     BuildContext context, {
     required IconData icon,
@@ -1065,6 +1087,7 @@ class SpeciesDetailScreen extends StatelessWidget {
     );
   }
 
+  /// Inner white panel used inside frosted glass cards for readability.
   Widget _innerInfoCard({required Widget child, EdgeInsets? padding}) {
     return Container(
       width: double.infinity,

@@ -4,11 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../config/map_keys.dart';
 
+/// Entry-point for mobile/desktop recognition using local file input.
 Future<Map<String, dynamic>> identifySpecies(File imageFile) async {
   final bytes = await imageFile.readAsBytes();
   return identifySpeciesFromBytes(bytes);
 }
 
+/// Shared recognition request using raw image bytes (web-safe path).
 Future<Map<String, dynamic>> identifySpeciesFromBytes(Uint8List bytes) async {
   if (geminiApiKey.isEmpty) {
     return {
@@ -19,7 +21,7 @@ Future<Map<String, dynamic>> identifySpeciesFromBytes(Uint8List bytes) async {
   }
   final base64Image = base64Encode(bytes);
 
-  // Hidden Instruction for Gemini
+  // Instruction constrains model output into strict machine-readable JSON.
   final systemInstruction = '''
 You are the KaChak AI species recognition engine.
 Analyze the provided image and classify it. You must reply STRICTLY in JSON format with no markdown tags.

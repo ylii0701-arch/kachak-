@@ -250,6 +250,7 @@ class _GlassBottomNav extends StatelessWidget {
   }
 }
 
+/// Root shell hosting tab navigation, overlay assistant, and side menu.
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
 
@@ -260,12 +261,14 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   bool _menuOpen = false;
 
+  /// Toggles right-side quick menu panel.
   void _toggleMenu() {
     setState(() {
       _menuOpen = !_menuOpen;
     });
   }
 
+  /// Closes menu panel if currently open.
   void _closeMenu() {
     if (!_menuOpen) return;
     setState(() {
@@ -273,6 +276,7 @@ class _MainShellState extends State<MainShell> {
     });
   }
 
+  /// Opens Saved screen from side menu and jumps back to Home on explore CTA.
   Future<void> _openSaved() async {
     _closeMenu();
     await Future<void>.delayed(const Duration(milliseconds: 200));
@@ -354,6 +358,7 @@ class _MainShellState extends State<MainShell> {
         : 6 * s + 64 * s;
     final panelWidth = (screenWidth * 0.74).clamp(240.0, 320.0);
 
+    // Main page surface (tabs + bottom nav) that slides when menu opens.
     final pageSurface = AssistantOverlayLayer(
       reservedBottom: navBarHeight,
       child: Scaffold(
@@ -363,6 +368,7 @@ class _MainShellState extends State<MainShell> {
           fit: StackFit.expand,
           children: [
             const MistBackdrop(backgroundBlurSigma: 9),
+            // Keep tab states alive while switching bottom navigation.
             IndexedStack(
               index: shell.index,
               children: const [
@@ -373,6 +379,7 @@ class _MainShellState extends State<MainShell> {
                 MapScreen(),
               ],
             ),
+            // Dim backdrop captures taps to close menu.
             if (_menuOpen)
               Positioned.fill(
                 child: GestureDetector(
@@ -432,6 +439,7 @@ class _MainShellState extends State<MainShell> {
       ),
     );
 
+    // Right-side menu layer behind sliding page surface.
     return Stack(
       fit: StackFit.expand,
       children: [

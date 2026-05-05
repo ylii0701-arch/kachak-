@@ -1,6 +1,7 @@
 import 'package:latlong2/latlong.dart';
 import 'site_data.dart';
 
+/// One observed species point used by map and detail deep-link sections.
 class SpeciesLocation {
   const SpeciesLocation({
     required this.id,
@@ -17,6 +18,7 @@ class SpeciesLocation {
   final String lastSeen;
 }
 
+/// User-facing wildlife photography point of interest.
 class PhotographySpot {
   const PhotographySpot({
     required this.id,
@@ -41,6 +43,7 @@ class PhotographySpot {
   final String description;
 }
 
+/// Polygon describing restricted photography/no-go areas.
 class RestrictedZone {
   const RestrictedZone({
     required this.id,
@@ -59,6 +62,7 @@ class RestrictedZone {
   final String description;
 }
 
+/// Protected conservation boundary polygon displayed on map overlays.
 class ProtectedArea {
   const ProtectedArea({
     required this.id,
@@ -77,6 +81,7 @@ class ProtectedArea {
   final String established;
 }
 
+/// Legacy lightweight weather marker model for map overlays.
 class WeatherData {
   const WeatherData({
     required this.lat,
@@ -94,30 +99,174 @@ class WeatherData {
 }
 
 const List<SpeciesLocation> speciesLocations = [
-  SpeciesLocation(id: 'loc1', speciesId: '1', lat: 3.2050, lng: 101.7290, lastSeen: '2026-04-01'),
-  SpeciesLocation(id: 'loc2', speciesId: '1', lat: 3.1850, lng: 101.7050, lastSeen: '2026-03-30'),
-  SpeciesLocation(id: 'loc3', speciesId: '2', lat: 3.1690, lng: 101.6950, lastSeen: '2026-03-28'),
-  SpeciesLocation(id: 'loc4', speciesId: '3', lat: 3.2150, lng: 101.7150, lastSeen: '2026-04-02'),
-  SpeciesLocation(id: 'loc5', speciesId: '3', lat: 3.1750, lng: 101.7250, lastSeen: '2026-04-01'),
-  SpeciesLocation(id: 'loc6', speciesId: '3', lat: 3.1550, lng: 101.6750, lastSeen: '2026-03-31'),
-  SpeciesLocation(id: 'loc7', speciesId: '4', lat: 3.1990, lng: 101.7190, lastSeen: '2026-03-29'),
-  SpeciesLocation(id: 'loc8', speciesId: '5', lat: 3.1450, lng: 101.6850, lastSeen: '2026-04-02'),
-  SpeciesLocation(id: 'loc9', speciesId: '5', lat: 3.1650, lng: 101.6950, lastSeen: '2026-04-01'),
-  SpeciesLocation(id: 'loc10', speciesId: '6', lat: 3.1890, lng: 101.7090, lastSeen: '2026-03-30'),
-  SpeciesLocation(id: 'loc11', speciesId: '7', lat: 3.2250, lng: 101.7350, lastSeen: '2026-04-02'),
-  SpeciesLocation(id: 'loc12', speciesId: '7', lat: 3.1950, lng: 101.7250, lastSeen: '2026-04-01'),
-  SpeciesLocation(id: 'loc13', speciesId: '8', lat: 3.1590, lng: 101.6890, lastSeen: '2026-04-03'),
-  SpeciesLocation(id: 'loc14', speciesId: '8', lat: 3.1790, lng: 101.7090, lastSeen: '2026-04-02'),
-  SpeciesLocation(id: 'loc15', speciesId: '8', lat: 3.1490, lng: 101.6790, lastSeen: '2026-04-01'),
-  SpeciesLocation(id: 'loc16', speciesId: '9', lat: 3.1690, lng: 101.6990, lastSeen: '2026-04-01'),
-  SpeciesLocation(id: 'loc17', speciesId: '10', lat: 3.1290, lng: 101.6690, lastSeen: '2026-03-30'),
-  SpeciesLocation(id: 'loc18', speciesId: '11', lat: 3.1990, lng: 101.7190, lastSeen: '2026-04-02'),
-  SpeciesLocation(id: 'loc19', speciesId: '11', lat: 3.1790, lng: 101.7090, lastSeen: '2026-04-01'),
-  SpeciesLocation(id: 'loc20', speciesId: '12', lat: 3.2090, lng: 101.7290, lastSeen: '2026-03-28'),
-  SpeciesLocation(id: 'loc21', speciesId: '13', lat: 3.1980, lng: 101.7120, lastSeen: '2026-03-25'),
-  SpeciesLocation(id: 'loc22', speciesId: '14', lat: 5.3820, lng: 117.0810, lastSeen: '2026-03-22'),
-  SpeciesLocation(id: 'loc23', speciesId: '15', lat: 2.0150, lng: 103.4420, lastSeen: '2026-03-30'),
-  SpeciesLocation(id: 'loc24', speciesId: '17', lat: 4.0480, lng: 114.8800, lastSeen: '2026-04-02'),
+  SpeciesLocation(
+    id: 'loc1',
+    speciesId: '1',
+    lat: 3.2050,
+    lng: 101.7290,
+    lastSeen: '2026-04-01',
+  ),
+  SpeciesLocation(
+    id: 'loc2',
+    speciesId: '1',
+    lat: 3.1850,
+    lng: 101.7050,
+    lastSeen: '2026-03-30',
+  ),
+  SpeciesLocation(
+    id: 'loc3',
+    speciesId: '2',
+    lat: 3.1690,
+    lng: 101.6950,
+    lastSeen: '2026-03-28',
+  ),
+  SpeciesLocation(
+    id: 'loc4',
+    speciesId: '3',
+    lat: 3.2150,
+    lng: 101.7150,
+    lastSeen: '2026-04-02',
+  ),
+  SpeciesLocation(
+    id: 'loc5',
+    speciesId: '3',
+    lat: 3.1750,
+    lng: 101.7250,
+    lastSeen: '2026-04-01',
+  ),
+  SpeciesLocation(
+    id: 'loc6',
+    speciesId: '3',
+    lat: 3.1550,
+    lng: 101.6750,
+    lastSeen: '2026-03-31',
+  ),
+  SpeciesLocation(
+    id: 'loc7',
+    speciesId: '4',
+    lat: 3.1990,
+    lng: 101.7190,
+    lastSeen: '2026-03-29',
+  ),
+  SpeciesLocation(
+    id: 'loc8',
+    speciesId: '5',
+    lat: 3.1450,
+    lng: 101.6850,
+    lastSeen: '2026-04-02',
+  ),
+  SpeciesLocation(
+    id: 'loc9',
+    speciesId: '5',
+    lat: 3.1650,
+    lng: 101.6950,
+    lastSeen: '2026-04-01',
+  ),
+  SpeciesLocation(
+    id: 'loc10',
+    speciesId: '6',
+    lat: 3.1890,
+    lng: 101.7090,
+    lastSeen: '2026-03-30',
+  ),
+  SpeciesLocation(
+    id: 'loc11',
+    speciesId: '7',
+    lat: 3.2250,
+    lng: 101.7350,
+    lastSeen: '2026-04-02',
+  ),
+  SpeciesLocation(
+    id: 'loc12',
+    speciesId: '7',
+    lat: 3.1950,
+    lng: 101.7250,
+    lastSeen: '2026-04-01',
+  ),
+  SpeciesLocation(
+    id: 'loc13',
+    speciesId: '8',
+    lat: 3.1590,
+    lng: 101.6890,
+    lastSeen: '2026-04-03',
+  ),
+  SpeciesLocation(
+    id: 'loc14',
+    speciesId: '8',
+    lat: 3.1790,
+    lng: 101.7090,
+    lastSeen: '2026-04-02',
+  ),
+  SpeciesLocation(
+    id: 'loc15',
+    speciesId: '8',
+    lat: 3.1490,
+    lng: 101.6790,
+    lastSeen: '2026-04-01',
+  ),
+  SpeciesLocation(
+    id: 'loc16',
+    speciesId: '9',
+    lat: 3.1690,
+    lng: 101.6990,
+    lastSeen: '2026-04-01',
+  ),
+  SpeciesLocation(
+    id: 'loc17',
+    speciesId: '10',
+    lat: 3.1290,
+    lng: 101.6690,
+    lastSeen: '2026-03-30',
+  ),
+  SpeciesLocation(
+    id: 'loc18',
+    speciesId: '11',
+    lat: 3.1990,
+    lng: 101.7190,
+    lastSeen: '2026-04-02',
+  ),
+  SpeciesLocation(
+    id: 'loc19',
+    speciesId: '11',
+    lat: 3.1790,
+    lng: 101.7090,
+    lastSeen: '2026-04-01',
+  ),
+  SpeciesLocation(
+    id: 'loc20',
+    speciesId: '12',
+    lat: 3.2090,
+    lng: 101.7290,
+    lastSeen: '2026-03-28',
+  ),
+  SpeciesLocation(
+    id: 'loc21',
+    speciesId: '13',
+    lat: 3.1980,
+    lng: 101.7120,
+    lastSeen: '2026-03-25',
+  ),
+  SpeciesLocation(
+    id: 'loc22',
+    speciesId: '14',
+    lat: 5.3820,
+    lng: 117.0810,
+    lastSeen: '2026-03-22',
+  ),
+  SpeciesLocation(
+    id: 'loc23',
+    speciesId: '15',
+    lat: 2.0150,
+    lng: 103.4420,
+    lastSeen: '2026-03-30',
+  ),
+  SpeciesLocation(
+    id: 'loc24',
+    speciesId: '17',
+    lat: 4.0480,
+    lng: 114.8800,
+    lastSeen: '2026-04-02',
+  ),
 ];
 
 // Dynamically generate map markers directly from siteData
@@ -130,7 +279,8 @@ final List<PhotographySpot> photographySpots = siteData.map((site) {
     lng: site.lng,
     habitatType: site.type,
     accessibility: site.accessibility,
-    publicAccess: !site.isCaptive, // Captive sites (Zoos) require tickets, treated as non-public access here
+    publicAccess: !site
+        .isCaptive, // Captive sites (Zoos) require tickets, treated as non-public access here
     speciesIds: site.supportedSpeciesIds,
     description: site.description,
   );
@@ -178,7 +328,7 @@ final List<RestrictedZone> restrictedZones = [
     type: 'Unsafe',
     reason: 'Landslide Risk',
     description:
-    'High landslide risk area, especially during rainy season. Entry not recommended.',
+        'High landslide risk area, especially during rainy season. Entry not recommended.',
   ),
   RestrictedZone(
     id: 'zone4',
@@ -191,7 +341,8 @@ final List<RestrictedZone> restrictedZones = [
     ]),
     type: 'Unsafe',
     reason: 'Steep Terrain',
-    description: 'Dangerous cliff area with unstable ground. Avoid during wet conditions.',
+    description:
+        'Dangerous cliff area with unstable ground. Avoid during wet conditions.',
   ),
 ];
 
@@ -207,7 +358,7 @@ final List<ProtectedArea> protectedAreas = [
     ]),
     type: 'National Park',
     description:
-    'One of the oldest rainforests in the world. Home to diverse wildlife including elephants, tigers, and hornbills.',
+        'One of the oldest rainforests in the world. Home to diverse wildlife including elephants, tigers, and hornbills.',
     established: '1938',
   ),
   ProtectedArea(
@@ -221,7 +372,7 @@ final List<ProtectedArea> protectedAreas = [
     ]),
     type: 'Forest Reserve',
     description:
-    'Urban forest reserve in the heart of Kuala Lumpur. Excellent for birdwatching and small mammals.',
+        'Urban forest reserve in the heart of Kuala Lumpur. Excellent for birdwatching and small mammals.',
     established: '1906',
   ),
   ProtectedArea(
@@ -235,7 +386,7 @@ final List<ProtectedArea> protectedAreas = [
     ]),
     type: 'Wildlife Reserve',
     description:
-    'Research forest with canopy walkway. Important habitat for hornbills and primates.',
+        'Research forest with canopy walkway. Important habitat for hornbills and primates.',
     established: '1929',
   ),
   ProtectedArea(
@@ -249,7 +400,7 @@ final List<ProtectedArea> protectedAreas = [
     ]),
     type: 'Forest Reserve',
     description:
-    'Riverine forest with recreational facilities. Popular for eco-tourism and wildlife observation.',
+        'Riverine forest with recreational facilities. Popular for eco-tourism and wildlife observation.',
     established: '1964',
   ),
 ];
@@ -261,11 +412,41 @@ List<PhotographySpot> photographySpotsForSpeciesId(String speciesId) =>
     photographySpots.where((s) => s.speciesIds.contains(speciesId)).toList();
 
 const List<WeatherData> mockWeatherData = [
-  WeatherData(lat: 3.1390, lng: 101.6869, temperature: 32, humidity: 75, condition: 'Partly Cloudy'),
-  WeatherData(lat: 3.2050, lng: 101.7290, temperature: 28, humidity: 85, condition: 'Cloudy'),
-  WeatherData(lat: 3.1590, lng: 101.6990, temperature: 30, humidity: 80, condition: 'Sunny'),
-  WeatherData(lat: 3.2350, lng: 101.6350, temperature: 27, humidity: 82, condition: 'Partly Cloudy'),
-  WeatherData(lat: 3.1290, lng: 101.6690, temperature: 31, humidity: 78, condition: 'Sunny'),
+  WeatherData(
+    lat: 3.1390,
+    lng: 101.6869,
+    temperature: 32,
+    humidity: 75,
+    condition: 'Partly Cloudy',
+  ),
+  WeatherData(
+    lat: 3.2050,
+    lng: 101.7290,
+    temperature: 28,
+    humidity: 85,
+    condition: 'Cloudy',
+  ),
+  WeatherData(
+    lat: 3.1590,
+    lng: 101.6990,
+    temperature: 30,
+    humidity: 80,
+    condition: 'Sunny',
+  ),
+  WeatherData(
+    lat: 3.2350,
+    lng: 101.6350,
+    temperature: 27,
+    humidity: 82,
+    condition: 'Partly Cloudy',
+  ),
+  WeatherData(
+    lat: 3.1290,
+    lng: 101.6690,
+    temperature: 31,
+    humidity: 78,
+    condition: 'Sunny',
+  ),
 ];
 
 bool isPointInPolygon(LatLng point, List<LatLng> polygon) {
@@ -278,7 +459,8 @@ bool isPointInPolygon(LatLng point, List<LatLng> polygon) {
     final lat2 = polygon[j].latitude;
     final lng2 = polygon[j].longitude;
     final intersect =
-        ((lng1 > lng) != (lng2 > lng)) && (lat < (lat2 - lat1) * (lng - lng1) / (lng2 - lng1) + lat1);
+        ((lng1 > lng) != (lng2 > lng)) &&
+        (lat < (lat2 - lat1) * (lng - lng1) / (lng2 - lng1) + lat1);
     if (intersect) inside = !inside;
   }
   return inside;

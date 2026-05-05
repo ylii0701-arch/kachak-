@@ -21,6 +21,9 @@ class MissionScreen extends StatefulWidget {
 }
 
 class _MissionScreenState extends State<MissionScreen> {
+  /// Quiz flow state:
+  /// - _started controls intro vs quiz flow
+  /// - _step controls current quiz/result/task screen
   bool _started = false;
   int _step = 0;
   String? _gear;
@@ -33,6 +36,7 @@ class _MissionScreenState extends State<MissionScreen> {
   List<_TaskCardData> _missionTasks = const [];
   final Map<String, String> _lastTaskFingerprintByProfile = {};
 
+  /// Starts the mission quiz from intro page.
   void _startQuiz() {
     setState(() {
       _started = true;
@@ -40,12 +44,14 @@ class _MissionScreenState extends State<MissionScreen> {
     });
   }
 
+  /// Moves one step back in quiz flow.
   void _goBackStep() {
     if (_step > 0) {
       setState(() => _step--);
     }
   }
 
+  /// Resets all mission selections, generated tasks, and proof progress.
   void _startOver() {
     setState(() {
       _started = false;
@@ -61,26 +67,32 @@ class _MissionScreenState extends State<MissionScreen> {
     });
   }
 
+  /// Handles quiz answer selection and advances step-by-step.
+  /// Once all answers are available, generates mission summary + checklist.
   void _selectAnswer(String value) {
     setState(() {
       _proofSpecies = null;
       _proofSubmissions.clear();
+      // Step 0: gear selection.
       if (_step == 0) {
         _gear = value;
         _step = 1;
         return;
       }
+      // Step 1: difficulty selection.
       if (_step == 1) {
         _difficulty = value;
         _step = 2;
         return;
       }
+      // Step 2: subject/category selection.
       if (_step == 2) {
         _subject = value;
         _step = 3;
         return;
       }
 
+      // Step 3: preferred time selected -> finalize mission payload.
       _timePeriod = value;
       _mission = buildMissionRecommendation(
         gear: _gear ?? 'Smartphone',
@@ -97,6 +109,7 @@ class _MissionScreenState extends State<MissionScreen> {
     });
   }
 
+  /// Opens identify flow and returns a verified species as mission proof.
   Future<void> _uploadMissionProof() async {
     final expectedCategory = _subject;
     if (expectedCategory == null) return;
@@ -122,6 +135,7 @@ class _MissionScreenState extends State<MissionScreen> {
     );
   }
 
+  /// Confirms destructive reset from the task list screen.
   Future<void> _confirmResetFromTaskList() async {
     final shouldReset = await showDialog<bool>(
       context: context,
@@ -268,6 +282,7 @@ class _MissionScreenState extends State<MissionScreen> {
   }
 
   Widget _contentByStep() {
+    // Step router for intro, quiz screens, recommendation, and task list.
     if (!_started) {
       return _introBlock();
     }
@@ -452,6 +467,7 @@ class _MissionScreenState extends State<MissionScreen> {
   }
 
   Widget _taskListCard() {
+    // Weekly task panel keeps fixed rounded shape; inner content scrolls.
     final s = Adaptive.scale(context);
     final panelHeight = (MediaQuery.sizeOf(context).height * 0.72).clamp(
       440.0,
@@ -528,6 +544,7 @@ class _MissionScreenState extends State<MissionScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 2),
+                    // Horizontal target-species strip for quick discovery.
                     if (speciesTargets.isNotEmpty) ...[
                       Text(
                         'Target species suggestions',
@@ -557,6 +574,7 @@ class _MissionScreenState extends State<MissionScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
+                    // Render generated task cards with rule-based progress.
                     ...taskItems.map(
                       (task) => Padding(
                         padding: const EdgeInsets.only(bottom: 8),
@@ -564,6 +582,7 @@ class _MissionScreenState extends State<MissionScreen> {
                       ),
                     ),
                     if (_proofSpecies != null) ...[
+                      // Lightweight feedback that latest proof was accepted.
                       const SizedBox(height: 2),
                       Container(
                         width: double.infinity,
@@ -797,16 +816,20 @@ class _MissionScreenState extends State<MissionScreen> {
     }
   }
 
+  /// Creates varied, verifiable tasks from the selected profile.
+  /// Includes anti-repeat behavior per profile combination.
   List<_TaskCardData> _generateTaskChecklist({
     required String subject,
     required String difficulty,
     required String gear,
     required String preferredTime,
   }) {
+    // Species shortlist affects specific/rarity task availability.
     final speciesTargets = _recommendedSpeciesForSubject(
       subject: subject,
       difficulty: difficulty,
     );
+    // Difficulty controls number of cards shown in final checklist.
     final maxTasks = switch (difficulty) {
       'Challenging' => 3,
       'Standard' => 2,
@@ -818,6 +841,7 @@ class _MissionScreenState extends State<MissionScreen> {
         profileKey.hashCode ^
         speciesTargets.length;
     List<_TaskCardData> generated = const [];
+    // Retry generation with shifted seed to reduce repeated output per profile.
     for (var attempt = 0; attempt < 6; attempt++) {
       generated = _buildTaskSet(
         subject: subject,
@@ -831,6 +855,7 @@ class _MissionScreenState extends State<MissionScreen> {
       final fingerprint = generated.map((t) => t.title).join('|');
       final previous = _lastTaskFingerprintByProfile[profileKey];
       if (fingerprint != previous || attempt == 5) {
+        // Persist last set so the next generation can avoid immediate repeats.
         _lastTaskFingerprintByProfile[profileKey] = fingerprint;
         break;
       }
@@ -838,6 +863,7 @@ class _MissionScreenState extends State<MissionScreen> {
     return generated;
   }
 
+  /// Builds one candidate task set using weighted templates.
   List<_TaskCardData> _buildTaskSet({
     required String subject,
     required String difficulty,
@@ -849,6 +875,7 @@ class _MissionScreenState extends State<MissionScreen> {
   }) {
     final subjectLower = subject.toLowerCase();
     final singular = _subjectSingular(subject);
+    // Core detection/count objective (always present).
     final categoryTargetCount = _categoryCountTarget(
       difficulty: difficulty,
       gear: gear,
@@ -874,6 +901,7 @@ class _MissionScreenState extends State<MissionScreen> {
       primaryTaskCandidates[rng.nextInt(primaryTaskCandidates.length)],
     ];
 
+    // Optional pool from which we sample based on difficulty/gear/context.
     final optional = <_TaskCardData>[];
 
     final preferredWindow = _timeWindowForLabel(preferredTime);
@@ -888,6 +916,7 @@ class _MissionScreenState extends State<MissionScreen> {
     );
 
     if (difficulty == 'Challenging' || gear == 'DSLR / Mirrorless') {
+      // Harder setups prioritize higher unique-species targets.
       optional.add(
         _TaskCardData(
           title:
@@ -909,6 +938,7 @@ class _MissionScreenState extends State<MissionScreen> {
     }
 
     if (gear == 'Smartphone') {
+      // Beginner-safe fallback for smartphone users.
       optional.add(
         _TaskCardData(
           title: 'Capture 1 $singular during daytime',
@@ -931,6 +961,7 @@ class _MissionScreenState extends State<MissionScreen> {
     }
 
     if (speciesTargets.isNotEmpty) {
+      // Add concrete species targets for clearer "what to hunt" direction.
       final shuffledTargets = List<Species>.from(speciesTargets)..shuffle(rng);
       for (final pick in shuffledTargets.take(2)) {
         optional.add(
@@ -949,6 +980,7 @@ class _MissionScreenState extends State<MissionScreen> {
       (s) => conservationStatusRank(s.conservationStatus) >= 2,
     );
     if (hasVulnerable && (difficulty != 'Casual' || rng.nextBool())) {
+      // Rarity task appears when the shortlist supports conservation validation.
       optional.add(
         _TaskCardData(
           title: 'Capture 1 vulnerable-or-higher $singular',
@@ -1005,6 +1037,7 @@ class _MissionScreenState extends State<MissionScreen> {
     return selected;
   }
 
+  /// Tunes category count target using difficulty + gear.
   int _categoryCountTarget({
     required String difficulty,
     required String gear,
@@ -1024,18 +1057,22 @@ class _MissionScreenState extends State<MissionScreen> {
     return (base + gearDelta + variation).clamp(1, 4);
   }
 
+  /// Evaluates current progress for a task from uploaded proof history.
   int _taskProgressCount(_TaskCardData task) {
     final submissions = _proofSubmissions;
     switch (task.ruleType) {
       case _TaskRuleType.categoryCount:
+        // Any verified proof contributes.
         return submissions.length.clamp(0, task.targetCount);
       case _TaskRuleType.uniqueSpeciesCount:
+        // Only distinct species IDs contribute.
         return submissions
             .map((p) => p.species.id)
             .toSet()
             .length
             .clamp(0, task.targetCount);
       case _TaskRuleType.timeWindow:
+        // Count proofs whose submission timestamp matches required window.
         final window = task.timeWindow;
         if (window == null) return 0;
         return submissions
@@ -1043,6 +1080,7 @@ class _MissionScreenState extends State<MissionScreen> {
             .length
             .clamp(0, task.targetCount);
       case _TaskRuleType.specificSpecies:
+        // Count only exact species matches.
         final speciesId = task.requiredSpeciesId;
         if (speciesId == null) return 0;
         return submissions
@@ -1050,6 +1088,7 @@ class _MissionScreenState extends State<MissionScreen> {
             .length
             .clamp(0, task.targetCount);
       case _TaskRuleType.conservationRank:
+        // Count species meeting minimum conservation urgency.
         final minRank = task.minConservationRank ?? 2;
         return submissions
             .where(
@@ -1062,6 +1101,7 @@ class _MissionScreenState extends State<MissionScreen> {
     }
   }
 
+  /// Maps plural quiz label to singular noun for task text.
   String _subjectSingular(String subject) {
     return switch (subject) {
       'Birds' => 'bird',
@@ -1072,6 +1112,7 @@ class _MissionScreenState extends State<MissionScreen> {
     };
   }
 
+  /// Converts user-selected time label into a verifiable hour window.
   _TaskTimeWindow _timeWindowForLabel(String label) {
     return switch (label) {
       'Morning' => const _TaskTimeWindow(startHour: 6, endHour: 10),
@@ -1083,6 +1124,7 @@ class _MissionScreenState extends State<MissionScreen> {
     };
   }
 
+  /// Suggests nearby target species filtered by category and difficulty.
   List<Species> _recommendedSpeciesForSubject({
     required String subject,
     required String difficulty,

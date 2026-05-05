@@ -16,6 +16,7 @@ enum _SortBy { none, conservationStatus, difficultyLevel }
 
 enum _SortOrder { ascending, descending }
 
+/// Main species explorer with search, filter, sort, and pagination controls.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -69,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<Species> get _filtered {
+    // Apply text/category/status/difficulty filters first.
     var list = speciesData.where((s) {
       final q = _searchQuery.toLowerCase();
       final matchSearch =
@@ -82,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return matchSearch && matchCat && matchSt && matchDiff;
     }).toList();
 
+    // Apply sorting over the already-filtered list.
     if (_sortBy == _SortBy.conservationStatus) {
       list.sort((a, b) {
         final c =
@@ -103,6 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
       (_status != 'All' ? 1 : 0) +
       (_difficulty != 'All' ? 1 : 0);
 
+  /// Clears active filter state and returns to page 1.
   void _resetFilters() {
     setState(() {
       _category = 'All';
@@ -115,6 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  /// Clears active sort state and returns to page 1.
   void _resetSort() {
     setState(() {
       _sortBy = _SortBy.none;
@@ -125,6 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  /// Clears search input and resets paging.
   void _clearSearchInput() {
     setState(() {
       _searchController.clear();
@@ -133,6 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  /// Handles pagination change and optionally scrolls list to top.
   void _goToPage(int page, {bool smooth = true}) {
     setState(() {
       _currentPage = page;
@@ -153,6 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final scale = Adaptive.scale(context);
     final filtered = _filtered;
+    // Pagination is computed after all filters/sorts are applied.
     final totalPages = filtered.isEmpty
         ? 1
         : (filtered.length / _pageSize).ceil();
@@ -304,6 +312,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+          // Empty states differentiate search miss vs filter miss.
           if (filtered.isEmpty && _searchQuery.isNotEmpty)
             SliverFillRemaining(
               child: Center(
@@ -363,6 +372,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             )
           else if (_gridView) ...[
+            // Grid mode: fixed 2-column cards + footer pager.
             SliverPadding(
               padding: EdgeInsets.fromLTRB(
                 16 * scale,
@@ -397,6 +407,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ] else
+            // List mode: full-width cards + inline pager card.
             SliverPadding(
               padding: EdgeInsets.fromLTRB(
                 16 * scale,
@@ -760,6 +771,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         const SizedBox(height: 10),
+        // Number tokens collapse with ellipsis for long page ranges.
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -1011,6 +1023,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
+    // Shared save/remove action block for both list and grid cards.
     final saveButton = Padding(
       padding: EdgeInsets.fromLTRB(
         (compact ? 10 : 16) * scale,
@@ -1048,6 +1061,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
+    // Local helper keeps card tap handler concise in both layouts.
     void openDetail() {
       Navigator.of(context).push(
         MaterialPageRoute<void>(

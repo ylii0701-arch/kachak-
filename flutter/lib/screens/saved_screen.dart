@@ -13,6 +13,7 @@ import '../widgets/difficulty_stars.dart';
 import '../widgets/species_network_image.dart';
 import 'species_detail_screen.dart';
 
+/// Saved species list with quick open/remove actions.
 class SavedScreen extends StatelessWidget {
   const SavedScreen({super.key, this.onExplore});
 
@@ -22,6 +23,7 @@ class SavedScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final scale = Adaptive.scale(context);
     final saved = context.watch<SavedSpeciesProvider>();
+    // Build saved list from provider state + static species catalog.
     final list = speciesData.where((sp) => saved.isSaved(sp.id)).toList();
 
     return AssistantOverlayLayer(
@@ -114,6 +116,7 @@ class SavedScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+                // Empty-state and populated-state are rendered as separate slivers.
                 if (list.isEmpty)
                   SliverFillRemaining(
                     hasScrollBody: false,
@@ -207,12 +210,14 @@ class SavedScreen extends StatelessWidget {
     );
   }
 
+  /// Card layout used for each saved species row.
   Widget _savedCard(
     BuildContext context,
     Species s,
     SavedSpeciesProvider saved,
   ) {
     final scale = Adaptive.scale(context);
+    // Full-width card used in saved list with quick remove action.
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -314,6 +319,7 @@ class SavedScreen extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(16 * scale, 0, 16 * scale, 16 * scale),
             child: FilledButton.icon(
               onPressed: () async {
+                // Keep provider write in try/catch for safer mentor demos.
                 try {
                   await saved.toggleSaved(s.id);
                 } catch (_) {

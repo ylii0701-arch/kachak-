@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 
+/// Fixed 5-star difficulty meter used across species cards/details.
 class DifficultyStars extends StatelessWidget {
-  const DifficultyStars({
-    super.key,
-    required this.level,
-    this.size = 16,
-  });
+  const DifficultyStars({super.key, required this.level, this.size = 16});
 
   final int level;
   final double size;
@@ -15,6 +12,7 @@ class DifficultyStars extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(5, (i) {
+        // Fill from left up to requested difficulty level.
         final filled = i < level;
         return Icon(
           Icons.star,

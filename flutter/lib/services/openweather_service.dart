@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+/// One forecast row returned from OpenWeather 3-hour buckets.
 class CityForecastEntry {
   const CityForecastEntry({
     required this.timestamp,
@@ -40,11 +41,13 @@ class CityWeatherBundle {
   final List<CityForecastEntry> forecast;
 }
 
+/// Thin wrapper over OpenWeather current + forecast endpoints.
 class OpenWeatherService {
   const OpenWeatherService({required this.apiKey});
 
   final String apiKey;
 
+  /// Fetches current weather and short forecast for one city point.
   Future<CityWeatherBundle> fetchCityWeather({
     required String cityName,
     required double lat,
@@ -63,6 +66,7 @@ class OpenWeatherService {
       '?lat=$lat&lon=$lon&appid=$apiKey&units=metric',
     );
 
+    // Fire both endpoints in parallel for faster map card updates.
     final responses = await Future.wait([
       http.get(currentUri),
       http.get(forecastUri),
@@ -93,6 +97,7 @@ class OpenWeatherService {
     final forecastMap =
         json.decode(forecastResponse.body) as Map<String, dynamic>;
     final forecastList = forecastMap['list'] as List<dynamic>? ?? const [];
+    // Keep payload lightweight: first 8 entries (~24 hours).
     final forecast = forecastList
         .map((raw) => raw as Map<String, dynamic>)
         .map(_toForecastEntry)
@@ -111,6 +116,7 @@ class OpenWeatherService {
     );
   }
 
+  /// Converts one forecast JSON row into app-friendly model.
   CityForecastEntry? _toForecastEntry(Map<String, dynamic> jsonMap) {
     final timestampSeconds = jsonMap['dt'] as num?;
     if (timestampSeconds == null) return null;

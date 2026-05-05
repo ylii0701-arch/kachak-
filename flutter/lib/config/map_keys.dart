@@ -1,3 +1,4 @@
+/// Build-time API keys injected through `--dart-define`.
 const String mapboxAccessToken = String.fromEnvironment(
   'MAPBOX_ACCESS_TOKEN',
   defaultValue: '',
@@ -6,6 +7,7 @@ const String mapboxAccessToken = String.fromEnvironment(
 const String mapboxStyleOwner = 'mapbox';
 const String mapboxStyleId = 'streets-v12';
 
+/// Runtime Mapbox raster style URL used by `flutter_map` tile layer.
 String get mapboxStaticTilesUrlTemplate =>
     'https://api.mapbox.com/styles/v1/$mapboxStyleOwner/$mapboxStyleId/tiles/512/{z}/{x}/{y}@2x?access_token=$mapboxAccessToken';
 

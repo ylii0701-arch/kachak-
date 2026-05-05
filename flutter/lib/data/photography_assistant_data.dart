@@ -1,5 +1,6 @@
 import '../models/species.dart';
 
+/// Lightweight recommendation payload used in mission summary cards.
 class MissionRecommendation {
   const MissionRecommendation({
     required this.title,
@@ -14,6 +15,7 @@ class MissionRecommendation {
   final String explanation;
 }
 
+/// Diet snippets shown in species detail cards.
 const Map<String, String> speciesDietData = {
   '1': 'Fruits, insects, termites, and honey.',
   '2': 'Mostly fruits, plus bark and young leaves.',
@@ -26,6 +28,7 @@ const Map<String, String> speciesDietData = {
   '12': 'Small fish, crabs, and shellfish.',
 };
 
+/// Legacy deterministic recommendation builder used by non-Gemini flows.
 MissionRecommendation buildMissionRecommendation({
   required String gear,
   required String difficulty,
@@ -60,7 +63,8 @@ MissionRecommendation buildMissionRecommendation({
 
   final task = switch (difficulty) {
     'Casual' => 'Capture 3 clear shots with stable framing.',
-    'Standard' => 'Capture 5 shots: wide, medium, close, and one behavior moment.',
+    'Standard' =>
+      'Capture 5 shots: wide, medium, close, and one behavior moment.',
     _ => 'Capture an action sequence with one final hero shot.',
   };
 
@@ -73,7 +77,11 @@ MissionRecommendation buildMissionRecommendation({
   );
 }
 
-Species? predictSpeciesFromImagePath(String imagePath, List<Species> allSpecies) {
+/// Simple filename-based species guess helper used in fallback demos.
+Species? predictSpeciesFromImagePath(
+  String imagePath,
+  List<Species> allSpecies,
+) {
   final value = imagePath.toLowerCase();
   const map = {
     'bear': '1',

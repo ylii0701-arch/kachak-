@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+/// Shared network image widget with resilient loading/error placeholders.
 class SpeciesNetworkImage extends StatelessWidget {
   const SpeciesNetworkImage({
     super.key,
@@ -19,6 +20,7 @@ class SpeciesNetworkImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Normalize accidental whitespace in data URLs before rendering.
     final normalizedUrl = url.trim();
     final imageWidget = Image.network(
       normalizedUrl,

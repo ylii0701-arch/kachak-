@@ -12,6 +12,7 @@ import '../widgets/species_network_image.dart';
 import 'species_prediction_screen.dart';
 import '../data/site_data.dart';
 
+/// Region-first prediction browser grouped by nearby photography sites.
 class PredictionScreen extends StatefulWidget {
   const PredictionScreen({super.key});
 
@@ -23,6 +24,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
   /// Selected Malaysian city (display name).
   String _selectedCity = 'Kuala Lumpur';
 
+  /// Background color for probability chips.
   Color _probabilityColors(String p) {
     switch (p) {
       case 'High':
@@ -36,6 +38,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
     }
   }
 
+  /// Foreground/text color for probability chips.
   Color _probabilityOnColor(String p) {
     switch (p) {
       case 'High':
@@ -49,6 +52,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
     }
   }
 
+  /// Simple weather label-to-emoji mapping for compact forecast rows.
   String _weatherEmoji(String w) {
     switch (w) {
       case 'Sunny':
@@ -64,6 +68,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
     }
   }
 
+  /// Opens searchable city picker and applies selection.
   Future<void> _openCityPicker() async {
     final picked = await showModalBottomSheet<String>(
       context: context,
@@ -87,10 +92,13 @@ class _PredictionScreenState extends State<PredictionScreen> {
     final s = Adaptive.scale(context);
 
     // 1. Get all sites for the selected city
-    final citySites = siteData.where((site) => site.cityName == _selectedCity).toList();
+    final citySites = siteData
+        .where((site) => site.cityName == _selectedCity)
+        .toList();
     citySites.sort((a, b) => a.name.compareTo(b.name));
 
-    // 2. Build the slivers dynamically
+    // 2) Build slivers dynamically so each selected city can render
+    //    a variable number of site sections.
     List<Widget> slivers = [
       SliverToBoxAdapter(
         child: Padding(
@@ -166,9 +174,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Colors.grey.shade300,
-                          ),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
                         suffixIcon: Icon(
                           Icons.arrow_drop_down_rounded,
@@ -262,22 +268,24 @@ class _PredictionScreenState extends State<PredictionScreen> {
         ),
       );
 
-      // Loop through each site and dynamically build the sorted species list
+      // Loop through each site and build sorted species cards by probability.
       for (final site in citySites) {
-        // Find all valid species for this site
+        // Convert IDs to species and drop unknown IDs.
         final speciesList = site.supportedSpeciesIds
             .map((id) => speciesById(id))
             .whereType<Species>()
             .toList();
 
-        // Sort species descending by their probability
+        // Highest probability appears first per site.
         speciesList.sort((a, b) {
-          final pA = speciesPredictions[a.id]?.forecast.first.probabilityPercent ?? 0;
-          final pB = speciesPredictions[b.id]?.forecast.first.probabilityPercent ?? 0;
+          final pA =
+              speciesPredictions[a.id]?.forecast.first.probabilityPercent ?? 0;
+          final pB =
+              speciesPredictions[b.id]?.forecast.first.probabilityPercent ?? 0;
           return pB.compareTo(pA);
         });
 
-        // Add Site Header
+        // Add site section header.
         slivers.add(
           SliverToBoxAdapter(
             child: Padding(
@@ -302,7 +310,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
           ),
         );
 
-        // Add the sorted Species Cards
+        // Add sorted species cards for this site.
         slivers.add(
           SliverPadding(
             padding: EdgeInsets.symmetric(horizontal: 16 * s),
@@ -328,7 +336,8 @@ class _PredictionScreenState extends State<PredictionScreen> {
                           MaterialPageRoute<void>(
                             builder: (_) => SpeciesPredictionScreen(
                               speciesId: species.id,
-                              siteName: site.name, // <--- PASS THE SITE NAME HERE
+                              siteName:
+                                  site.name, // <--- PASS THE SITE NAME HERE
                             ),
                           ),
                         );
@@ -455,7 +464,9 @@ class _PredictionScreenState extends State<PredictionScreen> {
                                           ),
                                         ),
                                       ),
-                                      Text(_weatherEmoji(todayForecast.weather)),
+                                      Text(
+                                        _weatherEmoji(todayForecast.weather),
+                                      ),
                                       SizedBox(width: 4 * s),
                                       Text(
                                         todayForecast.weather,
@@ -523,9 +534,13 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
   void _filter() {
     final q = _search.text.toLowerCase();
     setState(() {
-      _visible = _sorted.where((c) =>
-      c.name.toLowerCase().contains(q) || c.state.toLowerCase().contains(q)
-      ).toList();
+      _visible = _sorted
+          .where(
+            (c) =>
+                c.name.toLowerCase().contains(q) ||
+                c.state.toLowerCase().contains(q),
+          )
+          .toList();
     });
   }
 
@@ -584,30 +599,30 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
           Expanded(
             child: _visible.isEmpty
                 ? Center(
-              child: Text(
-                'No cities match your search',
-                style: TextStyle(color: Colors.grey.shade600),
-              ),
-            )
+                    child: Text(
+                      'No cities match your search',
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
+                  )
                 : ListView.builder(
-              itemCount: _visible.length,
-              itemBuilder: (_, i) {
-                final c = _visible[i];
-                final sel = c.name == widget.initialCity;
-                return ListTile(
-                  selected: sel,
-                  selectedTileColor: AppColors.primary.withValues(
-                    alpha: 0.12,
+                    itemCount: _visible.length,
+                    itemBuilder: (_, i) {
+                      final c = _visible[i];
+                      final sel = c.name == widget.initialCity;
+                      return ListTile(
+                        selected: sel,
+                        selectedTileColor: AppColors.primary.withValues(
+                          alpha: 0.12,
+                        ),
+                        title: Text(c.name),
+                        subtitle: Text(c.state),
+                        trailing: sel
+                            ? const Icon(Icons.check, color: AppColors.primary)
+                            : null,
+                        onTap: () => Navigator.pop(context, c.name),
+                      );
+                    },
                   ),
-                  title: Text(c.name),
-                  subtitle: Text(c.state),
-                  trailing: sel
-                      ? const Icon(Icons.check, color: AppColors.primary)
-                      : null,
-                  onTap: () => Navigator.pop(context, c.name),
-                );
-              },
-            ),
           ),
         ],
       ),
