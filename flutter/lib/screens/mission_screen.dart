@@ -167,10 +167,6 @@ class _MissionScreenState extends State<MissionScreen> {
     final s = Adaptive.scale(context);
     final media = MediaQuery.of(context);
     final topInset = media.padding.top;
-    final bottomInset = media.padding.bottom;
-    final navBarHeight = bottomInset > 0
-        ? bottomInset + (2 * s) + 64 * s
-        : 6 * s + 64 * s;
 
     return Material(
       color: Colors.transparent,
@@ -179,7 +175,7 @@ class _MissionScreenState extends State<MissionScreen> {
           16 * s,
           topInset + 8 * s,
           16 * s,
-          navBarHeight + 8 * s,
+          12 * s,
         ),
         child: Column(
           children: [
