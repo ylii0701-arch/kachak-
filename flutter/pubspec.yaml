@@ -73,6 +73,14 @@ flutter:
   assets:
     - assets/images/kachak_logo_green.png
     - assets/images/forest_mist_backdrop.jpg
+    - assets/images/leaf_branch.png
+    - assets/images/misty_terrace.png
+    - assets/images/misty_forest.png
+    - assets/images/home_editorial_bg.png
+    - assets/images/card_leaf.png
+    - assets/images/ai_chatbot_icon.png
+    - assets/images/splash_bg.png
+    - assets/images/identify_tips_right.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -17,7 +17,6 @@ const _predictionHeroShadows = <Shadow>[
   Shadow(blurRadius: 4, offset: Offset(0, 2), color: Color(0xB3000000)),
 ];
 
-/// Full 7-day forecast detail page for one species prediction profile.
 class SpeciesPredictionScreen extends StatefulWidget {
   const SpeciesPredictionScreen({
     super.key,
@@ -34,7 +33,6 @@ class SpeciesPredictionScreen extends StatefulWidget {
 }
 
 class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
-  /// Toggles notification state with prerequisite save checks + user feedback.
   Future<void> _toggleNotif(
     BuildContext context,
     SavedSpeciesProvider saved,
@@ -51,7 +49,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
       return;
     }
 
-    // Provider returns false when permission/channel setup fails.
+    // Call the provider logic
     final success = await saved.toggleNotification(widget.speciesId);
 
     if (!context.mounted) return;
@@ -79,7 +77,6 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
     );
   }
 
-  /// Human-friendly date labels for forecast row headers.
   String _formatDate(String dateStr) {
     final date = DateTime.tryParse(dateStr);
     if (date == null) return dateStr;
@@ -91,13 +88,11 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
     return '${_weekday(date.weekday)}, ${date.month}/${date.day}';
   }
 
-  /// Short weekday formatter used by [_formatDate].
   String _weekday(int w) {
     const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return names[(w - 1).clamp(0, 6)];
   }
 
-  /// Compact weather icon helper for forecast cells.
   String _weatherEmoji(String w) {
     switch (w) {
       case 'Sunny':
@@ -113,7 +108,6 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
     }
   }
 
-  /// Chip background color for probability states.
   Color _probBg(String p) {
     switch (p) {
       case 'High':
@@ -127,7 +121,6 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
     }
   }
 
-  /// Chip text color for probability states.
   Color _probFg(String p) {
     switch (p) {
       case 'High':
@@ -148,7 +141,6 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
     final prediction = speciesPredictions[widget.speciesId];
     final saved = context.watch<SavedSpeciesProvider>();
 
-    // Defensive fallback for invalid routing payloads.
     if (species == null || prediction == null) {
       return AssistantOverlayLayer(
         child: Scaffold(
@@ -229,10 +221,10 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                           ),
                           child: Icon(
                             saved.isSaved(species.id)
-                                ? Icons.favorite
-                                : Icons.favorite_border,
+                                ? Icons.bookmark_rounded
+                                : Icons.bookmark_border_rounded,
                             color: saved.isSaved(species.id)
-                                ? Colors.red.shade200
+                                ? const Color(0xFFEAF3E7)
                                 : Colors.white,
                             size: 20 * s,
                           ),
@@ -370,7 +362,6 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                     ),
                   ),
                 ),
-                // Summary/alerts panel directly under the hero.
                 SliverToBoxAdapter(
                   child: Padding(
                     // Space below hero — avoid overlapping the app bar.
@@ -596,7 +587,6 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                           ],
                         ),
                         SizedBox(height: 8 * s),
-                        // Day-by-day forecast cards.
                         ...prediction.forecast.asMap().entries.map((e) {
                           final day = e.value;
                           final first = e.key == 0;
@@ -741,18 +731,29 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                             ),
                           );
                         }),
-                        GlassCtaPill(
-                          emphasized: true,
-                          minHeight: 48 * s,
-                          onPressed: () {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute<void>(
-                                builder: (_) =>
-                                    SpeciesDetailScreen(speciesId: species.id),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton(
+                            onPressed: () {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute<void>(
+                                  builder: (_) =>
+                                      SpeciesDetailScreen(speciesId: species.id),
+                                ),
+                              );
+                            },
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              minimumSize: Size.fromHeight(48 * s),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24 * s),
                               ),
-                            );
-                          },
-                          child: const Text('View Full Species Details'),
+                              elevation: 0,
+                              shadowColor: Colors.transparent,
+                            ),
+                            child: const Text('View Full Species Details'),
+                          ),
                         ),
                         SizedBox(height: bottomPad),
                       ],
@@ -774,7 +775,6 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
     Color? iconColor,
     String? emoji,
   }) {
-    // Reusable line item used across each forecast card.
     final tint = iconColor ?? AppColors.primary;
     final emojiChar = emoji;
     return Row(

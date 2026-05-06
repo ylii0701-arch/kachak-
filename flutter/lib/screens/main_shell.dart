@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +14,7 @@ import 'mission_screen.dart';
 import 'prediction_screen.dart';
 import 'saved_screen.dart';
 
-/// Glass pill with balanced vertical padding (Material [NavigationBar] leaves excess space below labels when height is reduced).
+/// Editorial bottom navigation with calm, consistent styling.
 class _GlassBottomNav extends StatelessWidget {
   const _GlassBottomNav({required this.selectedIndex, required this.onSelect});
 
@@ -28,118 +26,44 @@ class _GlassBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = Adaptive.scale(context);
-    final radius = 22 * s;
-    return Stack(
-      clipBehavior: Clip.none,
-      alignment: Alignment.topCenter,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(radius),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(radius),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.white.withValues(alpha: 0.78),
-                    Colors.white.withValues(alpha: 0.88),
-                  ],
-                ),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.94),
-                  width: 1.2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.14),
-                    blurRadius: 26,
-                    offset: const Offset(0, 10),
-                  ),
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.08),
-                    blurRadius: 14,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(6 * s, 11 * s, 6 * s, 7 * s),
-                child: Row(
-                  children: [
-                    _standardItem(
-                      context,
-                      0,
-                      Icons.home_outlined,
-                      Icons.home,
-                      'Home',
-                    ),
-                    _standardItem(
-                      context,
-                      1,
-                      Icons.trending_up_outlined,
-                      Icons.trending_up,
-                      'Predict',
-                    ),
-                    _centerIdentifyLabel(context),
-                    _standardItem(
-                      context,
-                      3,
-                      Icons.adjust_outlined,
-                      Icons.adjust,
-                      'Mission',
-                    ),
-                    _standardItem(
-                      context,
-                      4,
-                      Icons.map_outlined,
-                      Icons.map,
-                      'Map',
-                    ),
-                  ],
-                ),
-              ),
-            ),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border(
+          top: BorderSide(
+            color: AppColors.primary.withValues(alpha: 0.12),
+            width: 1,
           ),
         ),
-        Positioned(top: -16 * s, child: _identifyCenterButton(context)),
-      ],
-    );
-  }
-
-  Widget _centerIdentifyLabel(BuildContext context) {
-    final s = Adaptive.scale(context);
-    final selected = selectedIndex == 2;
-    final labelSize = (11 * s).clamp(10.0, 13.0);
-    return Expanded(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => onSelect(2),
-          borderRadius: BorderRadius.circular(18 * s),
-          splashColor: AppColors.primary.withValues(alpha: 0.12),
-          highlightColor: Colors.transparent,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(height: 35 * s),
-              Text(
-                'Identify',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: labelSize,
-                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                  color: selected ? AppColors.primary : _inactive,
-                  height: 1.1,
-                  letterSpacing: selected ? -0.15 : -0.05,
-                ),
-              ),
-            ],
-          ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(4 * s, 8 * s, 4 * s, 8 * s),
+        child: Row(
+          children: [
+            _standardItem(context, 0, Icons.home_outlined, Icons.home, 'Home'),
+            _standardItem(
+              context,
+              1,
+              Icons.trending_up_outlined,
+              Icons.trending_up,
+              'Predict',
+            ),
+            _standardItem(
+              context,
+              2,
+              Icons.center_focus_weak_outlined,
+              Icons.center_focus_strong,
+              'Identify',
+            ),
+            _standardItem(
+              context,
+              3,
+              Icons.adjust_outlined,
+              Icons.adjust,
+              'Mission',
+            ),
+            _standardItem(context, 4, Icons.map_outlined, Icons.map, 'Map'),
+          ],
         ),
       ),
     );
@@ -153,8 +77,11 @@ class _GlassBottomNav extends StatelessWidget {
     String label,
   ) {
     final selected = selectedIndex == index;
+    final isIdentify = index == 2;
     final s = Adaptive.scale(context);
-    final iconSize = (22 * s).clamp(18.0, 24.0);
+    final iconSize = isIdentify
+        ? (24 * s).clamp(19.0, 26.0)
+        : (22 * s).clamp(18.0, 24.0);
     final labelSize = (11 * s).clamp(10.0, 13.0);
     return Expanded(
       child: Material(
@@ -162,27 +89,31 @@ class _GlassBottomNav extends StatelessWidget {
         child: InkWell(
           onTap: () => onSelect(index),
           borderRadius: BorderRadius.circular(20 * s),
-          splashColor: AppColors.primary.withValues(alpha: 0.18),
-          highlightColor: AppColors.primary.withValues(alpha: 0.06),
+          splashColor: AppColors.primary.withValues(alpha: 0.12),
+          highlightColor: Colors.transparent,
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                curve: Curves.easeOutCubic,
-                padding: EdgeInsets.symmetric(
-                  horizontal: 12 * s,
-                  vertical: 5 * s,
-                ),
-                decoration: BoxDecoration(
-                  color: selected ? AppColors.primary : Colors.transparent,
-                  borderRadius: BorderRadius.circular(999),
-                ),
+              Container(
+                width: isIdentify ? 34 * s : null,
+                height: isIdentify ? 34 * s : null,
+                decoration: isIdentify
+                    ? BoxDecoration(
+                        color: selected
+                            ? AppColors.primary.withValues(alpha: 0.16)
+                            : AppColors.primary.withValues(alpha: 0.08),
+                        shape: BoxShape.circle,
+                      )
+                    : null,
+                alignment: Alignment.center,
                 child: Icon(
                   selected ? iconFilled : iconOutlined,
                   size: iconSize,
-                  color: selected ? Colors.white : _inactive,
+                  color: isIdentify
+                      ? (selected
+                            ? AppColors.primary
+                            : AppColors.primary.withValues(alpha: 0.85))
+                      : (selected ? AppColors.primary : _inactive),
                 ),
               ),
               SizedBox(height: 3 * s),
@@ -190,59 +121,27 @@ class _GlassBottomNav extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: labelSize,
-                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                  color: selected ? AppColors.textBodyOnFrost : _inactive,
+                  fontWeight: selected
+                      ? (isIdentify ? FontWeight.w800 : FontWeight.w700)
+                      : FontWeight.w500,
+                  color: selected ? AppColors.primary : _inactive,
                   height: 1.1,
-                  letterSpacing: selected ? -0.15 : -0.05,
+                ),
+              ),
+              SizedBox(height: 4 * s),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeOutCubic,
+                width: selected ? 20 * s : 0,
+                height: 3 * s,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(999),
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _identifyCenterButton(BuildContext context) {
-    final s = Adaptive.scale(context);
-    final selected = selectedIndex == 2;
-    final size = 62 * s;
-    return Semantics(
-      label: 'Identify tab',
-      button: true,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => onSelect(2),
-          borderRadius: BorderRadius.circular(999),
-          splashColor: Colors.white.withValues(alpha: 0.2),
-          child: Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.primary,
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.95),
-                width: 2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.22),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Icon(
-              selected
-                  ? Icons.center_focus_strong
-                  : Icons.center_focus_weak_outlined,
-              color: Colors.white,
-              size: 28 * s,
-            ),
           ),
         ),
       ),
@@ -318,7 +217,7 @@ class _MainShellState extends State<MainShell> {
               const SizedBox(width: 12),
               Text(
                 label,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: secondary ? 13 : 16,
                   fontWeight: secondary ? FontWeight.w600 : FontWeight.w700,
                   color: secondary
@@ -330,7 +229,7 @@ class _MainShellState extends State<MainShell> {
                 const SizedBox(width: 8),
                 Text(
                   'soon',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: AppColors.accent.withValues(alpha: 0.5),
@@ -353,9 +252,7 @@ class _MainShellState extends State<MainShell> {
     final topPad = media.padding.top;
     final screenWidth = media.size.width;
 
-    final navBarHeight = bottom > 0
-        ? bottom + (2 * s) + 64 * s
-        : 6 * s + 64 * s;
+    final navBarHeight = bottom + (64 * s);
     final panelWidth = (screenWidth * 0.74).clamp(240.0, 320.0);
 
     // Main page surface (tabs + bottom nav) that slides when menu opens.
@@ -363,7 +260,7 @@ class _MainShellState extends State<MainShell> {
       reservedBottom: navBarHeight,
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        extendBody: true,
+        extendBody: false,
         body: Stack(
           fit: StackFit.expand,
           children: [
@@ -421,13 +318,8 @@ class _MainShellState extends State<MainShell> {
             ),
           ],
         ),
-        bottomNavigationBar: Padding(
-          padding: EdgeInsets.fromLTRB(
-            8 * s,
-            0,
-            8 * s,
-            bottom > 0 ? bottom + (2 * s) : 6 * s,
-          ),
+        bottomNavigationBar: SafeArea(
+          top: false,
           child: _GlassBottomNav(
             selectedIndex: shell.index,
             onSelect: (i) {
@@ -466,9 +358,9 @@ class _MainShellState extends State<MainShell> {
                       children: [
                         Text(
                           'Menu',
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.libreBaskerville(
                             fontSize: 22,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                             color: AppColors.accent,
                           ),
                         ),

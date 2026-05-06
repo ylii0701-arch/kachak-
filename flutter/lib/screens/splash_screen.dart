@@ -30,18 +30,31 @@ class SplashScreen extends StatelessWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          const MistBackdrop(),
+          const DecoratedBox(
+            decoration: BoxDecoration(color: AppColors.pageMist),
+            child: SizedBox.expand(),
+          ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Image.asset(
+                'assets/images/splash_bg.png',
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+              ),
+            ),
+          ),
           SafeArea(
             child: Padding(
               padding: EdgeInsets.fromLTRB(20 * s, 12 * s, 20 * s, 8 * s),
               child: Column(
                 children: [
                   const Spacer(flex: 2),
-                  GlassPanel(
+                  Container(
                     padding: EdgeInsets.fromLTRB(22 * s, 28 * s, 22 * s, 28 * s),
-                    borderRadius: 28 * s,
-                    fillAlpha: 0.34,
-                    blurSigma: 28,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(28 * s),
+                      color: Colors.transparent,
+                    ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -182,35 +195,22 @@ class _SplashGoRailState extends State<_SplashGoRail> with SingleTickerProviderS
         height: railH,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(railW / 2),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(railW / 2),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.white.withValues(alpha: 0.08),
-                    Colors.white.withValues(alpha: 0.16),
-                    Colors.white.withValues(alpha: 0.30),
-                    Colors.white.withValues(alpha: 0.46),
-                  ],
-                  stops: const [0.0, 0.32, 0.68, 1.0],
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(railW / 2),
+              color: const Color(0xFFF7F4EC).withValues(alpha: 0.64),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.035),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.48), width: 1.15),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.12),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Stack(
-                clipBehavior: Clip.hardEdge,
-                fit: StackFit.expand,
-                children: [
+              ],
+            ),
+            child: Stack(
+              clipBehavior: Clip.hardEdge,
+              fit: StackFit.expand,
+              children: [
                   Positioned(
                     top: 12,
                     left: 6,
@@ -220,16 +220,15 @@ class _SplashGoRailState extends State<_SplashGoRail> with SingleTickerProviderS
                       children: [
                         Icon(
                           Icons.keyboard_double_arrow_up_rounded,
-                          color: Colors.white,
+                          color: AppColors.textSubtitleOnFrost,
                           size: 30,
-                          shadows: const [Shadow(blurRadius: 6, color: Colors.black26)],
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Swipe up',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.88),
+                            color: AppColors.textSubtitleOnFrost,
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.2,
@@ -254,10 +253,9 @@ class _SplashGoRailState extends State<_SplashGoRail> with SingleTickerProviderS
                       onVerticalDragEnd: _onDragEnd,
                       onVerticalDragCancel: _onDragCancel,
                       child: Material(
-                        color: Colors.white,
+                        color: const Color(0xFF6E946A).withValues(alpha: 0.8),
                         shape: const CircleBorder(),
-                        elevation: 5,
-                        shadowColor: Colors.black38,
+                        elevation: 0,
                         child: InkWell(
                           customBorder: const CircleBorder(),
                           onTap: widget.onGo,
@@ -265,7 +263,7 @@ class _SplashGoRailState extends State<_SplashGoRail> with SingleTickerProviderS
                             child: Text(
                               'Go',
                               style: TextStyle(
-                                color: AppColors.accent,
+                                color: Colors.white,
                                 fontWeight: FontWeight.w800,
                                 fontSize: 16,
                                 letterSpacing: -0.2,
@@ -276,8 +274,7 @@ class _SplashGoRailState extends State<_SplashGoRail> with SingleTickerProviderS
                       ),
                     ),
                   ),
-                ],
-              ),
+              ],
             ),
           ),
         ),

@@ -10,7 +10,6 @@ import 'identify_screen.dart';
 import 'species_detail_screen.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
-import '../widgets/glass.dart';
 import '../widgets/species_network_image.dart';
 
 class MissionScreen extends StatefulWidget {
@@ -184,10 +183,8 @@ class _MissionScreenState extends State<MissionScreen> {
         ),
         child: Column(
           children: [
-            if (_started) ...[
-              _headerCard(context, s),
-              SizedBox(height: 10 * s),
-            ],
+            _headerCard(context, s),
+            SizedBox(height: 10 * s),
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -228,53 +225,53 @@ class _MissionScreenState extends State<MissionScreen> {
   }
 
   Widget _headerCard(BuildContext context, double s) {
-    return GlassPanel(
-      padding: EdgeInsets.all(16 * s),
-      borderRadius: 22 * s,
-      fillAlpha: 0.45,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(4 * s, 2 * s, 4 * s, 2 * s),
+      color: Colors.transparent,
+      child: Stack(
         children: [
-          Text(
-            'Photo Mission',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: Adaptive.clamp(context, 28, min: 22, max: 34),
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.6,
-              height: 1.05,
-              color: AppColors.accent,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            _started
-                ? 'Personalised challenge builder'
-                : 'Personalise and find your perfect challenge today!',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.35,
-              height: 1.35,
-              color: const Color(0xFF5C6B63),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: List.generate(
-              4,
-              (i) => Expanded(
-                child: Container(
-                  margin: EdgeInsets.only(right: i == 3 ? 0 : 8),
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: _started && i <= _step
-                        ? AppColors.primary
-                        : Colors.green.shade100,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Photo Mission',
+                style: GoogleFonts.libreBaskerville(
+                  fontSize: Adaptive.clamp(context, 34, min: 26, max: 40),
+                  fontWeight: FontWeight.w700,
+                  height: 1.05,
+                  color: AppColors.accent,
                 ),
               ),
-            ),
+              const SizedBox(height: 4),
+              Text(
+                'Malaysian Wildlife Explorer',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  height: 1.35,
+                  color: AppColors.textSubtitleOnFrost,
+                ),
+              ),
+              if (_started) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: List.generate(
+                    4,
+                    (i) => Expanded(
+                      child: Container(
+                        margin: EdgeInsets.only(right: i == 3 ? 0 : 8),
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: i <= _step ? AppColors.primary : AppColors.lightSage,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ],
       ),
@@ -284,7 +281,7 @@ class _MissionScreenState extends State<MissionScreen> {
   Widget _contentByStep() {
     // Step router for intro, quiz screens, recommendation, and task list.
     if (!_started) {
-      return _introBlock();
+      return _landingContent();
     }
 
     if (_step == 0) {
@@ -406,6 +403,212 @@ class _MissionScreenState extends State<MissionScreen> {
     return const SizedBox.shrink();
   }
 
+  Widget _landingContent() {
+    final s = Adaptive.scale(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: AppColors.surface.withValues(alpha: 0.96),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: AppColors.border),
+            boxShadow: const [
+              BoxShadow(
+                color: AppColors.calmShadow,
+                blurRadius: 16,
+                offset: Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Personalise and find\nyour perfect challenge\ntoday!',
+                              style: GoogleFonts.libreBaskerville(
+                                fontSize: 19,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.accent,
+                                height: 1.26,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Choose your preferences and\nwe\'ll create missions just for you.',
+                              style: GoogleFonts.inter(
+                                color: Colors.grey.shade700,
+                                fontSize: 13.5,
+                                height: 1.48,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 12 * s),
+                      SizedBox(
+                        width: Adaptive.clamp(context, 168, min: 140, max: 188),
+                        child: Image.asset(
+                          'assets/images/kachak_logo_green.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: _startQuiz,
+                      icon: const Icon(Icons.camera_alt_outlined),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      label: const Text('Let\'s Begin!'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 16 * s),
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Mission Ideas for You',
+                    style: GoogleFonts.libreBaskerville(
+                      fontSize: 34 / 1.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.accent,
+                    ),
+                  ),
+                  Text(
+                    'Quick inspiration to get started',
+                    style: TextStyle(color: Colors.grey.shade700, fontSize: 15),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 10 * s),
+        SizedBox(
+          height: 216,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              _ideaCard(
+                icon: Icons.eco_outlined,
+                title: 'Beginner\nfriendly',
+                subtitle: 'Perfect for new\nwildlife explorers.',
+                badge: 'Easy',
+              ),
+              SizedBox(width: 10 * s),
+              _ideaCard(
+                icon: Icons.schedule,
+                title: '1-hour\nwalk',
+                subtitle: 'Short on time?\nWe\'ve got you.',
+                badge: '~1 hour',
+              ),
+              SizedBox(width: 10 * s),
+              _ideaCard(
+                icon: Icons.flutter_dash_outlined,
+                title: 'Birds',
+                subtitle: 'Spot and capture\nbeautiful birds.',
+                badge: 'Popular',
+              ),
+              SizedBox(width: 10 * s),
+              _ideaCard(
+                icon: Icons.forest_outlined,
+                title: 'Forest\ntrail',
+                subtitle: 'Explore lush trails\nand hidden gems.',
+                badge: 'Scenic',
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _ideaCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required String badge,
+  }) {
+    return Container(
+      width: 120,
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+      decoration: BoxDecoration(
+        color: AppColors.surface.withValues(alpha: 0.96),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppColors.lightSage.withValues(alpha: 0.45),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: AppColors.primary),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            title,
+            style: GoogleFonts.libreBaskerville(
+              fontWeight: FontWeight.w700,
+              color: AppColors.accent,
+              fontSize: 16,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: TextStyle(color: Colors.grey.shade700, fontSize: 11.5, height: 1.35),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F0E4),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              badge,
+              style: TextStyle(
+                color: AppColors.badgeText,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _missionSummaryCard(MissionRecommendation mission) {
     return Container(
       width: double.infinity,
@@ -425,7 +628,11 @@ class _MissionScreenState extends State<MissionScreen> {
           const SizedBox(height: 10),
           Text(
             mission.title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+            style: GoogleFonts.libreBaskerville(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: AppColors.accent,
+            ),
           ),
           const SizedBox(height: 10),
           Text('Location hint: ${mission.locationHint}'),
@@ -501,17 +708,15 @@ class _MissionScreenState extends State<MissionScreen> {
                 children: [
                   const Text(
                     'Weekly Task',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.accent,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.accent),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'Mission: ${_mission?.title ?? '$subject Challenge'}',
-                    style: const TextStyle(
+                    style: GoogleFonts.libreBaskerville(
                       fontWeight: FontWeight.w700,
                       fontSize: 18,
+                      color: AppColors.accent,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -1176,7 +1381,7 @@ class _MissionScreenState extends State<MissionScreen> {
         children: [
           Text(
             'Photo Mission',
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.libreBaskerville(
               fontSize: 30,
               fontWeight: FontWeight.w800,
               color: AppColors.accent,
@@ -1248,7 +1453,7 @@ class _MissionScreenState extends State<MissionScreen> {
           Text(
             questionTitle,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: GoogleFonts.libreBaskerville(
               color: AppColors.accent,
               fontWeight: FontWeight.w800,
               fontSize: Adaptive.clamp(context, 27 / 1.5, min: 16, max: 22),

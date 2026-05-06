@@ -9,7 +9,6 @@ import '../data/species_data.dart';
 import '../models/species.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
-import '../widgets/glass.dart';
 import 'species_detail_screen.dart';
 import '../utils/image_validator.dart';
 import '../services/gemini_recognition_service.dart';
@@ -153,66 +152,68 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
     final s = Adaptive.scale(context);
     final canPop = Navigator.of(context).canPop();
     return Material(
-      color: AppColors.detailBackdrop,
+      color: Colors.transparent,
       child: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(16 * s, 42 * s, 16 * s, 8 * s),
-              child: GlassPanel(
-                padding: EdgeInsets.all(16 * s),
-                borderRadius: 22 * s,
-                fillAlpha: 0.45,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (canPop)
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.arrow_back_rounded),
-                        tooltip: 'Back',
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(
-                          minWidth: 32,
-                          minHeight: 32,
+              child: Stack(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (canPop)
+                        IconButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          icon: const Icon(Icons.arrow_back_rounded),
+                          tooltip: 'Back',
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 32,
+                            minHeight: 32,
+                          ),
+                        ),
+                      if (canPop) SizedBox(height: 4 * s),
+                      Text(
+                        'Species\nRecognition',
+                        style: GoogleFonts.libreBaskerville(
+                          fontSize: Adaptive.clamp(context, 34, min: 24, max: 40),
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.accent,
+                          height: 1.0,
                         ),
                       ),
-                    if (canPop) SizedBox(height: 4 * s),
-                    Text(
-                      'Species Recognition',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: Adaptive.clamp(context, 28, min: 22, max: 34),
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.6,
-                        height: 1.05,
-                        color: AppColors.accent,
+                      SizedBox(height: 4 * s),
+                      Text(
+                        'Identify wildlife from photos',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          height: 1.35,
+                          color: AppColors.textSubtitleOnFrost,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 4 * s),
-                    Text(
-                      'Identify wildlife from photos',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.35,
-                        height: 1.35,
-                        color: const Color(0xFF5C6B63),
+                      SizedBox(height: 12 * s),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 14 * s,
+                          vertical: 14 * s,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface.withValues(alpha: 0.95),
+                          borderRadius: BorderRadius.circular(16 * s),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: const Text(
+                          'Upload a clear photo of an animal for AI-powered species identification.\nWell-lit, focused images work best.',
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 12 * s),
-                    Container(
-                      padding: EdgeInsets.all(12 * s),
-                      decoration: BoxDecoration(
-                        color: Colors.green.shade50,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Text(
-                        'Upload a clear photo of an animal for AI-powered species identification. Works best with well-lit, focused images.',
-                      ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
@@ -288,41 +289,64 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
     required VoidCallback onTap,
   }) {
     return Material(
-      color: Colors.white.withValues(alpha: 0.9),
-      borderRadius: BorderRadius.circular(16),
+      color: AppColors.surface.withValues(alpha: 0.95),
+      borderRadius: BorderRadius.circular(18),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         onTap: onTap,
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: highlighted ? Colors.green.shade300 : Colors.grey.shade300,
-              width: highlighted ? 1.5 : 1,
+              color: highlighted
+                  ? AppColors.primary.withValues(alpha: 0.34)
+                  : AppColors.border,
+              width: 1,
             ),
           ),
-          child: Column(
+          child: Stack(
             children: [
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade50,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(icon, color: AppColors.primary, size: 30),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 96,
+                    height: 96,
+                    decoration: BoxDecoration(
+                      color: AppColors.lightSage.withValues(alpha: 0.45),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(icon, color: AppColors.primary, size: 42),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: GoogleFonts.libreBaskerville(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.accent,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 30 / 1.5,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(subtitle, style: TextStyle(color: Colors.grey.shade700)),
             ],
           ),
         ),
@@ -398,26 +422,95 @@ class _IdentifyScreenState extends State<IdentifyScreen> {
   Widget _tipsCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200),
+        color: const Color(0xFFFFFBF3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text(
-            'Tips for Best Results',
-            style: TextStyle(fontWeight: FontWeight.w700),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Opacity(
+                  opacity: 0.95,
+                  child: Image.asset(
+                    'assets/images/identify_tips_right.png',
+                    fit: BoxFit.cover,
+                    alignment: Alignment.center,
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Tips for best results',
+                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  _tipRow(
+                    icon: Icons.wb_sunny_outlined,
+                    title: 'Use good lighting',
+                    subtitle: 'Natural light works best.',
+                  ),
+                  const SizedBox(height: 12),
+                  _tipRow(
+                    icon: Icons.center_focus_strong_rounded,
+                    title: 'Keep the animal centered',
+                    subtitle: 'Make sure it\'s clearly visible.',
+                  ),
+                  const SizedBox(height: 12),
+                  _tipRow(
+                    icon: Icons.blur_off_rounded,
+                    title: 'Avoid blurry photos',
+                    subtitle: 'Steady hands or zoom in gently.',
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _tipRow({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    return Row(
+      children: [
+        Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: AppColors.lightSage.withValues(alpha: 0.5),
+            shape: BoxShape.circle,
           ),
-          SizedBox(height: 8),
-          Text('• Ensure the animal is clearly visible and in focus'),
-          Text('• Use good lighting conditions'),
-          Text('• Get as close as safely possible'),
-          Text('• Avoid blurry or distant shots'),
-        ],
-      ),
+          child: Icon(icon, color: AppColors.primary, size: 20),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+              Text(
+                subtitle,
+                style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

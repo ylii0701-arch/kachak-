@@ -196,23 +196,45 @@ class _AssistantOverlayLayerState extends State<AssistantOverlayLayer>
                       height: _fabSize * s,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.primary,
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.95),
-                          width: 2,
-                        ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.22),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
+                            color: Colors.black.withValues(alpha: 0.18),
+                            blurRadius: 18 * s,
+                            offset: Offset(0, 8 * s),
                           ),
                         ],
                       ),
-                      child: Icon(
-                        Icons.chat_bubble_outline_rounded,
-                        color: Colors.white,
-                        size: 28 * s,
+                      child: ClipOval(
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Center(
+                              child: Transform.scale(
+                                scale: 1.88,
+                                child: Image.asset(
+                                  'assets/images/ai_chatbot_icon.png',
+                                  fit: BoxFit.cover,
+                                  alignment: const Alignment(0, 0.34),
+                                ),
+                              ),
+                            ),
+                            IgnorePointer(
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.white.withValues(alpha: 0.08),
+                                      Colors.transparent,
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

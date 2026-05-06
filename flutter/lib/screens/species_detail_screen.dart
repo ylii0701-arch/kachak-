@@ -18,7 +18,6 @@ import '../widgets/glass.dart';
 import '../widgets/species_network_image.dart';
 import 'species_prediction_screen.dart';
 
-/// Species deep-dive page with habitat, tips, map links, and prediction snapshot.
 class SpeciesDetailScreen extends StatelessWidget {
   const SpeciesDetailScreen({super.key, required this.speciesId});
 
@@ -27,9 +26,7 @@ class SpeciesDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = Adaptive.scale(context);
-    // Resolve species + related state payloads once per build.
     final species = speciesById(speciesId);
-    // Fallback page for stale/deleted IDs.
     if (species == null) {
       return AssistantOverlayLayer(
         child: Scaffold(
@@ -67,7 +64,6 @@ class SpeciesDetailScreen extends StatelessWidget {
       );
     }
 
-    // Provider flags drive favorite/notification controls in the header.
     final saved = context.watch<SavedSpeciesProvider>();
     final isFav = saved.isSaved(species.id);
     final isNotified = saved.isNotified(species.id);
@@ -80,7 +76,6 @@ class SpeciesDetailScreen extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             const MistBackdrop(backgroundBlurSigma: 5),
-            // Sliver layout keeps hero + long info sections smooth and performant.
             CustomScrollView(
               slivers: [
                 SliverAppBar(
@@ -359,14 +354,9 @@ class SpeciesDetailScreen extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 12 * s),
-                      GlassPanel(
-                        padding: EdgeInsets.all(8 * s),
-                        borderRadius: 20 * s,
-                        blurSigma: 14,
-                        fillAlpha: 0.62,
-                        verticalFrostGradient: true,
-                        child: GlassCtaPill(
-                          emphasized: isFav,
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
                           onPressed: () async {
                             try {
                               await saved.toggleSaved(species.id);
@@ -383,32 +373,38 @@ class SpeciesDetailScreen extends StatelessWidget {
                               }
                             }
                           },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                isFav ? Icons.favorite : Icons.favorite_border,
-                              ),
-                              SizedBox(width: 10 * s),
-                              Text(
-                                isFav
-                                    ? 'Saved to Favorites'
-                                    : 'Save to Favorites',
-                              ),
-                            ],
+                          icon: Icon(
+                            isFav
+                                ? Icons.bookmark_rounded
+                                : Icons.bookmark_border_rounded,
+                            color: AppColors.accent,
+                          ),
+                          label: Text(
+                            isFav ? 'Saved to Favorites' : 'Save to Favorites',
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.accent,
+                            backgroundColor: AppColors.surface.withValues(alpha: 0.92),
+                            side: BorderSide(
+                              color: AppColors.primary.withValues(alpha: 0.22),
+                            ),
+                            minimumSize: Size.fromHeight(56 * s),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28 * s),
+                            ),
+                            elevation: 0,
+                            shadowColor: Colors.transparent,
                           ),
                         ),
                       ),
                       SizedBox(height: 12 * s),
-                      // Core species profile cards.
                       _sectionCard(
                         context,
                         title: 'About',
                         icon: Icons.info_outline,
                         child: Text(species.description),
                       ),
-                      // Prediction snapshot appears only when forecast exists.
                       if (speciesPrediction != null)
                         _predictionSnapshotCard(
                           context,
@@ -569,9 +565,7 @@ class SpeciesDetailScreen extends StatelessWidget {
     );
   }
 
-  /// Builds habitat/observation rows and map deep-link affordances.
   Widget _habitatLocationsSection(BuildContext context, Species species) {
-    // Compose a unified list from observation pins + photography spots.
     final locs = speciesLocationsForSpecies(species.id);
     final spots = photographySpotsForSpeciesId(species.id);
     if (locs.isEmpty && spots.isEmpty) return const SizedBox.shrink();
@@ -660,7 +654,6 @@ class SpeciesDetailScreen extends StatelessWidget {
     );
   }
 
-  /// Reusable clickable location row that jumps to Map tab focus.
   Widget _locationMapRow(
     BuildContext context, {
     required int index,
@@ -678,7 +671,6 @@ class SpeciesDetailScreen extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          // Jump to map tab, center on pin, then close detail stack.
           context.read<AppShellController>().openMapAt(
             point,
             zoom: 15,
@@ -743,14 +735,12 @@ class SpeciesDetailScreen extends StatelessWidget {
     );
   }
 
-  /// Shared frosted section card wrapper for species info blocks.
   Widget _sectionCard(
     BuildContext context, {
     required String title,
     IconData? icon,
     required Widget child,
   }) {
-    // Gracefully replace blank content with readable placeholders.
     Widget content = child;
     if (child is Text && (child.data == null || child.data!.trim().isEmpty)) {
       content = Text(
@@ -860,13 +850,11 @@ class SpeciesDetailScreen extends StatelessWidget {
     }
   }
 
-  /// Inline prediction summary card shown on detail page before full forecast view.
   Widget _predictionSnapshotCard(
     BuildContext context, {
     required Species species,
     required SpeciesPrediction prediction,
   }) {
-    // Uses first forecast item as "current" snapshot.
     final s = Adaptive.scale(context);
     final currentForecast = prediction.forecast.isNotEmpty
         ? prediction.forecast.first
@@ -923,12 +911,7 @@ class SpeciesDetailScreen extends StatelessWidget {
                           '${prediction.locationName} • ${prediction.distance.toStringAsFixed(1)}km away',
                           style: GoogleFonts.plusJakartaSans(
                             color: AppColors.textSubtitleOnFrost,
-                            fontSize: Adaptive.clamp(
-                              context,
-                              13,
-                              min: 11,
-                              max: 15,
-                            ),
+                            fontSize: Adaptive.clamp(context, 13, min: 11, max: 15),
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.05,
                           ),
@@ -1007,18 +990,28 @@ class SpeciesDetailScreen extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 12 * s),
-              GlassCtaPill(
-                emphasized: true,
-                minHeight: 46 * s,
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) =>
-                          SpeciesPredictionScreen(speciesId: species.id),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => SpeciesPredictionScreen(speciesId: species.id),
+                      ),
+                    );
+                  },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.88),
+                    foregroundColor: Colors.white,
+                    minimumSize: Size.fromHeight(46 * s),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24 * s),
                     ),
-                  );
-                },
-                child: const Text('See more prediction details'),
+                    elevation: 0,
+                    shadowColor: Colors.transparent,
+                  ),
+                  child: const Text('See more prediction details'),
+                ),
               ),
             ],
           ),
@@ -1027,7 +1020,6 @@ class SpeciesDetailScreen extends StatelessWidget {
     );
   }
 
-  /// Small metric pill used by the prediction summary card.
   Widget _predictionMiniFact(
     BuildContext context, {
     required IconData icon,
@@ -1087,7 +1079,6 @@ class SpeciesDetailScreen extends StatelessWidget {
     );
   }
 
-  /// Inner white panel used inside frosted glass cards for readability.
   Widget _innerInfoCard({required Widget child, EdgeInsets? padding}) {
     return Container(
       width: double.infinity,

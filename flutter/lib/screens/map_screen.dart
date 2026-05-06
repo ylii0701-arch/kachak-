@@ -1,8 +1,7 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
@@ -202,31 +201,19 @@ class _MapScreenState extends State<MapScreen> {
     required Widget child,
     required double scale,
     double radius = 16,
-    double blur = 16,
-    double alpha = 0.44,
   }) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius * scale),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: alpha),
-            borderRadius: BorderRadius.circular(radius * scale),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.62),
-              width: 1.1 * scale,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.08),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF0EBDF),
+          borderRadius: BorderRadius.circular(radius * scale),
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.18),
+            width: 1.1 * scale,
           ),
-          child: child,
         ),
+        child: child,
       ),
     );
   }
@@ -548,304 +535,322 @@ class _MapScreenState extends State<MapScreen> {
       );
     }
 
-    return Stack(
-      children: [
-        FlutterMap(
-          mapController: _mapController,
-          options: _mapOptions,
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(16 * s, 14 * s, 16 * s, 0),
+        child: Column(
           children: [
-            TileLayer(
-              urlTemplate: mapboxStaticTilesUrlTemplate,
-              userAgentPackageName: 'com.kachak.kachak_tracker',
-            ),
-            IgnorePointer(child: PolygonLayer(polygons: polygons)),
-            IgnorePointer(child: CircleLayer(circles: circles)),
-            MarkerLayer(
-              markers: [
-                ...cityWeatherMarkers,
-                ...photographyMarkers,
-                ...speciesMarkers,
-                ...userMarkers,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Kachak',
+                        style: GoogleFonts.libreBaskerville(
+                          fontSize: Adaptive.clamp(context, 38, min: 30, max: 42),
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.accent,
+                        ),
+                      ),
+                      Text(
+                        'Malaysian Wildlife Explorer',
+                        style: GoogleFonts.inter(
+                          color: AppColors.textSubtitleOnFrost,
+                          fontSize: Adaptive.clamp(context, 17, min: 14, max: 19),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
-          ],
-        ),
-        SafeArea(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(16 * s, 62 * s, 16 * s, 0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+            SizedBox(height: 10 * s),
+            Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildGlassCard(
-                        scale: s,
-                        radius: 18,
-                        child: SizedBox(
-                          height: Adaptive.clamp(context, 52, min: 46, max: 60),
-                          child: Row(
+                Expanded(
+                  child: _buildGlassCard(
+                    scale: s,
+                    radius: 18,
+                    child: SizedBox(
+                      height: Adaptive.clamp(context, 52, min: 46, max: 60),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 44 * s,
+                            child: Icon(
+                              Icons.search,
+                              color: AppColors.accent.withValues(alpha: 0.86),
+                              size: Adaptive.clamp(context, 20, min: 17, max: 23),
+                            ),
+                          ),
+                          Expanded(
+                            child: TextField(
+                              controller: _speciesSearchController,
+                              onChanged: _onSpeciesQueryChanged,
+                              textInputAction: TextInputAction.search,
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                color: AppColors.accent,
+                                fontWeight: FontWeight.w700,
+                                fontSize: Adaptive.clamp(context, 15, min: 13, max: 18),
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Search species',
+                                hintStyle: TextStyle(
+                                  color: AppColors.accent.withValues(alpha: 0.84),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                filled: false,
+                                fillColor: Colors.transparent,
+                                isDense: true,
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 6 * s,
+                                  vertical: 10 * s,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 44 * s,
+                            child: q.isEmpty
+                                ? null
+                                : IconButton(
+                                    icon: Icon(
+                                      Icons.close,
+                                      color: AppColors.accent.withValues(alpha: 0.86),
+                                    ),
+                                    onPressed: _clearSpeciesSearch,
+                                  ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8 * s),
+                _buildGlassCard(
+                  scale: s,
+                  radius: 18,
+                  child: SizedBox(
+                    width: Adaptive.clamp(context, 52, min: 46, max: 58),
+                    height: Adaptive.clamp(context, 52, min: 46, max: 58),
+                    child: IconButton(
+                      tooltip: 'Refocus hotspots',
+                      onPressed: _fitWildlifeHotspots,
+                      icon: const Icon(
+                        Icons.filter_alt_outlined,
+                        color: AppColors.iconSectionOnFrost,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (showSuggestionList) ...[
+              SizedBox(height: 8 * s),
+              _buildGlassCard(
+                scale: s,
+                radius: 16,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: Adaptive.clamp(context, 230, min: 180, max: 260),
+                  ),
+                  child: ListView.separated(
+                    padding: EdgeInsets.symmetric(vertical: 6 * s),
+                    shrinkWrap: true,
+                    itemCount: suggestions.length,
+                    separatorBuilder: (_, _) => Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: Colors.white.withValues(alpha: 0.7),
+                    ),
+                    itemBuilder: (context, index) {
+                      final species = suggestions[index];
+                      return ListTile(
+                        dense: true,
+                        leading: const Icon(Icons.pets, color: AppColors.primary),
+                        title: Text(
+                          species.commonName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: AppColors.accent,
+                            fontWeight: FontWeight.w700,
+                            fontSize: Adaptive.clamp(context, 14, min: 12, max: 16),
+                          ),
+                        ),
+                        subtitle: Text(
+                          species.scientificName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: AppColors.accent.withValues(alpha: 0.76),
+                            fontSize: Adaptive.clamp(context, 12, min: 10, max: 14),
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                        onTap: () => _selectSpeciesSuggestion(species),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+            SizedBox(height: 12 * s),
+            Expanded(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22 * s),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(22 * s),
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: FlutterMap(
+                          mapController: _mapController,
+                          options: _mapOptions,
+                          children: [
+                            TileLayer(
+                              urlTemplate: mapboxStaticTilesUrlTemplate,
+                              userAgentPackageName: 'com.kachak.kachak_tracker',
+                            ),
+                            IgnorePointer(child: PolygonLayer(polygons: polygons)),
+                            IgnorePointer(child: CircleLayer(circles: circles)),
+                            MarkerLayer(
+                              markers: [
+                                ...cityWeatherMarkers,
+                                ...photographyMarkers,
+                                ...speciesMarkers,
+                                ...userMarkers,
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (_locationToast != null)
+                        Positioned(
+                          top: 12 * s,
+                          left: 12 * s,
+                          right: 12 * s,
+                          child: Material(
+                            elevation: 6,
+                            borderRadius: BorderRadius.circular(16 * s),
+                            child: Padding(
+                              padding: EdgeInsets.all(12 * s),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.warning_amber_rounded,
+                                    color: Colors.red.shade700,
+                                    size: 22 * s,
+                                  ),
+                                  SizedBox(width: 10 * s),
+                                  Expanded(child: Text(_locationToast!)),
+                                  IconButton(
+                                    icon: const Icon(Icons.close),
+                                    onPressed: () => setState(() => _locationToast = null),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (_loadingLocation)
+                        const Positioned.fill(
+                          child: IgnorePointer(
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                        ),
+                      Positioned(
+                        right: 12 * s,
+                        bottom: 12 * s,
+                        child: Material(
+                          elevation: 6,
+                          borderRadius: BorderRadius.circular(12 * s),
+                          color: Colors.white,
+                          clipBehavior: Clip.antiAlias,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              SizedBox(
-                                width: 44 * s,
-                                child: Icon(
-                                  Icons.search,
-                                  color: AppColors.accent.withValues(
-                                    alpha: 0.86,
-                                  ),
-                                  size: Adaptive.clamp(
-                                    context,
-                                    20,
-                                    min: 17,
-                                    max: 23,
-                                  ),
+                              IconButton(
+                                tooltip: 'Refresh weather',
+                                onPressed: _loadCityWeather,
+                                icon: Icon(
+                                  _loadingCityWeather ? Icons.sync : Icons.refresh,
+                                  color: AppColors.primary,
                                 ),
+                                visualDensity: VisualDensity.compact,
                               ),
-                              Expanded(
-                                child: TextField(
-                                  controller: _speciesSearchController,
-                                  onChanged: _onSpeciesQueryChanged,
-                                  textInputAction: TextInputAction.search,
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                    color: AppColors.accent,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: Adaptive.clamp(
-                                      context,
-                                      15,
-                                      min: 13,
-                                      max: 18,
-                                    ),
-                                  ),
-                                  decoration: InputDecoration(
-                                    hintText: 'Search species',
-                                    hintStyle: TextStyle(
-                                      color: AppColors.accent.withValues(
-                                        alpha: 0.84,
-                                      ),
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                    filled: false,
-                                    fillColor: Colors.transparent,
-                                    isDense: true,
-                                    border: InputBorder.none,
-                                    enabledBorder: InputBorder.none,
-                                    focusedBorder: InputBorder.none,
-                                    disabledBorder: InputBorder.none,
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 6 * s,
-                                      vertical: 10 * s,
-                                    ),
-                                  ),
+                              Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
+                              IconButton(
+                                tooltip: _showCityWeatherMarkers
+                                    ? 'Hide city weather'
+                                    : 'Show city weather',
+                                onPressed: () {
+                                  setState(() {
+                                    _showCityWeatherMarkers = !_showCityWeatherMarkers;
+                                  });
+                                },
+                                icon: Icon(
+                                  _showCityWeatherMarkers
+                                      ? Icons.cloud_rounded
+                                      : Icons.cloud_off_rounded,
+                                  color: AppColors.primary,
                                 ),
+                                visualDensity: VisualDensity.compact,
                               ),
-                              SizedBox(
-                                width: 44 * s,
-                                child: q.isEmpty
-                                    ? null
-                                    : IconButton(
-                                        icon: Icon(
-                                          Icons.close,
-                                          color: AppColors.accent.withValues(
-                                            alpha: 0.86,
-                                          ),
-                                        ),
-                                        onPressed: _clearSpeciesSearch,
-                                      ),
+                              Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
+                              IconButton(
+                                tooltip: 'Show species & photo spots',
+                                onPressed: _fitWildlifeHotspots,
+                                icon: const Icon(
+                                  Icons.filter_center_focus,
+                                  color: AppColors.primary,
+                                ),
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              if (_user != null)
+                                IconButton(
+                                  tooltip: 'My location',
+                                  onPressed: _goToMyLocation,
+                                  icon: const Icon(Icons.my_location, color: AppColors.primary),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                              Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
+                              IconButton(
+                                tooltip: 'Zoom in',
+                                onPressed: () => _zoomBy(1),
+                                icon: const Icon(Icons.add, color: AppColors.primary),
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
+                              IconButton(
+                                tooltip: 'Zoom out',
+                                onPressed: () => _zoomBy(-1),
+                                icon: const Icon(Icons.remove, color: AppColors.primary),
+                                visualDensity: VisualDensity.compact,
                               ),
                             ],
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                if (showSuggestionList) ...[
-                  SizedBox(height: 8 * s),
-                  _buildGlassCard(
-                    scale: s,
-                    radius: 16,
-                    alpha: 0.86,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: Adaptive.clamp(
-                          context,
-                          230,
-                          min: 180,
-                          max: 260,
-                        ),
-                      ),
-                      child: ListView.separated(
-                        padding: EdgeInsets.symmetric(vertical: 6 * s),
-                        shrinkWrap: true,
-                        itemCount: suggestions.length,
-                        separatorBuilder: (_, _) => Divider(
-                          height: 1,
-                          thickness: 1,
-                          color: Colors.white.withValues(alpha: 0.7),
-                        ),
-                        itemBuilder: (context, index) {
-                          final species = suggestions[index];
-                          return ListTile(
-                            dense: true,
-                            leading: const Icon(
-                              Icons.pets,
-                              color: AppColors.primary,
-                            ),
-                            title: Text(
-                              species.commonName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: AppColors.accent,
-                                fontWeight: FontWeight.w700,
-                                fontSize: Adaptive.clamp(
-                                  context,
-                                  14,
-                                  min: 12,
-                                  max: 16,
-                                ),
-                              ),
-                            ),
-                            subtitle: Text(
-                              species.scientificName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: AppColors.accent.withValues(alpha: 0.76),
-                                fontSize: Adaptive.clamp(
-                                  context,
-                                  12,
-                                  min: 10,
-                                  max: 14,
-                                ),
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                            onTap: () => _selectSpeciesSuggestion(species),
-                          );
-                        },
-                      ),
-                    ),
+                    ],
                   ),
-                ],
-              ],
-            ),
-          ),
-        ),
-        if (_locationToast != null)
-          Positioned(
-            top: 72,
-            left: 16 * s,
-            right: 16 * s,
-            child: Material(
-              elevation: 6,
-              borderRadius: BorderRadius.circular(16 * s),
-              child: Padding(
-                padding: EdgeInsets.all(12 * s),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      color: Colors.red.shade700,
-                      size: 22 * s,
-                    ),
-                    SizedBox(width: 10 * s),
-                    Expanded(child: Text(_locationToast!)),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => setState(() => _locationToast = null),
-                    ),
-                  ],
                 ),
               ),
             ),
-          ),
-        if (_loadingLocation)
-          const Positioned.fill(
-            child: IgnorePointer(
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          ),
-        Positioned(
-          right: 12 * s,
-          bottom: 12 * s,
-          child: SafeArea(
-            child: Material(
-              elevation: 6,
-              borderRadius: BorderRadius.circular(12 * s),
-              color: Colors.white,
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    tooltip: 'Refresh weather',
-                    onPressed: _loadCityWeather,
-                    icon: Icon(
-                      _loadingCityWeather ? Icons.sync : Icons.refresh,
-                      color: AppColors.primary,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
-                  IconButton(
-                    tooltip: _showCityWeatherMarkers
-                        ? 'Hide city weather'
-                        : 'Show city weather',
-                    onPressed: () {
-                      setState(() {
-                        _showCityWeatherMarkers = !_showCityWeatherMarkers;
-                      });
-                    },
-                    icon: Icon(
-                      _showCityWeatherMarkers
-                          ? Icons.cloud_rounded
-                          : Icons.cloud_off_rounded,
-                      color: AppColors.primary,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
-                  IconButton(
-                    tooltip: 'Show species & photo spots',
-                    onPressed: _fitWildlifeHotspots,
-                    icon: const Icon(
-                      Icons.filter_center_focus,
-                      color: AppColors.primary,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  if (_user != null)
-                    IconButton(
-                      tooltip: 'My location',
-                      onPressed: _goToMyLocation,
-                      icon: const Icon(
-                        Icons.my_location,
-                        color: AppColors.primary,
-                      ),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
-                  IconButton(
-                    tooltip: 'Zoom in',
-                    onPressed: () => _zoomBy(1),
-                    icon: const Icon(Icons.add, color: AppColors.primary),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
-                  IconButton(
-                    tooltip: 'Zoom out',
-                    onPressed: () => _zoomBy(-1),
-                    icon: const Icon(Icons.remove, color: AppColors.primary),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ],
-              ),
-            ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 

@@ -7,7 +7,6 @@ import '../models/species.dart';
 import '../providers/saved_species_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
-import '../widgets/glass.dart';
 import '../widgets/difficulty_stars.dart';
 import '../widgets/species_network_image.dart';
 import 'species_detail_screen.dart';
@@ -119,17 +118,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  /// Clears active sort state and returns to page 1.
-  void _resetSort() {
-    setState(() {
-      _sortBy = _SortBy.none;
-      _sortOrder = _SortOrder.ascending;
-      _tempSortBy = _SortBy.none;
-      _tempSortOrder = _SortOrder.ascending;
-      _currentPage = 1;
-    });
-  }
-
   /// Clears search input and resets paging.
   void _clearSearchInput() {
     setState(() {
@@ -171,9 +159,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Material(
       color: Colors.transparent,
-      child: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Image.asset(
+                'assets/images/home_editorial_bg.png',
+                fit: BoxFit.fitWidth,
+                alignment: Alignment.topCenter,
+              ),
+            ),
+          ),
+          CustomScrollView(
+            controller: _scrollController,
+            slivers: [
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(
@@ -182,37 +181,33 @@ class _HomeScreenState extends State<HomeScreen> {
                 16 * scale,
                 8 * scale,
               ),
-              child: GlassPanel(
+              child: Padding(
                 padding: EdgeInsets.fromLTRB(
-                  18 * scale,
-                  20 * scale,
-                  18 * scale,
-                  18 * scale,
+                  6 * scale,
+                  6 * scale,
+                  6 * scale,
+                  10 * scale,
                 ),
-                borderRadius: 26 * scale,
-                fillAlpha: 0.42,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Kachak',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: Adaptive.clamp(context, 28, min: 22, max: 34),
+                      style: GoogleFonts.libreBaskerville(
+                        fontSize: Adaptive.clamp(context, 38, min: 30, max: 42),
                         fontWeight: FontWeight.w700,
-                        letterSpacing: -0.6,
-                        height: 1.05,
+                        height: 1.0,
                         color: AppColors.accent,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Malaysian Wildlife Explorer',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
+                      style: GoogleFonts.inter(
+                        fontSize: Adaptive.clamp(context, 17, min: 15, max: 19),
                         fontWeight: FontWeight.w500,
-                        letterSpacing: 0.35,
                         height: 1.35,
-                        color: const Color(0xFF5C6B63),
+                        color: AppColors.textSubtitleOnFrost,
                       ),
                     ),
                     SizedBox(height: 20 * scale),
@@ -220,7 +215,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       controller: _searchController,
                       decoration: InputDecoration(
                         hintText: 'Search species name',
-                        prefixIcon: const Icon(Icons.search),
+                        prefixIcon: const Icon(
+                          Icons.search_rounded,
+                          color: AppColors.iconSectionOnFrost,
+                        ),
                         suffixIcon: _searchQuery.isNotEmpty
                             ? IconButton(
                                 icon: const Icon(Icons.close),
@@ -286,21 +284,27 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                         ),
-                        if (_activeFilterCount > 0 || _sortBy != _SortBy.none)
-                          IconButton(
-                            onPressed: () {
-                              _resetFilters();
-                              _resetSort();
-                            },
-                            icon: const Icon(Icons.cleaning_services_outlined),
-                            color: Colors.red.shade700,
-                            tooltip: 'Clear all',
-                          ),
-                        IconButton(
-                          onPressed: () =>
-                              setState(() => _gridView = !_gridView),
-                          icon: Icon(
-                            _gridView ? Icons.view_list : Icons.grid_view,
+                        SizedBox(width: 8 * scale),
+                        Material(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () => setState(() => _gridView = !_gridView),
+                            child: Container(
+                              width: 56 * scale,
+                              height: 50 * scale,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: AppColors.border),
+                              ),
+                              child: Icon(
+                                _gridView
+                                    ? Icons.view_list_rounded
+                                    : Icons.grid_view_rounded,
+                                color: AppColors.iconSectionOnFrost,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -441,6 +445,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+            ],
+          ),
         ],
       ),
     );
@@ -456,34 +462,34 @@ class _HomeScreenState extends State<HomeScreen> {
   }) {
     final color = primary ? AppColors.primary : AppColors.accent;
     return Material(
-      color: selected ? color : Colors.white.withValues(alpha: 0.82),
+      color: selected
+          ? AppColors.lightSage.withValues(alpha: 0.66)
+          : Colors.white,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: selected ? color : Colors.grey.shade300,
-              width: 2,
+              color: selected
+                  ? color.withValues(alpha: 0.35)
+                  : AppColors.border,
+              width: 1.2,
             ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon,
-                size: 20,
-                color: selected ? Colors.white : Colors.black87,
-              ),
+              Icon(icon, size: 20, color: AppColors.iconSectionOnFrost),
               const SizedBox(width: 6),
               Text(
                 label,
-                style: TextStyle(
+                style: GoogleFonts.inter(
                   fontWeight: FontWeight.w600,
-                  color: selected ? Colors.white : Colors.black87,
+                  color: AppColors.accent,
                 ),
               ),
               if (badge != null) ...[
@@ -933,6 +939,24 @@ class _HomeScreenState extends State<HomeScreen> {
     const tagDensity = VisualDensity(horizontal: -2, vertical: -2);
 
     final infoPadding = EdgeInsets.all((compact ? 10 : 16) * scale);
+    Widget tagChip({
+      required Widget label,
+      required Color bgColor,
+      required Color borderColor,
+    }) {
+      return Chip(
+        label: label,
+        labelPadding: tagLabelPadding,
+        visualDensity: tagDensity,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        padding: EdgeInsets.zero,
+        shape: tagShape,
+        side: BorderSide(width: 1, color: borderColor),
+        backgroundColor: bgColor,
+        surfaceTintColor: Colors.transparent,
+      );
+    }
+
     final infoColumn = Padding(
       padding: infoPadding,
       child: Column(
@@ -943,20 +967,21 @@ class _HomeScreenState extends State<HomeScreen> {
             commonName,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: GoogleFonts.libreBaskerville(
               fontSize: compact
                   ? Adaptive.clamp(context, 16, min: 13, max: 19)
                   : Adaptive.clamp(context, 20, min: 16, max: 24),
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
+              color: AppColors.accent,
             ),
           ),
           Text(
             scientificName,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: GoogleFonts.inter(
               fontStyle: FontStyle.italic,
-              color: Colors.grey.shade600,
+              color: AppColors.textSubtitleOnFrost,
               fontSize: compact
                   ? Adaptive.clamp(context, 11, min: 10, max: 13)
                   : Adaptive.clamp(context, 13, min: 11, max: 15),
@@ -968,33 +993,32 @@ class _HomeScreenState extends State<HomeScreen> {
             runSpacing: 5 * scale,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Chip(
-                label: Text(
-                  categoryText,
-                  style: tagTextStyle.copyWith(color: Colors.black87),
+              tagChip(
+                bgColor: const Color(0xFFF5F0E4),
+                borderColor: AppColors.primary.withValues(alpha: 0.12),
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.pets_rounded,
+                      size: compact ? 13 : 14,
+                      color: AppColors.textSubtitleOnFrost,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      categoryText,
+                      style: tagTextStyle.copyWith(color: AppColors.accent),
+                    ),
+                  ],
                 ),
-                labelPadding: tagLabelPadding,
-                visualDensity: tagDensity,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                padding: EdgeInsets.zero,
-                shape: tagShape,
-                side: BorderSide(color: Colors.grey.shade400),
-                backgroundColor: Colors.white,
-                surfaceTintColor: Colors.transparent,
               ),
-              Chip(
+              tagChip(
+                bgColor: bg,
+                borderColor: bg,
                 label: Text(
                   statusText,
                   style: tagTextStyle.copyWith(color: fg),
                 ),
-                labelPadding: tagLabelPadding,
-                visualDensity: tagDensity,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                padding: EdgeInsets.zero,
-                shape: tagShape,
-                side: BorderSide(width: 1, color: bg),
-                backgroundColor: bg,
-                surfaceTintColor: Colors.transparent,
               ),
             ],
           ),
@@ -1003,11 +1027,11 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Text(
                 'Difficulty:',
-                style: TextStyle(
+                style: GoogleFonts.inter(
                   fontSize: compact
                       ? Adaptive.clamp(context, 10, min: 9, max: 12)
                       : Adaptive.clamp(context, 12, min: 10, max: 14),
-                  color: Colors.grey.shade600,
+                  color: AppColors.textSubtitleOnFrost,
                 ),
               ),
               SizedBox(width: 6 * scale),
@@ -1020,44 +1044,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ],
-      ),
-    );
-
-    // Shared save/remove action block for both list and grid cards.
-    final saveButton = Padding(
-      padding: EdgeInsets.fromLTRB(
-        (compact ? 10 : 16) * scale,
-        0,
-        (compact ? 10 : 16) * scale,
-        (compact ? 10 : 16) * scale,
-      ),
-      child: FilledButton.icon(
-        onPressed: () async {
-          try {
-            await saved.toggleSaved(s.id);
-          } catch (_) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Failed to update saved species. Please try again.',
-                  ),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          }
-        },
-        icon: Icon(
-          saved.isSaved(s.id) ? Icons.favorite : Icons.favorite_border,
-        ),
-        label: Text(saved.isSaved(s.id) ? 'Saved' : 'Save'),
-        style: FilledButton.styleFrom(
-          backgroundColor: saved.isSaved(s.id)
-              ? AppColors.primary
-              : Colors.grey.shade200,
-          foregroundColor: saved.isSaved(s.id) ? Colors.white : Colors.black87,
-        ),
       ),
     );
 
@@ -1074,27 +1060,66 @@ class _HomeScreenState extends State<HomeScreen> {
       return Card(
         clipBehavior: Clip.antiAlias,
         margin: EdgeInsets.zero,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(22),
+          side: BorderSide(color: AppColors.primary.withValues(alpha: 0.12)),
+        ),
+        child: Stack(
           children: [
-            Expanded(
-              child: InkWell(
-                onTap: openDetail,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      child: SpeciesNetworkImage(
-                        url: s.imageUrl,
-                        fit: BoxFit.cover,
-                      ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: openDetail,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: SpeciesNetworkImage(
+                            url: s.imageUrl,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Positioned(
+                          top: 8 * scale,
+                          right: 8 * scale,
+                          child: Material(
+                            color: AppColors.pageMist.withValues(alpha: 0.96),
+                            shape: const CircleBorder(),
+                            child: IconButton(
+                              visualDensity: VisualDensity.compact,
+                              icon: Icon(
+                                saved.isSaved(s.id)
+                                    ? Icons.bookmark_rounded
+                                    : Icons.bookmark_border_rounded,
+                                color: AppColors.accent,
+                              ),
+                              onPressed: () async {
+                                try {
+                                  await saved.toggleSaved(s.id);
+                                } catch (_) {
+                                  if (!mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Failed to update saved species. Please try again.',
+                                      ),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                        ),
+                        infoColumn,
+                      ],
                     ),
-                    infoColumn,
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-            saveButton,
           ],
         ),
       );
@@ -1102,26 +1127,70 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+        side: BorderSide(color: AppColors.primary.withValues(alpha: 0.12)),
+      ),
+      child: Stack(
         children: [
-          InkWell(
-            onTap: openDetail,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(
-                  height: imgH,
-                  child: SpeciesNetworkImage(
-                    url: s.imageUrl,
-                    fit: BoxFit.cover,
-                  ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              InkWell(
+                onTap: openDetail,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Stack(
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          height: imgH,
+                          child: SpeciesNetworkImage(
+                            url: s.imageUrl,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Positioned(
+                          top: 10 * scale,
+                          right: 10 * scale,
+                          child: Material(
+                            color: AppColors.pageMist.withValues(alpha: 0.96),
+                            shape: const CircleBorder(),
+                            child: IconButton(
+                              visualDensity: VisualDensity.compact,
+                              icon: Icon(
+                                saved.isSaved(s.id)
+                                    ? Icons.bookmark_rounded
+                                    : Icons.bookmark_border_rounded,
+                                color: AppColors.accent,
+                              ),
+                              onPressed: () async {
+                                try {
+                                  await saved.toggleSaved(s.id);
+                                } catch (_) {
+                                  if (!mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Failed to update saved species. Please try again.',
+                                      ),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    infoColumn,
+                  ],
                 ),
-                infoColumn,
-              ],
-            ),
+              ),
+            ],
           ),
-          saveButton,
         ],
       ),
     );
