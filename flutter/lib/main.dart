@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'providers/app_shell_controller.dart';
 import 'providers/saved_species_provider.dart';
 import 'screens/splash_screen.dart';
+import 'services/onboarding_service.dart';
 import 'theme/app_theme.dart';
 import 'utils/adaptive.dart';
 
@@ -36,6 +38,7 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => SavedSpeciesProvider(prefs)),
         ChangeNotifierProvider(create: (_) => AppShellController()),
+        ChangeNotifierProvider(create: (_) => OnboardingService(prefs)),
       ],
       child: const KachakApp(),
     ),

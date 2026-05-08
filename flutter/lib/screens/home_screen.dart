@@ -939,6 +939,38 @@ class _HomeScreenState extends State<HomeScreen> {
     const tagDensity = VisualDensity(horizontal: -2, vertical: -2);
 
     final infoPadding = EdgeInsets.all((compact ? 10 : 16) * scale);
+
+    final bookmarkButton = SizedBox(
+      width: (compact ? 28 : 32) * scale,
+      height: (compact ? 28 : 32) * scale,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        visualDensity: VisualDensity.compact,
+        iconSize: (compact ? 18 : 20) * scale,
+        icon: Icon(
+          saved.isSaved(s.id)
+              ? Icons.bookmark_rounded
+              : Icons.bookmark_border_rounded,
+          color: AppColors.accent,
+        ),
+        onPressed: () async {
+          try {
+            await saved.toggleSaved(s.id);
+          } catch (_) {
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Failed to update saved species. Please try again.',
+                ),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+      ),
+    );
+
     Widget tagChip({
       required Widget label,
       required Color bgColor,
@@ -963,17 +995,26 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            commonName,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.libreBaskerville(
-              fontSize: compact
-                  ? Adaptive.clamp(context, 16, min: 13, max: 19)
-                  : Adaptive.clamp(context, 20, min: 16, max: 24),
-              fontWeight: FontWeight.w700,
-              color: AppColors.accent,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  commonName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.libreBaskerville(
+                    fontSize: compact
+                        ? Adaptive.clamp(context, 16, min: 13, max: 19)
+                        : Adaptive.clamp(context, 20, min: 16, max: 24),
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.accent,
+                  ),
+                ),
+              ),
+              SizedBox(width: 4 * scale),
+              bookmarkButton,
+            ],
           ),
           Text(
             scientificName,
@@ -1064,63 +1105,20 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: BorderRadius.circular(22),
           side: BorderSide(color: AppColors.primary.withValues(alpha: 0.12)),
         ),
-        child: Stack(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: openDetail,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          child: SpeciesNetworkImage(
-                            url: s.imageUrl,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        Positioned(
-                          top: 8 * scale,
-                          right: 8 * scale,
-                          child: Material(
-                            color: AppColors.pageMist.withValues(alpha: 0.96),
-                            shape: const CircleBorder(),
-                            child: IconButton(
-                              visualDensity: VisualDensity.compact,
-                              icon: Icon(
-                                saved.isSaved(s.id)
-                                    ? Icons.bookmark_rounded
-                                    : Icons.bookmark_border_rounded,
-                                color: AppColors.accent,
-                              ),
-                              onPressed: () async {
-                                try {
-                                  await saved.toggleSaved(s.id);
-                                } catch (_) {
-                                  if (!mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Failed to update saved species. Please try again.',
-                                      ),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
-                          ),
-                        ),
-                        infoColumn,
-                      ],
-                    ),
-                  ),
+        child: InkWell(
+          onTap: openDetail,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: SpeciesNetworkImage(
+                  url: s.imageUrl,
+                  fit: BoxFit.cover,
                 ),
-              ],
-            ),
-          ],
+              ),
+              infoColumn,
+            ],
+          ),
         ),
       );
     }
@@ -1131,67 +1129,22 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(24),
         side: BorderSide(color: AppColors.primary.withValues(alpha: 0.12)),
       ),
-      child: Stack(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              InkWell(
-                onTap: openDetail,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Stack(
-                      children: [
-                        SizedBox(
-                          width: double.infinity,
-                          height: imgH,
-                          child: SpeciesNetworkImage(
-                            url: s.imageUrl,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        Positioned(
-                          top: 10 * scale,
-                          right: 10 * scale,
-                          child: Material(
-                            color: AppColors.pageMist.withValues(alpha: 0.96),
-                            shape: const CircleBorder(),
-                            child: IconButton(
-                              visualDensity: VisualDensity.compact,
-                              icon: Icon(
-                                saved.isSaved(s.id)
-                                    ? Icons.bookmark_rounded
-                                    : Icons.bookmark_border_rounded,
-                                color: AppColors.accent,
-                              ),
-                              onPressed: () async {
-                                try {
-                                  await saved.toggleSaved(s.id);
-                                } catch (_) {
-                                  if (!mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Failed to update saved species. Please try again.',
-                                      ),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    infoColumn,
-                  ],
-                ),
+      child: InkWell(
+        onTap: openDetail,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              height: imgH,
+              child: SpeciesNetworkImage(
+                url: s.imageUrl,
+                fit: BoxFit.cover,
               ),
-            ],
-          ),
-        ],
+            ),
+            infoColumn,
+          ],
+        ),
       ),
     );
   }

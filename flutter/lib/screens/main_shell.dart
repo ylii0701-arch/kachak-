@@ -3,10 +3,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/app_shell_controller.dart';
+import '../services/onboarding_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
 import '../widgets/assistant_overlay_layer.dart';
 import '../widgets/glass.dart';
+import '../widgets/onboarding/onboarding_content.dart';
+import '../widgets/onboarding/page_intro_sheet.dart';
+import '../widgets/onboarding/welcome_carousel.dart';
 import 'home_screen.dart';
 import 'identify_screen.dart';
 import 'map_screen.dart';
@@ -159,6 +163,113 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   bool _menuOpen = false;
+
+  /// Tracks the last tab index we evaluated for an onboarding tour, so we
+  /// only show a tour once per tab visit.
+  int? _lastEvaluatedTabIndex;
+
+  /// True while a tour bottom sheet / welcome carousel is on screen, so we
+  /// do not stack multiple onboarding overlays.
+  bool _tourInProgress = false;
+
+  AppShellController? _shellListenerTarget;
+
+  @override
+  void initState() {
+    super.initState();
+    final shell = context.read<AppShellController>();
+    shell.addListener(_handleShellChange);
+    _shellListenerTarget = shell;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _runInitialOnboarding();
+    });
+  }
+
+  @override
+  void dispose() {
+    _shellListenerTarget?.removeListener(_handleShellChange);
+    super.dispose();
+  }
+
+  /// Handles tab changes from [AppShellController] and fires the tour for the
+  /// newly active tab if the user has not seen it yet.
+  void _handleShellChange() {
+    if (!mounted) return;
+    final idx = context.read<AppShellController>().index;
+    if (_lastEvaluatedTabIndex == idx) return;
+    _lastEvaluatedTabIndex = idx;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _maybeShowTourFor(idx);
+    });
+  }
+
+  /// Maps a bottom-navigation index to the matching [OnboardingTour].
+  OnboardingTour? _tourForTab(int idx) {
+    switch (idx) {
+      case 0:
+        return OnboardingTour.home;
+      case 1:
+        return OnboardingTour.predict;
+      case 2:
+        return OnboardingTour.identify;
+      case 3:
+        return OnboardingTour.mission;
+      case 4:
+        return OnboardingTour.map;
+    }
+    return null;
+  }
+
+  /// Runs the welcome carousel + initial tab tour for first-time users.
+  Future<void> _runInitialOnboarding() async {
+    final onboarding = context.read<OnboardingService>();
+    if (!onboarding.hasSeen(OnboardingTour.welcome)) {
+      _tourInProgress = true;
+      await WelcomeCarousel.show(context);
+      if (!mounted) {
+        _tourInProgress = false;
+        return;
+      }
+      await onboarding.markSeen(OnboardingTour.welcome);
+      _tourInProgress = false;
+    }
+    if (!mounted) return;
+    final idx = context.read<AppShellController>().index;
+    _lastEvaluatedTabIndex = idx;
+    await _maybeShowTourFor(idx);
+  }
+
+  /// Shows the per-tab tour bottom sheet if the user has not seen it yet.
+  Future<void> _maybeShowTourFor(int idx) async {
+    if (_tourInProgress) return;
+    final tour = _tourForTab(idx);
+    if (tour == null) return;
+    final content = kOnboardingContent[tour];
+    if (content == null) return;
+    final onboarding = context.read<OnboardingService>();
+    if (onboarding.hasSeen(tour)) return;
+    _tourInProgress = true;
+    try {
+      await PageIntroSheet.show(context, content);
+      if (!mounted) return;
+      await onboarding.markSeen(tour);
+    } finally {
+      _tourInProgress = false;
+    }
+  }
+
+  /// Resets all tour flags and replays the welcome + current tab tour.
+  Future<void> _restartTutorial() async {
+    _closeMenu();
+    await Future<void>.delayed(const Duration(milliseconds: 220));
+    if (!mounted) return;
+    final onboarding = context.read<OnboardingService>();
+    await onboarding.resetAll();
+    _lastEvaluatedTabIndex = null;
+    await _runInitialOnboarding();
+  }
 
   /// Toggles right-side quick menu panel.
   void _toggleMenu() {
@@ -369,6 +480,11 @@ class _MainShellState extends State<MainShell> {
                           icon: Icons.favorite_border_rounded,
                           label: 'Saved',
                           onTap: _openSaved,
+                        ),
+                        _menuTile(
+                          icon: Icons.school_outlined,
+                          label: 'Show tutorial',
+                          onTap: _restartTutorial,
                         ),
                         _menuTile(
                           icon: Icons.settings_outlined,
