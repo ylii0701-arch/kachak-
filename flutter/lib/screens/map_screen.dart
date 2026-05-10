@@ -642,11 +642,15 @@ class _MapScreenState extends State<MapScreen> {
                     width: Adaptive.clamp(context, 52, min: 46, max: 58),
                     height: Adaptive.clamp(context, 52, min: 46, max: 58),
                     child: IconButton(
-                      tooltip: 'Refocus hotspots',
-                      onPressed: _fitWildlifeHotspots,
-                      icon: const Icon(
-                        Icons.filter_alt_outlined,
-                        color: AppColors.iconSectionOnFrost,
+                      tooltip: 'Clear search',
+                      onPressed: q.isEmpty ? null : _clearSpeciesSearch,
+                      icon: Icon(
+                        Icons.cleaning_services_outlined,
+                        color: q.isEmpty
+                            ? AppColors.iconSectionOnFrost.withValues(
+                                alpha: 0.4,
+                              )
+                            : AppColors.iconSectionOnFrost,
                       ),
                     ),
                   ),
