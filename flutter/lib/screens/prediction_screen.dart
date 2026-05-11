@@ -3,11 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../data/malaysia_cities.dart';
-import '../data/predictions_data.dart';
+import '../data/predictions_data.dart'; // 重新加回來，當作生物習性資料庫
 import '../data/site_data.dart';
 import '../data/species_data.dart';
 import '../models/species.dart';
 import '../providers/saved_species_provider.dart';
+import '../services/prediction_manager.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
 import '../widgets/species_network_image.dart';
@@ -23,6 +24,12 @@ class PredictionScreen extends StatefulWidget {
 
 class _PredictionScreenState extends State<PredictionScreen> {
   String _selectedCity = 'Kuala Lumpur';
+
+  String _getProbLabel(double p) {
+    if (p >= 0.7) return 'High';
+    if (p >= 0.4) return 'Medium';
+    return 'Low';
+  }
 
   Color _probabilityColors(String p) {
     switch (p) {
@@ -49,17 +56,11 @@ class _PredictionScreenState extends State<PredictionScreen> {
   }
 
   IconData _weatherIcon(String weather) {
-    switch (weather) {
-      case 'Sunny':
-        return Icons.wb_sunny_outlined;
-      case 'Partly Cloudy':
-      case 'Cloudy':
-        return Icons.cloud_outlined;
-      case 'Rainy':
-        return Icons.umbrella_outlined;
-      default:
-        return Icons.wb_sunny_outlined;
-    }
+    final w = weather.toLowerCase();
+    if (w.contains('sun') || w.contains('clear')) return Icons.wb_sunny_outlined;
+    if (w.contains('cloud')) return Icons.cloud_outlined;
+    if (w.contains('rain')) return Icons.umbrella_outlined;
+    return Icons.wb_sunny_outlined;
   }
 
   IconData _timeOfDayIcon(String timeOfDay) {
@@ -67,7 +68,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
     if (value.contains('night')) return Icons.dark_mode_outlined;
     if (value.contains('morning')) return Icons.wb_twilight_outlined;
     if (value.contains('afternoon')) return Icons.wb_sunny_outlined;
-    if (value.contains('evening')) return Icons.nights_stay_outlined;
+    if (value.contains('evening') || value.contains('dusk')) return Icons.nights_stay_outlined;
     return Icons.schedule_outlined;
   }
 
@@ -76,7 +77,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
     if (value.contains('night')) return const Color(0xFF5A4B3B);
     if (value.contains('morning')) return const Color(0xFFB08A2C);
     if (value.contains('afternoon')) return const Color(0xFFD2A33B);
-    if (value.contains('evening')) return const Color(0xFF7C6650);
+    if (value.contains('evening') || value.contains('dusk')) return const Color(0xFF7C6650);
     return AppColors.badgeText;
   }
 
@@ -103,240 +104,268 @@ class _PredictionScreenState extends State<PredictionScreen> {
     final s = Adaptive.scale(context);
     final saved = context.watch<SavedSpeciesProvider>();
     final citySites =
-        siteData.where((site) => site.cityName == _selectedCity).toList()
-          ..sort((a, b) => a.name.compareTo(b.name));
+    siteData.where((site) => site.cityName == _selectedCity).toList()
+      ..sort((a, b) => a.name.compareTo(b.name));
     final featuredSite = citySites.isEmpty ? null : citySites.first;
 
-    final slivers = <Widget>[
-      SliverToBoxAdapter(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(18 * s, 44 * s, 18 * s, 8 * s),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-                  Text(
-                    'Predictions',
-                    style: GoogleFonts.libreBaskerville(
-                      fontSize: Adaptive.clamp(context, 38, min: 30, max: 42),
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.accent,
-                      height: 1.0,
-                    ),
-                  ),
-              const SizedBox(height: 4),
-              Text(
-                'Malaysian Wildlife Explorer',
-                style: GoogleFonts.inter(
-                  color: AppColors.textSubtitleOnFrost,
-                  fontSize: Adaptive.clamp(context, 17, min: 15, max: 19),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      SliverToBoxAdapter(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(16 * s, 8 * s, 16 * s, 12 * s),
-          child: Container(
-            padding: EdgeInsets.all(16 * s),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(22 * s),
-              border: Border.all(color: AppColors.border),
-              boxShadow: const [
-                BoxShadow(
-                  color: AppColors.calmShadow,
-                  blurRadius: 18,
-                  offset: Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+    return ListenableBuilder(
+        listenable: PredictionManager.instance,
+        builder: (context, _) {
+          final isCalculating = PredictionManager.instance.isCalculating;
+
+          final slivers = <Widget>[
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(18 * s, 44 * s, 18 * s, 8 * s),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 40 * s,
-                      height: 40 * s,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.location_on_outlined,
-                        color: Colors.white,
-                        size: 22,
+                    Text(
+                      'Predictions',
+                      style: GoogleFonts.libreBaskerville(
+                        fontSize: Adaptive.clamp(context, 38, min: 30, max: 42),
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.accent,
+                        height: 1.0,
                       ),
                     ),
-                    SizedBox(width: 10 * s),
-                    Text(
-                      'Select Region',
-                      style: GoogleFonts.inter(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        color: AppColors.accent,
-                      ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Text(
+                          'Malaysian Wildlife Explorer',
+                          style: GoogleFonts.inter(
+                            color: AppColors.textSubtitleOnFrost,
+                            fontSize: Adaptive.clamp(context, 17, min: 15, max: 19),
+                          ),
+                        ),
+                        if (isCalculating) ...[
+                          const SizedBox(width: 8),
+                          SizedBox(
+                              width: 12,
+                              height: 12,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)
+                          )
+                        ]
+                      ],
                     ),
                   ],
                 ),
-                SizedBox(height: 12 * s),
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: _openCityPicker,
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16 * s,
-                        vertical: 14 * s,
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16 * s, 8 * s, 16 * s, 12 * s),
+                child: Container(
+                  padding: EdgeInsets.all(16 * s),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(22 * s),
+                    border: Border.all(color: AppColors.border),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: AppColors.calmShadow,
+                        blurRadius: 18,
+                        offset: Offset(0, 6),
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Row(
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
+                          Container(
+                            width: 40 * s,
+                            height: 40 * s,
+                            decoration: const BoxDecoration(
+                              color: AppColors.primary,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.location_on_outlined,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                          ),
+                          SizedBox(width: 10 * s),
+                          Text(
+                            'Select Region',
+                            style: GoogleFonts.inter(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              color: AppColors.accent,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12 * s),
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: _openCityPicker,
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16 * s,
+                              vertical: 14 * s,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: AppColors.border),
+                            ),
+                            child: Row(
                               children: [
-                                Text(
-                                  _selectedCity,
-                                  style: GoogleFonts.inter(
-                                    fontSize: Adaptive.clamp(
-                                      context,
-                                      16,
-                                      min: 14,
-                                      max: 18,
-                                    ),
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.accent,
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        _selectedCity,
+                                        style: GoogleFonts.inter(
+                                          fontSize: Adaptive.clamp(
+                                            context,
+                                            16,
+                                            min: 14,
+                                            max: 18,
+                                          ),
+                                          fontWeight: FontWeight.w800,
+                                          color: AppColors.accent,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Tap to search all cities',
+                                        style: GoogleFonts.inter(
+                                          fontSize: Adaptive.clamp(
+                                            context,
+                                            12,
+                                            min: 10,
+                                            max: 14,
+                                          ),
+                                          color: AppColors.textSubtitleOnFrost,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                Text(
-                                  'Tap to search all cities',
-                                  style: GoogleFonts.inter(
-                                    fontSize: Adaptive.clamp(
-                                      context,
-                                      12,
-                                      min: 10,
-                                      max: 14,
-                                    ),
-                                    color: AppColors.textSubtitleOnFrost,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                Icon(
+                                  Icons.expand_more_rounded,
+                                  size: 24 * s,
+                                  color: AppColors.iconSectionOnFrost,
                                 ),
                               ],
                             ),
                           ),
-                          Icon(
-                            Icons.expand_more_rounded,
-                            size: 24 * s,
-                            color: AppColors.iconSectionOnFrost,
-                          ),
-                        ],
+                        ),
                       ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ];
+
+          if (citySites.isEmpty) {
+            slivers.add(
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.all(40 * s),
+                  child: Center(
+                    child: Text(
+                      'No tracked sites or photography spots currently available in $_selectedCity.',
+                      style: TextStyle(color: Colors.grey.shade600, fontSize: 16 * s),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    ];
-
-    if (citySites.isEmpty) {
-      slivers.add(
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.all(40 * s),
-            child: Center(
-              child: Text(
-                'No tracked sites or photography spots currently available in $_selectedCity.',
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 16 * s),
-                textAlign: TextAlign.center,
               ),
-            ),
-          ),
-        ),
-      );
-    } else {
-      slivers.add(
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(16 * s, 10 * s, 16 * s, 6 * s),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Top Predictions by Site',
-                  style: GoogleFonts.libreBaskerville(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.accent,
-                    fontSize: Adaptive.clamp(context, 22, min: 18, max: 26),
+            );
+          } else {
+            slivers.add(
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(16 * s, 10 * s, 16 * s, 6 * s),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Top Predictions by Site',
+                        style: GoogleFonts.libreBaskerville(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.accent,
+                          fontSize: Adaptive.clamp(context, 22, min: 18, max: 26),
+                        ),
+                      ),
+                      SizedBox(height: 8 * s),
+                      _sitePill(
+                        siteName: featuredSite?.name ?? citySites.first.name,
+                        s: s,
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: 8 * s),
-                _sitePill(
-                  siteName: featuredSite?.name ?? citySites.first.name,
-                  s: s,
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-      final speciesList =
-          (featuredSite?.supportedSpeciesIds ?? const <String>[])
-              .map((id) => speciesById(id))
-              .whereType<Species>()
-              .toList()
-            ..sort((a, b) {
-              final pA =
-                  speciesPredictions[a.id]?.forecast.first.probabilityPercent ??
-                  0;
-              final pB =
-                  speciesPredictions[b.id]?.forecast.first.probabilityPercent ??
-                  0;
-              return pB.compareTo(pA);
-            });
-      slivers.add(
-        SliverPadding(
-          padding: EdgeInsets.symmetric(horizontal: 16 * s),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              final species = speciesList[index];
-              final pred = speciesPredictions[species.id];
-              if (pred == null || featuredSite == null) {
-                return const SizedBox.shrink();
-              }
-              final todayForecast = pred.forecast.first;
-              return Padding(
-                padding: EdgeInsets.only(bottom: 12 * s),
-                child: _predictionCard(
-                  context: context,
-                  s: s,
-                  species: species,
-                    saved: saved,
-                  siteName: featuredSite.name,
-                  todayForecast: todayForecast,
-                ),
-              );
-            }, childCount: speciesList.length),
-          ),
-        ),
-      );
-    }
+              ),
+            );
 
-    slivers.add(SliverToBoxAdapter(child: SizedBox(height: 100 * s)));
-    return Material(
-      color: Colors.transparent,
-      child: CustomScrollView(slivers: slivers),
+            final speciesList =
+            (featuredSite?.supportedSpeciesIds ?? const <String>[])
+                .map((id) => speciesById(id))
+                .whereType<Species>()
+                .toList()
+              ..sort((a, b) {
+                final pA = PredictionManager.instance.latestPredictions[featuredSite!.id]?[a.id] ?? 0.0;
+                final pB = PredictionManager.instance.latestPredictions[featuredSite.id]?[b.id] ?? 0.0;
+                return pB.compareTo(pA);
+              });
+
+            slivers.add(
+              SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: 16 * s),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final species = speciesList[index];
+
+                    final forecasts = PredictionManager.instance.getSevenDayForecastForUI(featuredSite!.id, species.id);
+                    if (forecasts.isEmpty) return const SizedBox.shrink();
+
+                    final today = forecasts.first;
+                    final probPercent = (today.probability * 100).round();
+                    final probLabel = _getProbLabel(today.probability);
+
+                    // 🟢 核心修改：直接從你寫好的預測資料庫讀取這個動物的專屬習性時間
+                    final bestTime = speciesPredictions[species.id]?.forecast.first.timeOfDay ?? 'Night';
+
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 12 * s),
+                      child: _predictionCard(
+                        context: context,
+                        s: s,
+                        species: species,
+                        saved: saved,
+                        siteId: featuredSite.id,
+                        siteName: featuredSite.name,
+                        probPercent: probPercent,
+                        probLabel: probLabel,
+                        weather: today.weatherDescription,
+                        bestTime: bestTime, // 傳入真實習性
+                      ),
+                    );
+                  }, childCount: speciesList.length),
+                ),
+              ),
+            );
+          }
+
+          slivers.add(SliverToBoxAdapter(child: SizedBox(height: 100 * s)));
+
+          return Material(
+            color: Colors.transparent,
+            child: CustomScrollView(slivers: slivers),
+          );
+        }
     );
   }
 
@@ -381,8 +410,12 @@ class _PredictionScreenState extends State<PredictionScreen> {
     required double s,
     required Species species,
     required SavedSpeciesProvider saved,
+    required String siteId,
     required String siteName,
-    required dynamic todayForecast,
+    required int probPercent,
+    required String probLabel,
+    required String weather,
+    required String bestTime,
   }) {
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -396,6 +429,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
             MaterialPageRoute<void>(
               builder: (_) => SpeciesPredictionScreen(
                 speciesId: species.id,
+                siteId: siteId,
                 siteName: siteName,
               ),
             ),
@@ -527,9 +561,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                                 vertical: 5 * s,
                               ),
                               decoration: BoxDecoration(
-                                color: _probabilityColors(
-                                  todayForecast.probability,
-                                ),
+                                color: _probabilityColors(probLabel),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Row(
@@ -538,18 +570,14 @@ class _PredictionScreenState extends State<PredictionScreen> {
                                   Icon(
                                     Icons.trending_up_rounded,
                                     size: 14 * s,
-                                    color: _probabilityOnColor(
-                                      todayForecast.probability,
-                                    ),
+                                    color: _probabilityOnColor(probLabel),
                                   ),
                                   SizedBox(width: 3 * s),
                                   Text(
-                                    '${todayForecast.probabilityPercent}% ${todayForecast.probability}',
+                                    '$probPercent% $probLabel',
                                     style: GoogleFonts.inter(
                                       fontWeight: FontWeight.w700,
-                                      color: _probabilityOnColor(
-                                        todayForecast.probability,
-                                      ),
+                                      color: _probabilityOnColor(probLabel),
                                     ),
                                   ),
                                 ],
@@ -563,14 +591,14 @@ class _PredictionScreenState extends State<PredictionScreen> {
                     Row(
                       children: [
                         Icon(
-                          _timeOfDayIcon(todayForecast.timeOfDay),
+                          _timeOfDayIcon(bestTime),
                           size: 16 * s,
-                          color: _timeOfDayIconColor(todayForecast.timeOfDay),
+                          color: _timeOfDayIconColor(bestTime),
                         ),
                         SizedBox(width: 4 * s),
                         Expanded(
                           child: Text(
-                            todayForecast.timeOfDay,
+                            bestTime,
                             style: GoogleFonts.inter(
                               color: AppColors.badgeText,
                               fontSize: Adaptive.clamp(
@@ -583,14 +611,14 @@ class _PredictionScreenState extends State<PredictionScreen> {
                           ),
                         ),
                         Icon(
-                          _weatherIcon(todayForecast.weather),
+                          _weatherIcon(weather),
                           size: 16 * s,
                           color: AppColors.statusYellow,
                         ),
                         SizedBox(width: 4 * s),
                         Flexible(
                           child: Text(
-                            todayForecast.weather,
+                            weather,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.inter(
@@ -619,9 +647,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
 
 class _CitySearchSheet extends StatefulWidget {
   const _CitySearchSheet({required this.initialCity});
-
   final String initialCity;
-
   @override
   State<_CitySearchSheet> createState() => _CitySearchSheetState();
 }
@@ -646,9 +672,9 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
       _visible = _sorted
           .where(
             (c) =>
-                c.name.toLowerCase().contains(q) ||
-                c.state.toLowerCase().contains(q),
-          )
+        c.name.toLowerCase().contains(q) ||
+            c.state.toLowerCase().contains(q),
+      )
           .toList();
     });
   }
@@ -708,30 +734,30 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
           Expanded(
             child: _visible.isEmpty
                 ? Center(
-                    child: Text(
-                      'No cities match your search',
-                      style: TextStyle(color: Colors.grey.shade600),
-                    ),
-                  )
+              child: Text(
+                'No cities match your search',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            )
                 : ListView.builder(
-                    itemCount: _visible.length,
-                    itemBuilder: (_, i) {
-                      final c = _visible[i];
-                      final sel = c.name == widget.initialCity;
-                      return ListTile(
-                        selected: sel,
-                        selectedTileColor: AppColors.primary.withValues(
-                          alpha: 0.12,
-                        ),
-                        title: Text(c.name),
-                        subtitle: Text(c.state),
-                        trailing: sel
-                            ? const Icon(Icons.check, color: AppColors.primary)
-                            : null,
-                        onTap: () => Navigator.pop(context, c.name),
-                      );
-                    },
+              itemCount: _visible.length,
+              itemBuilder: (_, i) {
+                final c = _visible[i];
+                final sel = c.name == widget.initialCity;
+                return ListTile(
+                  selected: sel,
+                  selectedTileColor: AppColors.primary.withValues(
+                    alpha: 0.12,
                   ),
+                  title: Text(c.name),
+                  subtitle: Text(c.state),
+                  trailing: sel
+                      ? const Icon(Icons.check, color: AppColors.primary)
+                      : null,
+                  onTap: () => Navigator.pop(context, c.name),
+                );
+              },
+            ),
           ),
         ],
       ),

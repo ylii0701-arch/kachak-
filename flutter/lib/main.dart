@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,6 +9,8 @@ import 'screens/splash_screen.dart';
 import 'services/onboarding_service.dart';
 import 'theme/app_theme.dart';
 import 'utils/adaptive.dart';
+import 'services/onnx_prediction_service.dart';
+import 'services/prediction_manager.dart';
 
 // Global keys and instances for notifications
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -17,6 +18,10 @@ final FlutterLocalNotificationsPlugin localNotifs = FlutterLocalNotificationsPlu
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Onnx initialize
+  await OnnxPredictionService.initModel();
+  PredictionManager.instance.startEngine();
 
   // Initialize Local Notifications
   const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');

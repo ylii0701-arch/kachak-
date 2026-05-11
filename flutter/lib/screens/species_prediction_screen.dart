@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import '../data/predictions_data.dart';
+import '../data/predictions_data.dart'; // 重新加回來提取生物習性
 import '../data/species_data.dart';
 import '../providers/saved_species_provider.dart';
+import '../services/prediction_manager.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
 import '../widgets/assistant_overlay_layer.dart';
@@ -21,10 +22,12 @@ class SpeciesPredictionScreen extends StatefulWidget {
   const SpeciesPredictionScreen({
     super.key,
     required this.speciesId,
+    required this.siteId,
     this.siteName,
   });
 
   final String speciesId;
+  final String siteId;
   final String? siteName;
 
   @override
@@ -33,11 +36,18 @@ class SpeciesPredictionScreen extends StatefulWidget {
 }
 
 class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
+
+  String _getProbLabel(double p) {
+    if (p >= 0.7) return 'High';
+    if (p >= 0.4) return 'Medium';
+    return 'Low';
+  }
+
   Future<void> _toggleNotif(
-    BuildContext context,
-    SavedSpeciesProvider saved,
-    String commonName,
-  ) async {
+      BuildContext context,
+      SavedSpeciesProvider saved,
+      String commonName,
+      ) async {
     if (!saved.isSaved(widget.speciesId)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -49,7 +59,6 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
       return;
     }
 
-    // Call the provider logic
     final success = await saved.toggleNotification(widget.speciesId);
 
     if (!context.mounted) return;
@@ -77,9 +86,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
     );
   }
 
-  String _formatDate(String dateStr) {
-    final date = DateTime.tryParse(dateStr);
-    if (date == null) return dateStr;
+  String _formatDate(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final d = DateTime(date.year, date.month, date.day);
@@ -94,18 +101,12 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
   }
 
   String _weatherEmoji(String w) {
-    switch (w) {
-      case 'Sunny':
-        return '☀️';
-      case 'Partly Cloudy':
-        return '⛅';
-      case 'Cloudy':
-        return '☁️';
-      case 'Rainy':
-        return '🌧️';
-      default:
-        return '☁️';
-    }
+    final weather = w.toLowerCase();
+    if (weather.contains('sun') || weather.contains('clear')) return '☀️';
+    if (weather.contains('partly')) return '⛅';
+    if (weather.contains('cloud')) return '☁️';
+    if (weather.contains('rain')) return '🌧️';
+    return '☁️';
   }
 
   Color _probBg(String p) {
@@ -138,10 +139,11 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
   Widget build(BuildContext context) {
     final s = Adaptive.scale(context);
     final species = speciesById(widget.speciesId);
-    final prediction = speciesPredictions[widget.speciesId];
     final saved = context.watch<SavedSpeciesProvider>();
 
-    if (species == null || prediction == null) {
+    final dailyForecasts = PredictionManager.instance.getSevenDayForecastForUI(widget.siteId, widget.speciesId);
+
+    if (species == null || dailyForecasts.isEmpty) {
       return AssistantOverlayLayer(
         child: Scaffold(
           backgroundColor: AppColors.detailBackdrop,
@@ -153,10 +155,12 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('Species prediction not found'),
+                const CircularProgressIndicator(),
+                const SizedBox(height: 16),
+                const Text('Calculating predictions...'),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Back to Predictions'),
+                  child: const Text('Back'),
                 ),
               ],
             ),
@@ -171,9 +175,13 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
     final textScale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.5);
     final heroExpandedHeight =
         topInset +
-        Adaptive.clamp(context, 170, min: 150, max: 220) +
-        ((textScale - 1.0) * 40);
+            Adaptive.clamp(context, 170, min: 150, max: 220) +
+            ((textScale - 1.0) * 40);
     final isNotified = saved.isNotified(species.id);
+
+    final primaryFactor = 'Time';
+
+    final fixedBestTime = speciesPredictions[widget.speciesId]?.forecast.first.timeOfDay ?? 'Night';
 
     return AssistantOverlayLayer(
       child: Scaffold(
@@ -274,7 +282,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
@@ -329,7 +337,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                             SizedBox(width: 5 * s),
                                             Expanded(
                                               child: Text(
-                                                '${widget.siteName ?? prediction.locationName} • ${prediction.distance}km away',
+                                                '${widget.siteName ?? "Local Site"}',
                                                 style: TextStyle(
                                                   color: Colors.white
                                                       .withValues(alpha: 0.92),
@@ -342,7 +350,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                                   fontWeight: FontWeight.w500,
                                                   height: 1.35,
                                                   shadows:
-                                                      _predictionHeroShadows,
+                                                  _predictionHeroShadows,
                                                 ),
                                                 maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
@@ -364,7 +372,6 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
-                    // Space below hero — avoid overlapping the app bar.
                     padding: EdgeInsets.fromLTRB(16 * s, 16 * s, 16 * s, 0),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -385,7 +392,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                     padding: EdgeInsets.all(16 * s),
                                     child: Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           '🌿 Key Factors',
@@ -404,89 +411,88 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                         SizedBox(height: 10 * s),
                                         Row(
                                           children:
-                                              [
-                                                'Time',
-                                                'Weather',
-                                                'Humidity',
-                                                'Temperature',
-                                              ].map((factor) {
-                                                final primary =
-                                                    factor ==
-                                                    prediction.primaryFactor;
-                                                return Expanded(
-                                                  child: Padding(
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                          horizontal: 2 * s,
+                                          [
+                                            'Time',
+                                            'Weather',
+                                            'Humidity',
+                                            'Temperature',
+                                          ].map((factor) {
+                                            final primary =
+                                                factor == primaryFactor;
+                                            return Expanded(
+                                              child: Padding(
+                                                padding:
+                                                EdgeInsets.symmetric(
+                                                  horizontal: 2 * s,
+                                                ),
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      padding:
+                                                      EdgeInsets.all(
+                                                        8 * s,
+                                                      ),
+                                                      decoration: BoxDecoration(
+                                                        color: primary
+                                                            ? AppColors
+                                                            .primary
+                                                            : Colors.white
+                                                            .withValues(
+                                                          alpha:
+                                                          0.38,
                                                         ),
-                                                    child: Column(
-                                                      children: [
-                                                        Container(
-                                                          padding:
-                                                              EdgeInsets.all(
-                                                                8 * s,
-                                                              ),
-                                                          decoration: BoxDecoration(
-                                                            color: primary
-                                                                ? AppColors
-                                                                      .primary
-                                                                : Colors.white
-                                                                      .withValues(
-                                                                        alpha:
-                                                                            0.38,
-                                                                      ),
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                  10 * s,
-                                                                ),
-                                                            border: primary
-                                                                ? Border.all(
-                                                                    color: AppColors
-                                                                        .primary,
-                                                                    width: 2,
-                                                                  )
-                                                                : Border.all(
-                                                                    color: Colors
-                                                                        .white
-                                                                        .withValues(
-                                                                          alpha:
-                                                                              0.55,
-                                                                        ),
-                                                                    width: 1,
-                                                                  ),
-                                                          ),
-                                                          child: Icon(
-                                                            factor == 'Time'
-                                                                ? Icons.schedule
-                                                                : factor ==
-                                                                      'Weather'
-                                                                ? Icons
-                                                                      .cloud_outlined
-                                                                : factor ==
-                                                                      'Humidity'
-                                                                ? Icons
-                                                                      .water_drop_outlined
-                                                                : Icons
-                                                                      .thermostat,
-                                                            size: 18 * s,
-                                                            color: primary
-                                                                ? Colors.white
-                                                                : AppColors
-                                                                      .textSubtitleOnFrost,
-                                                          ),
+                                                        borderRadius:
+                                                        BorderRadius.circular(
+                                                          10 * s,
                                                         ),
-                                                        if (primary)
-                                                          const Text(
-                                                            '⭐',
-                                                            style: TextStyle(
-                                                              fontSize: 10,
-                                                            ),
+                                                        border: primary
+                                                            ? Border.all(
+                                                          color: AppColors
+                                                              .primary,
+                                                          width: 2,
+                                                        )
+                                                            : Border.all(
+                                                          color: Colors
+                                                              .white
+                                                              .withValues(
+                                                            alpha:
+                                                            0.55,
                                                           ),
-                                                      ],
+                                                          width: 1,
+                                                        ),
+                                                      ),
+                                                      child: Icon(
+                                                        factor == 'Time'
+                                                            ? Icons.schedule
+                                                            : factor ==
+                                                            'Weather'
+                                                            ? Icons
+                                                            .cloud_outlined
+                                                            : factor ==
+                                                            'Humidity'
+                                                            ? Icons
+                                                            .water_drop_outlined
+                                                            : Icons
+                                                            .thermostat,
+                                                        size: 18 * s,
+                                                        color: primary
+                                                            ? Colors.white
+                                                            : AppColors
+                                                            .textSubtitleOnFrost,
+                                                      ),
                                                     ),
-                                                  ),
-                                                );
-                                              }).toList(),
+                                                    if (primary)
+                                                      const Text(
+                                                        '⭐',
+                                                        style: TextStyle(
+                                                          fontSize: 10,
+                                                        ),
+                                                      ),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
                                         ),
                                       ],
                                     ),
@@ -516,14 +522,14 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                           isNotified
                                               ? Icons.notifications_active
                                               : Icons
-                                                    .notifications_off_outlined,
+                                              .notifications_off_outlined,
                                         ),
                                         style: IconButton.styleFrom(
                                           backgroundColor: isNotified
                                               ? AppColors.primary
                                               : Colors.white.withValues(
-                                                  alpha: 0.4,
-                                                ),
+                                            alpha: 0.4,
+                                          ),
                                           foregroundColor: isNotified
                                               ? Colors.white
                                               : AppColors.textBodyOnFrost,
@@ -587,9 +593,11 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                           ],
                         ),
                         SizedBox(height: 8 * s),
-                        ...prediction.forecast.asMap().entries.map((e) {
+                        ...dailyForecasts.asMap().entries.map((e) {
                           final day = e.value;
                           final first = e.key == 0;
+                          final probLabel = _getProbLabel(day.probability);
+
                           return Padding(
                             padding: EdgeInsets.only(bottom: 8 * s),
                             child: GlassPanel(
@@ -611,21 +619,21 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                     decoration: BoxDecoration(
                                       color: first
                                           ? AppColors.primary.withValues(
-                                              alpha: 0.12,
-                                            )
+                                        alpha: 0.12,
+                                      )
                                           : Colors.white.withValues(
-                                              alpha: 0.42,
-                                            ),
+                                        alpha: 0.42,
+                                      ),
                                       borderRadius: BorderRadius.vertical(
                                         top: Radius.circular(14 * s),
                                       ),
                                     ),
                                     child: Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          _formatDate(day.date),
+                                          _formatDate(day.timestamp),
                                           style: GoogleFonts.plusJakartaSans(
                                             fontWeight: FontWeight.w800,
                                             fontSize: Adaptive.clamp(
@@ -644,7 +652,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                             vertical: 4 * s,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: _probBg(day.probability),
+                                            color: _probBg(probLabel),
                                             borderRadius: BorderRadius.circular(
                                               20 * s,
                                             ),
@@ -653,7 +661,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                             ),
                                           ),
                                           child: Text(
-                                            '${day.probability} Chance',
+                                            '$probLabel Chance',
                                             style: GoogleFonts.plusJakartaSans(
                                               fontSize: Adaptive.clamp(
                                                 context,
@@ -662,7 +670,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                                 max: 13,
                                               ),
                                               fontWeight: FontWeight.w800,
-                                              color: _probFg(day.probability),
+                                              color: _probFg(probLabel),
                                               letterSpacing: 0.05,
                                             ),
                                           ),
@@ -676,13 +684,13 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                       children: [
                                         Row(
                                           crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                          CrossAxisAlignment.start,
                                           children: [
                                             Expanded(
                                               child: _forecastCell(
                                                 icon: Icons.schedule,
                                                 label: 'Best Time',
-                                                value: day.timeOfDay,
+                                                value: fixedBestTime, // 使用預先設定好的習性
                                                 iconColor: AppColors.primary,
                                               ),
                                             ),
@@ -690,9 +698,9 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                             Expanded(
                                               child: _forecastCell(
                                                 label: 'Weather',
-                                                value: day.weather,
+                                                value: day.weatherDescription,
                                                 emoji: _weatherEmoji(
-                                                  day.weather,
+                                                  day.weatherDescription,
                                                 ),
                                               ),
                                             ),
@@ -701,15 +709,15 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                         SizedBox(height: 10 * s),
                                         Row(
                                           crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                          CrossAxisAlignment.start,
                                           children: [
                                             Expanded(
                                               child: _forecastCell(
                                                 icon: Icons.thermostat,
                                                 label: 'Temperature',
-                                                value: '${day.temperature}°C',
+                                                value: '${day.temperature.round()}°C',
                                                 iconColor:
-                                                    Colors.orange.shade700,
+                                                Colors.orange.shade700,
                                               ),
                                             ),
                                             const SizedBox(width: 10),
@@ -717,7 +725,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                               child: _forecastCell(
                                                 icon: Icons.water_drop,
                                                 label: 'Humidity',
-                                                value: '${day.humidity}%',
+                                                value: '${day.humidity.round()}%',
                                                 iconColor: Colors.cyan.shade700,
                                               ),
                                             ),
@@ -789,8 +797,8 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
           ),
           child: emojiChar != null
               ? Center(
-                  child: Text(emojiChar, style: const TextStyle(fontSize: 18)),
-                )
+            child: Text(emojiChar, style: const TextStyle(fontSize: 18)),
+          )
               : Icon(icon, color: tint, size: 20),
         ),
         const SizedBox(width: 10),
