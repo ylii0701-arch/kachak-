@@ -14,7 +14,10 @@ import '../widgets/onboarding/welcome_carousel.dart';
 import 'home_screen.dart';
 import 'identify_screen.dart';
 import 'map_screen.dart';
+import 'about_us_screen.dart';
 import 'mission_screen.dart';
+import 'nature_first_principle_screen.dart';
+import 'photo_quality_screen.dart';
 import 'prediction_screen.dart';
 import 'saved_screen.dart';
 
@@ -303,6 +306,38 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
+  /// Opens the imageTest-style photo quality tool (standalone route).
+  Future<void> _openPhotoQuality() async {
+    _closeMenu();
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    if (!mounted) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => const PhotoQualityScreen(),
+      ),
+    );
+  }
+
+  Future<void> _openAboutUs() async {
+    _closeMenu();
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    if (!mounted) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(builder: (_) => const AboutUsScreen()),
+    );
+  }
+
+  Future<void> _openNatureFirst() async {
+    _closeMenu();
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    if (!mounted) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => const NatureFirstPrincipleScreen(),
+      ),
+    );
+  }
+
   Widget _menuTile({
     required IconData icon,
     required String label,
@@ -482,21 +517,24 @@ class _MainShellState extends State<MainShell> {
                           onTap: _openSaved,
                         ),
                         _menuTile(
+                          icon: Icons.photo_camera_back_outlined,
+                          label: 'Photo quality',
+                          onTap: _openPhotoQuality,
+                        ),
+                        _menuTile(
                           icon: Icons.school_outlined,
                           label: 'Show tutorial',
                           onTap: _restartTutorial,
                         ),
                         _menuTile(
-                          icon: Icons.settings_outlined,
-                          label: 'Settings',
-                          onTap: () {},
-                          secondary: true,
+                          icon: Icons.info_outline_rounded,
+                          label: 'About us',
+                          onTap: _openAboutUs,
                         ),
                         _menuTile(
-                          icon: Icons.help_outline_rounded,
-                          label: 'Help Center',
-                          onTap: () {},
-                          secondary: true,
+                          icon: Icons.forest_outlined,
+                          label: 'Nature First Principle',
+                          onTap: _openNatureFirst,
                         ),
                         SizedBox(height: 14 * s),
                         Divider(color: Colors.grey.shade200, thickness: 1),
