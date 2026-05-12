@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../data/malaysia_cities.dart';
-import '../data/predictions_data.dart'; // 重新加回來，當作生物習性資料庫
+import '../data/predictions_data.dart'; // Retained for biological habits (timeOfDay)
 import '../data/site_data.dart';
 import '../data/species_data.dart';
 import '../models/species.dart';
@@ -25,6 +25,7 @@ class PredictionScreen extends StatefulWidget {
 class _PredictionScreenState extends State<PredictionScreen> {
   String _selectedCity = 'Kuala Lumpur';
 
+  // Helper: Convert decimal probability to UI text label
   String _getProbLabel(double p) {
     if (p >= 0.7) return 'High';
     if (p >= 0.4) return 'Medium';
@@ -103,10 +104,11 @@ class _PredictionScreenState extends State<PredictionScreen> {
   Widget build(BuildContext context) {
     final s = Adaptive.scale(context);
     final saved = context.watch<SavedSpeciesProvider>();
+
+    // Retrieve all sites associated with the selected city
     final citySites =
     siteData.where((site) => site.cityName == _selectedCity).toList()
       ..sort((a, b) => a.name.compareTo(b.name));
-    final featuredSite = citySites.isEmpty ? null : citySites.first;
 
     return ListenableBuilder(
         listenable: PredictionManager.instance,
@@ -268,6 +270,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
             ),
           ];
 
+          // If this city has no registered sites, display an empty state
           if (citySites.isEmpty) {
             slivers.add(
               SliverToBoxAdapter(
@@ -284,79 +287,86 @@ class _PredictionScreenState extends State<PredictionScreen> {
               ),
             );
           } else {
+            // Display the main section header
             slivers.add(
               SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(16 * s, 10 * s, 16 * s, 6 * s),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Top Predictions by Site',
-                        style: GoogleFonts.libreBaskerville(
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.accent,
-                          fontSize: Adaptive.clamp(context, 22, min: 18, max: 26),
-                        ),
-                      ),
-                      SizedBox(height: 8 * s),
-                      _sitePill(
-                        siteName: featuredSite?.name ?? citySites.first.name,
-                        s: s,
-                      ),
-                    ],
+                  child: Text(
+                    'Top Predictions by Site',
+                    style: GoogleFonts.libreBaskerville(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.accent,
+                      fontSize: Adaptive.clamp(context, 22, min: 18, max: 26),
+                    ),
                   ),
                 ),
               ),
             );
 
-            final speciesList =
-            (featuredSite?.supportedSpeciesIds ?? const <String>[])
-                .map((id) => speciesById(id))
-                .whereType<Species>()
-                .toList()
-              ..sort((a, b) {
-                final pA = PredictionManager.instance.latestPredictions[featuredSite!.id]?[a.id] ?? 0.0;
-                final pB = PredictionManager.instance.latestPredictions[featuredSite.id]?[b.id] ?? 0.0;
-                return pB.compareTo(pA);
-              });
-
-            slivers.add(
-              SliverPadding(
-                padding: EdgeInsets.symmetric(horizontal: 16 * s),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    final species = speciesList[index];
-
-                    final forecasts = PredictionManager.instance.getSevenDayForecastForUI(featuredSite!.id, species.id);
-                    if (forecasts.isEmpty) return const SizedBox.shrink();
-
-                    final today = forecasts.first;
-                    final probPercent = (today.probability * 100).round();
-                    final probLabel = _getProbLabel(today.probability);
-
-                    // 🟢 核心修改：直接從你寫好的預測資料庫讀取這個動物的專屬習性時間
-                    final bestTime = speciesPredictions[species.id]?.forecast.first.timeOfDay ?? 'Night';
-
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: 12 * s),
-                      child: _predictionCard(
-                        context: context,
-                        s: s,
-                        species: species,
-                        saved: saved,
-                        siteId: featuredSite.id,
-                        siteName: featuredSite.name,
-                        probPercent: probPercent,
-                        probLabel: probLabel,
-                        weather: today.weatherDescription,
-                        bestTime: bestTime, // 傳入真實習性
-                      ),
-                    );
-                  }, childCount: speciesList.length),
+            // Iterate through ALL sites in the selected city
+            for (final site in citySites) {
+              // Render the site name pill
+              slivers.add(
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(16 * s, 12 * s, 16 * s, 8 * s),
+                    child: _sitePill(siteName: site.name, s: s),
+                  ),
                 ),
-              ),
-            );
+              );
+
+              // Filter and sort the supported species by their calculated probability
+              final speciesList = site.supportedSpeciesIds
+                  .map((id) => speciesById(id))
+                  .whereType<Species>()
+                  .toList()
+                ..sort((a, b) {
+                  final pA = PredictionManager.instance.latestPredictions[site.id]?[a.id] ?? 0.0;
+                  final pB = PredictionManager.instance.latestPredictions[site.id]?[b.id] ?? 0.0;
+                  return pB.compareTo(pA); // Highest probability first
+                });
+
+              if (speciesList.isEmpty) continue;
+
+              // Render the list of species cards for this specific site
+              slivers.add(
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: 16 * s),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final species = speciesList[index];
+
+                      final forecasts = PredictionManager.instance.getSevenDayForecastForUI(site.id, species.id);
+                      if (forecasts.isEmpty) return const SizedBox.shrink();
+
+                      final today = forecasts.first;
+                      final probPercent = (today.probability * 100).round();
+                      final probLabel = _getProbLabel(today.probability);
+
+                      // Retrieve the biological best time from the existing database
+                      final bestTime = speciesPredictions[species.id]?.forecast.first.timeOfDay ?? 'Night';
+
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: 12 * s),
+                        child: _predictionCard(
+                          context: context,
+                          s: s,
+                          species: species,
+                          saved: saved,
+                          siteId: site.id, // Pass the correct Site ID
+                          siteName: site.name,
+                          probPercent: probPercent,
+                          probLabel: probLabel,
+                          weather: today.weatherDescription,
+                          bestTime: bestTime,
+                        ),
+                      );
+                    }, childCount: speciesList.length),
+                  ),
+                ),
+              );
+            }
           }
 
           slivers.add(SliverToBoxAdapter(child: SizedBox(height: 100 * s)));

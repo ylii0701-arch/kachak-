@@ -10,7 +10,7 @@ import '../models/species.dart';
 import 'openweather_service.dart';
 import 'onnx_prediction_service.dart';
 
-/// Represents a prediction result for a specific point in time
+/// Represents a prediction result and environmental data for a specific point in time
 class TimeSeriesPrediction {
   final DateTime timestamp;
   final double probability;
@@ -119,7 +119,7 @@ class PredictionManager extends ChangeNotifier {
 
             // Add "Right Now" as the first entry
             timeSeries.add(TimeSeriesPrediction(
-              timestamp: DateTime.now(),
+              timestamp: DateTime.now().toLocal(),
               probability: currentProb,
               temperature: currentTemp,
               humidity: currentHumid,
@@ -137,7 +137,7 @@ class PredictionManager extends ChangeNotifier {
 
                 if (prob != null) {
                   timeSeries.add(TimeSeriesPrediction(
-                    timestamp: entry.timestamp,
+                    timestamp: entry.timestamp.toLocal(),
                     probability: prob,
                     temperature: entry.temperature,
                     humidity: entry.humidity.toDouble(),
@@ -175,10 +175,12 @@ class PredictionManager extends ChangeNotifier {
     final rawList = forecastPredictions[siteId]?[speciesId];
     if (rawList == null || rawList.isEmpty) return [];
 
-    // Group by Date (YYYY-MM-DD) and keep the highest probability entry for each day
+    // Group by Local Date (YYYY-MM-DD) and keep the highest probability entry for each day
     Map<String, TimeSeriesPrediction> dailyBest = {};
     for (var entry in rawList) {
-      String dateKey = "${entry.timestamp.year}-${entry.timestamp.month.toString().padLeft(2, '0')}-${entry.timestamp.day.toString().padLeft(2, '0')}";
+      // Ensure we use the local timezone to avoid matching errors across midnight
+      final localTime = entry.timestamp.toLocal();
+      String dateKey = "${localTime.year}-${localTime.month.toString().padLeft(2, '0')}-${localTime.day.toString().padLeft(2, '0')}";
       if (!dailyBest.containsKey(dateKey) || entry.probability > dailyBest[dateKey]!.probability) {
         dailyBest[dateKey] = entry;
       }
@@ -189,11 +191,18 @@ class PredictionManager extends ChangeNotifier {
 
     // Ensure we return exactly 7 days
     List<TimeSeriesPrediction> sevenDayList = [];
-    DateTime baseDate = DateTime.now();
+    DateTime baseDate = DateTime.now().toLocal();
 
     for (int i = 0; i < 7; i++) {
       DateTime targetDate = baseDate.add(Duration(days: i));
-      var match = sortedDaily.where((e) => e.timestamp.day == targetDate.day).firstOrNull;
+
+      // Accurately match Year, Month, and Day
+      var match = sortedDaily.where((e) {
+        final eLocal = e.timestamp.toLocal();
+        return eLocal.year == targetDate.year &&
+            eLocal.month == targetDate.month &&
+            eLocal.day == targetDate.day;
+      }).firstOrNull;
 
       if (match != null) {
         sevenDayList.add(match);
