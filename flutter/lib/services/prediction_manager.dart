@@ -241,4 +241,4 @@ class PredictionManager extends ChangeNotifier {
     debugPrint('👆 Prediction Engine: Manual refresh triggered.');
     await fetchAndCalculate();
   }
-}
+} ///end
