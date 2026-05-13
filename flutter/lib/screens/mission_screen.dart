@@ -1362,6 +1362,60 @@ class _MissionScreenState extends State<MissionScreen> {
     return source.take(6).toList();
   }
 
+  Widget _introBlock() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.green.shade100),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Photo Mission',
+            style: GoogleFonts.libreBaskerville(
+              fontSize: 30,
+              fontWeight: FontWeight.w800,
+              color: AppColors.accent,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Personalise and find your perfect challenge today!',
+            style: TextStyle(
+              color: Colors.grey.shade700,
+              height: 1.35,
+              fontSize: 15,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Center(
+            child: Image.asset(
+              'assets/images/kachak_logo_green.png',
+              height: Adaptive.clamp(context, 132, min: 110, max: 160),
+              fit: BoxFit.contain,
+            ),
+          ),
+          const SizedBox(height: 18),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: _startQuiz,
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              child: const Text('Let\'s Begin!'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _quizBlock({
     required String questionTitle,
     required String questionSubtitle,

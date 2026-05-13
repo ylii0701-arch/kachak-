@@ -337,7 +337,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                             SizedBox(width: 5 * s),
                                             Expanded(
                                               child: Text(
-                                                widget.siteName ?? 'Local Site',
+                                                '${widget.siteName ?? "Local Site"}',
                                                 style: TextStyle(
                                                   color: Colors.white
                                                       .withValues(alpha: 0.92),

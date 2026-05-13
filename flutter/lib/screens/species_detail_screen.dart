@@ -888,11 +888,8 @@ class SpeciesDetailScreen extends StatelessWidget {
 
     // 解析機率標籤
     String probLabel = 'Low';
-    if (currentForecast.probability >= 0.7) {
-      probLabel = 'High';
-    } else if (currentForecast.probability >= 0.4) {
-      probLabel = 'Medium';
-    }
+    if (currentForecast.probability >= 0.7) probLabel = 'High';
+    else if (currentForecast.probability >= 0.4) probLabel = 'Medium';
     final probPercent = (currentForecast.probability * 100).round();
 
     // 🟢 從舊資料庫提取此物種專屬的活動時間 (timeOfDay)
