@@ -1,11 +1,8 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
-import '../widgets/glass.dart';
 import 'main_shell.dart';
 
 /// Glass-style splash over mist backdrop; [Go] enters [MainShell].

@@ -163,7 +163,7 @@ class PredictionManager extends ChangeNotifier {
 
   /// Helper method for ONNX Inference
   Future<double?> _runInference(dynamic site, String category, double temp, double rain, double humid, double wind) async {
-    const int mockOcc30d = 3; // TODO: Connect to real database later
+    const int mockOcc30d = 3; // Placeholder until occurrence data source is integrated.
     return await OnnxPredictionService.getPrediction(
       lat: site.lat, lon: site.lng, temperature: temp, rainfall: rain,
       humidity: humid, windSpeed: wind, occ30d: mockOcc30d, animalClass: category,

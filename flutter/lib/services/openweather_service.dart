@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -108,7 +109,7 @@ class OpenWeatherService {
       final cachedForecast = prefs.getString(forecastCacheKey);
 
       if (cachedCurrent != null && cachedForecast != null) {
-        print('⚠️ Network failed. Using offline cached weather data for $cityName');
+        debugPrint('⚠️ Network failed. Using offline cached weather data for $cityName');
         return _parseWeatherBundle(
           cityName: cityName,
           currentBody: cachedCurrent,
