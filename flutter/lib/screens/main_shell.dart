@@ -10,6 +10,8 @@ import '../widgets/assistant_overlay_layer.dart';
 import '../widgets/glass.dart';
 import '../widgets/onboarding/onboarding_content.dart';
 import '../widgets/onboarding/page_intro_sheet.dart';
+import '../widgets/onboarding/spotlight_tour.dart';
+import '../widgets/onboarding/tour_anchor.dart';
 import '../widgets/onboarding/welcome_carousel.dart';
 import 'home_screen.dart';
 import 'identify_screen.dart';
@@ -95,7 +97,7 @@ class _GlassBottomNav extends StatelessWidget {
         ? (24 * s).clamp(19.0, 26.0)
         : (22 * s).clamp(18.0, 24.0);
     final labelSize = (11 * s).clamp(10.0, 13.0);
-    return Expanded(
+    Widget item = Expanded(
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -158,6 +160,16 @@ class _GlassBottomNav extends StatelessWidget {
         ),
       ),
     );
+    if (index == 1) {
+      item = TourAnchor(id: TourTargetIds.homeNavMap, child: item);
+    } else if (index == 2) {
+      item = TourAnchor(id: TourTargetIds.homeNavIdentify, child: item);
+    } else if (index == 3) {
+      item = TourAnchor(id: TourTargetIds.homeNavMission, child: item);
+    } else if (index == 4) {
+      item = TourAnchor(id: TourTargetIds.homeNavSaved, child: item);
+    }
+    return item;
   }
 }
 
@@ -260,7 +272,92 @@ class _MainShellState extends State<MainShell> {
     if (onboarding.hasSeen(tour)) return;
     _tourInProgress = true;
     try {
-      await PageIntroSheet.show(context, content);
+      if (tour == OnboardingTour.home) {
+        await SpotlightTour.show(
+          context,
+          steps: const [
+            SpotlightStep(
+              targetId: TourTargetIds.homeSearch,
+              title: 'Search by name',
+              body:
+                  'Type a common or scientific name to jump straight to a species card.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeFilterButton,
+              title: 'Filter wildlife list',
+              body:
+                  'Use Filter to narrow by location and species attributes.',
+              onEnterCommand: 'home.openFilter',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeFilterTabs,
+              title: 'Location and species filters',
+              body:
+                  'Location helps area-specific discovery, while Species tab refines category, status, and difficulty.',
+              cardPlacement: SpotlightCardPlacement.above,
+              onEnterCommand: 'home.openFilter',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeSortButton,
+              title: 'Sort results',
+              body:
+                  'Sort species by conservation status or difficulty to suit your goals.',
+              onEnterCommand: 'home.closeFilter',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeLayoutButton,
+              title: 'Switch layouts',
+              body:
+                  'Toggle between list and grid views depending on how you like to browse.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeAiChat,
+              title: 'AI assistant',
+              body:
+                  'Ask about wildlife photography planning, preparation, and field tips.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeNavMap,
+              title: 'Map page',
+              body:
+                  'Map helps you view wildlife locations and explore areas by place.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeNavIdentify,
+              title: 'Identify page',
+              body:
+                  'Identify lets you identify wildlife from your captured photo.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeNavMission,
+              title: 'Mission page',
+              body:
+                  'Mission gives guided tasks and learning challenges while exploring.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeNavSaved,
+              title: 'Saved page',
+              body:
+                  'Saved keeps your bookmarked species so you can revisit quickly later.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeSpeciesCard,
+              title: 'Species list cards',
+              body:
+                  'Scroll to explore species and tap any card for full species information.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeSaveButton,
+              title: 'Save species',
+              body:
+                  'Use this bookmark to save species and revisit them from the Saved tab.',
+            ),
+          ],
+          onComplete: () async {},
+        );
+      } else {
+        await PageIntroSheet.show(context, content);
+      }
       if (!mounted) return;
       await onboarding.markSeen(tour);
     } finally {
@@ -392,6 +489,7 @@ class _MainShellState extends State<MainShell> {
     // Main page surface (tabs + bottom nav) that slides when menu opens.
     final pageSurface = AssistantOverlayLayer(
       reservedBottom: navBarHeight,
+      tourAnchorId: TourTargetIds.homeAiChat,
       child: Scaffold(
         backgroundColor: Colors.transparent,
         extendBody: false,
