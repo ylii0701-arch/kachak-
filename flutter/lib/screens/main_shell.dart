@@ -10,6 +10,8 @@ import '../widgets/assistant_overlay_layer.dart';
 import '../widgets/glass.dart';
 import '../widgets/onboarding/onboarding_content.dart';
 import '../widgets/onboarding/page_intro_sheet.dart';
+import '../widgets/onboarding/spotlight_tour.dart';
+import '../widgets/onboarding/tour_anchor.dart';
 import '../widgets/onboarding/welcome_carousel.dart';
 import 'home_screen.dart';
 import 'identify_screen.dart';
@@ -32,6 +34,7 @@ class _GlassBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = Adaptive.scale(context);
+    final bottomInset = MediaQuery.of(context).padding.bottom;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -43,7 +46,7 @@ class _GlassBottomNav extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: EdgeInsets.fromLTRB(4 * s, 8 * s, 4 * s, 8 * s),
+        padding: EdgeInsets.fromLTRB(4 * s, 8 * s, 4 * s, (8 * s) + bottomInset),
         child: Row(
           children: [
             _standardItem(context, 0, Icons.home_outlined, Icons.home, 'Home'),
@@ -95,7 +98,7 @@ class _GlassBottomNav extends StatelessWidget {
         ? (24 * s).clamp(19.0, 26.0)
         : (22 * s).clamp(18.0, 24.0);
     final labelSize = (11 * s).clamp(10.0, 13.0);
-    return Expanded(
+    Widget item = Expanded(
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -158,6 +161,16 @@ class _GlassBottomNav extends StatelessWidget {
         ),
       ),
     );
+    if (index == 1) {
+      item = TourAnchor(id: TourTargetIds.homeNavMap, child: item);
+    } else if (index == 2) {
+      item = TourAnchor(id: TourTargetIds.homeNavIdentify, child: item);
+    } else if (index == 3) {
+      item = TourAnchor(id: TourTargetIds.homeNavMission, child: item);
+    } else if (index == 4) {
+      item = TourAnchor(id: TourTargetIds.homeNavSaved, child: item);
+    }
+    return item;
   }
 }
 
@@ -260,7 +273,167 @@ class _MainShellState extends State<MainShell> {
     if (onboarding.hasSeen(tour)) return;
     _tourInProgress = true;
     try {
-      await PageIntroSheet.show(context, content);
+      if (tour == OnboardingTour.home) {
+        await SpotlightTour.show(
+          context,
+          steps: const [
+            SpotlightStep(
+              targetId: TourTargetIds.homeSearch,
+              title: 'Search by name',
+              body:
+                  'Type a common or scientific name to jump straight to a species card.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeFilterButton,
+              title: 'Filter wildlife list',
+              body:
+                  'Use Filter to narrow by location and species attributes.',
+              onEnterCommand: 'home.openFilter',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeFilterTabs,
+              title: 'Location and species filters',
+              body:
+                  'Location helps area-specific discovery, while Species tab refines category, status, and difficulty.',
+              cardPlacement: SpotlightCardPlacement.above,
+              onEnterCommand: 'home.openFilter',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeSortButton,
+              title: 'Sort results',
+              body:
+                  'Sort species by conservation status or difficulty to suit your goals.',
+              onEnterCommand: 'home.closeFilter',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeLayoutButton,
+              title: 'Switch layouts',
+              body:
+                  'Toggle between list and grid views depending on how you like to browse.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeAiChat,
+              title: 'AI assistant',
+              body:
+                  'Ask about wildlife photography planning, preparation, and field tips.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeNavMap,
+              title: 'Map page',
+              body:
+                  'Map helps you view wildlife locations and explore areas by place.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeNavIdentify,
+              title: 'Identify page',
+              body:
+                  'Identify lets you identify wildlife from your captured photo.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeNavMission,
+              title: 'Mission page',
+              body:
+                  'Mission gives guided tasks and learning challenges while exploring.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeNavSaved,
+              title: 'Saved page',
+              body:
+                  'Saved keeps your bookmarked species so you can revisit quickly later.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeSpeciesCard,
+              title: 'Species list cards',
+              body:
+                  'Scroll to explore species and tap any card for full species information.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.homeSaveButton,
+              title: 'Save species',
+              body:
+                  'Use this bookmark to save species and revisit them from the Saved tab.',
+            ),
+          ],
+          onComplete: () async {},
+        );
+      } else if (tour == OnboardingTour.map) {
+        await SpotlightTour.show(
+          context,
+          steps: const [
+            SpotlightStep(
+              targetId: TourTargetIds.mapSearch,
+              title: 'Search species locations',
+              body:
+                  'Search a species name to quickly find where it has been spotted on the map.',
+              onEnterCommand: 'map.resetTourState',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapWeatherMarker,
+              title: 'Weather marker',
+              body:
+                  'These markers show city weather snapshots to help plan better shooting conditions.',
+              cardPlacement: SpotlightCardPlacement.above,
+              onEnterCommand: 'map.openWeatherPreview',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapAnimalMarker,
+              title: 'Animal marker',
+              body:
+                  'Animal markers show nearby species observations around your current location range. Tap View More Details to open species detail.',
+              cardPlacement: SpotlightCardPlacement.above,
+              onEnterCommand: 'map.openAnimalPreview',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapSpeciesViewMore,
+              title: 'View more details',
+              body:
+                  'Use View More Details to open the full species detail page and learn more before planning your shoot.',
+              cardPlacement: SpotlightCardPlacement.above,
+              onEnterCommand: 'map.openAnimalPreview',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapToolRefresh,
+              title: 'Refresh map weather',
+              body:
+                  'Tap to refresh city weather data shown on map markers.',
+              onEnterCommand: 'map.closePreview',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapToolWeather,
+              title: 'Toggle weather layer',
+              body:
+                  'Show or hide weather markers to focus on sightings or forecast context.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapToolFocus,
+              title: 'Focus wildlife hotspots',
+              body:
+                  'Jump the camera to fit known wildlife and photography hotspot coverage.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapToolMyLocation,
+              title: 'Go to my location',
+              body:
+                  'Center the map back to your current position quickly.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapToolZoomIn,
+              title: 'Zoom in',
+              body:
+                  'Increase map zoom for close-up marker and area details.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapToolZoomOut,
+              title: 'Zoom out',
+              body:
+                  'Reduce map zoom to see wider region context.',
+            ),
+          ],
+          onComplete: () async {},
+        );
+      } else {
+        await PageIntroSheet.show(context, content);
+      }
       if (!mounted) return;
       await onboarding.markSeen(tour);
     } finally {
@@ -392,6 +565,8 @@ class _MainShellState extends State<MainShell> {
     // Main page surface (tabs + bottom nav) that slides when menu opens.
     final pageSurface = AssistantOverlayLayer(
       reservedBottom: navBarHeight,
+      tourAnchorId: shell.index == 0 ? TourTargetIds.homeAiChat : null,
+      showFab: shell.index != 1,
       child: Scaffold(
         backgroundColor: Colors.transparent,
         extendBody: false,
@@ -452,15 +627,12 @@ class _MainShellState extends State<MainShell> {
             ),
           ],
         ),
-        bottomNavigationBar: SafeArea(
-          top: false,
-          child: _GlassBottomNav(
-            selectedIndex: shell.index,
-            onSelect: (i) {
-              _closeMenu();
-              context.read<AppShellController>().selectTab(i);
-            },
-          ),
+        bottomNavigationBar: _GlassBottomNav(
+          selectedIndex: shell.index,
+          onSelect: (i) {
+            _closeMenu();
+            context.read<AppShellController>().selectTab(i);
+          },
         ),
       ),
     );

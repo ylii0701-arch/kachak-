@@ -10,6 +10,8 @@ import '../services/prediction_manager.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
 import '../widgets/difficulty_stars.dart';
+import '../widgets/onboarding/spotlight_tour.dart';
+import '../widgets/onboarding/tour_anchor.dart';
 import '../widgets/species_network_image.dart';
 import 'species_detail_screen.dart';
 
@@ -53,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
   static const int _pageSize = 6;
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool _tourFilterOpenedByStep = false;
 
   static const _categories = [
     'All',
@@ -74,9 +77,49 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    TourRuntimeCommand.command.removeListener(_onTourCommandChanged);
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    TourRuntimeCommand.command.addListener(_onTourCommandChanged);
+  }
+
+  void _onTourCommandChanged() {
+    final cmd = TourRuntimeCommand.command.value;
+    if (!mounted || cmd == null) return;
+    if (cmd == 'home.openFilter') {
+      if (_showFilters) return;
+      setState(() {
+        _tempCategory = _category;
+        _tempStatus = _status;
+        _tempDifficulty = _difficulty;
+        _tempSelectedCity = _selectedCity;
+        _tempSelectedSiteId = _selectedSiteId;
+        _activeFilterPanelTab = _FilterPanelTab.location;
+        _showAllCities = false;
+        _showAllSites = false;
+        _showFilters = true;
+        _showSort = false;
+        _tourFilterOpenedByStep = true;
+      });
+    } else if (cmd == 'home.closeFilter') {
+      if (_showFilters && _tourFilterOpenedByStep) {
+        setState(() {
+          _showFilters = false;
+          _tourFilterOpenedByStep = false;
+        });
+      }
+    } else if (cmd != 'home.openFilter' && _tourFilterOpenedByStep && _showFilters) {
+      setState(() {
+        _showFilters = false;
+        _tourFilterOpenedByStep = false;
+      });
+    }
   }
 
   bool get _isAreaMode => _selectedCity != null;
@@ -205,6 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _toggleFilterDropdown() {
     setState(() {
+      _tourFilterOpenedByStep = false;
       if (_showFilters) {
         _showFilters = false;
       } else {
@@ -335,25 +379,28 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     SizedBox(height: 20 * scale),
-                    TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText: 'Search species name',
-                        prefixIcon: const Icon(
-                          Icons.search_rounded,
-                          color: AppColors.iconSectionOnFrost,
+                    TourAnchor(
+                      id: TourTargetIds.homeSearch,
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: 'Search species name',
+                          prefixIcon: const Icon(
+                            Icons.search_rounded,
+                            color: AppColors.iconSectionOnFrost,
+                          ),
+                          suffixIcon: _searchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.close),
+                                  onPressed: _clearSearchInput,
+                                )
+                              : null,
                         ),
-                        suffixIcon: _searchQuery.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.close),
-                                onPressed: _clearSearchInput,
-                              )
-                            : null,
+                        onChanged: (v) => setState(() {
+                          _searchQuery = v;
+                          _currentPage = 1;
+                        }),
                       ),
-                      onChanged: (v) => setState(() {
-                        _searchQuery = v;
-                        _currentPage = 1;
-                      }),
                     ),
                     SizedBox(height: 12 * scale),
                     if (_isAreaMode)
@@ -438,7 +485,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               children: [
-                                _chipButton(
+                                TourAnchor(
+                                  id: TourTargetIds.homeFilterButton,
+                                  child: _chipButton(
                                   label: 'Filter',
                                   icon: Icons.filter_list,
                                   selected: _showFilters || _hasFilterApplied,
@@ -446,8 +495,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   badge: _hasFilterApplied ? '$_activeFilterCount' : null,
                                   onTap: _toggleFilterDropdown,
                                 ),
+                                ),
                                 SizedBox(width: 8 * scale),
-                                _chipButton(
+                                TourAnchor(
+                                  id: TourTargetIds.homeSortButton,
+                                  child: _chipButton(
                                   label: 'Sort',
                                   icon: Icons.swap_vert,
                                   selected: _showSort || _sortBy != _SortBy.none,
@@ -466,6 +518,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     });
                                   },
                                 ),
+                                ),
                                 if (_hasFilterApplied || _hasSortApplied) ...[
                                   SizedBox(width: 8 * scale),
                                   _iconActionButton(
@@ -478,7 +531,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         SizedBox(width: 8 * scale),
-                        Material(
+                        TourAnchor(
+                          id: TourTargetIds.homeLayoutButton,
+                          child: Material(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
                           child: InkWell(
@@ -500,9 +555,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                         ),
+                        ),
                       ],
                     ),
-                    if (_showFilters) _filterPanel(),
+                    if (_showFilters)
+                      TourAnchor(
+                        id: TourTargetIds.homeFilterPanel,
+                        child: _filterPanel(),
+                      ),
                     if (_showSort) _sortPanel(),
                   ],
                 ),
@@ -590,7 +650,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (context, index) =>
-                      _speciesCard(displayed[index], saved, compact: true),
+                      _speciesCard(
+                        displayed[index],
+                        saved,
+                        compact: true,
+                        tourAnchorCard: index == 0,
+                        tourAnchorSave: index == 0,
+                      ),
                   childCount: displayed.length,
                 ),
               ),
@@ -631,6 +697,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         displayed[index],
                         saved,
                         compact: false,
+                        tourAnchorCard: index == 0,
+                        tourAnchorSave: index == 0,
                       ),
                     );
                   },
@@ -764,22 +832,25 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: _filterTabTile(
-                    tab: _FilterPanelTab.location,
-                    title: 'Location',
+            TourAnchor(
+              id: TourTargetIds.homeFilterTabs,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _filterTabTile(
+                      tab: _FilterPanelTab.location,
+                      title: 'Location',
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _filterTabTile(
-                    tab: _FilterPanelTab.species,
-                    title: 'Species',
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _filterTabTile(
+                      tab: _FilterPanelTab.species,
+                      title: 'Species',
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: 14),
             SizedBox(
@@ -1298,6 +1369,8 @@ class _HomeScreenState extends State<HomeScreen> {
     Species s,
     SavedSpeciesProvider saved, {
     required bool compact,
+    bool tourAnchorCard = false,
+    bool tourAnchorSave = false,
   }) {
     final imgH = compact
         ? Adaptive.clamp(context, 120, min: 92, max: 150)
@@ -1344,7 +1417,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final infoPadding = EdgeInsets.all((compact ? 10 : 16) * scale);
 
-    final bookmarkButton = SizedBox(
+    Widget bookmarkButton = SizedBox(
       width: (compact ? 28 : 32) * scale,
       height: (compact ? 28 : 32) * scale,
       child: IconButton(
@@ -1374,6 +1447,12 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
     );
+    if (tourAnchorSave) {
+      bookmarkButton = TourAnchor(
+        id: TourTargetIds.homeSaveButton,
+        child: bookmarkButton,
+      );
+    }
 
     Widget tagChip({
       required Widget label,
@@ -1502,7 +1581,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (compact) {
-      return Card(
+      Widget card = Card(
         clipBehavior: Clip.antiAlias,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
@@ -1525,9 +1604,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       );
+      if (tourAnchorCard) {
+        card = TourAnchor(
+          id: TourTargetIds.homeSpeciesCard,
+          child: card,
+        );
+      }
+      return card;
     }
 
-    return Card(
+    Widget card = Card(
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
@@ -1551,5 +1637,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+    if (tourAnchorCard) {
+      card = TourAnchor(
+        id: TourTargetIds.homeSpeciesCard,
+        child: card,
+      );
+    }
+    return card;
   }
 }

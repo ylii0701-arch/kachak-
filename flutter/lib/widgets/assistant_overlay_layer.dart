@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../utils/adaptive.dart';
 import 'assistant_panel.dart';
+import 'onboarding/tour_anchor.dart';
 
 /// Shared singleton that holds the FAB position so every
 /// [AssistantOverlayLayer] instance stays in sync.
@@ -36,12 +37,16 @@ class AssistantOverlayLayer extends StatefulWidget {
     super.key,
     required this.child,
     this.reservedBottom = 0,
+    this.tourAnchorId,
+    this.showFab = true,
   });
 
   final Widget child;
 
   /// Space to keep clear at bottom (e.g. bottom nav height).
   final double reservedBottom;
+  final String? tourAnchorId;
+  final bool showFab;
 
   @override
   State<AssistantOverlayLayer> createState() => _AssistantOverlayLayerState();
@@ -83,6 +88,14 @@ class _AssistantOverlayLayerState extends State<AssistantOverlayLayer>
     _fab.removeListener(_onFabPositionChanged);
     _fabSnapController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant AssistantOverlayLayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!widget.showFab && _assistantVisible) {
+      _closeAssistant();
+    }
   }
 
   void _onFabPositionChanged() {
@@ -192,7 +205,7 @@ class _AssistantOverlayLayerState extends State<AssistantOverlayLayer>
       fit: StackFit.expand,
       children: [
         widget.child,
-        if (!_assistantVisible)
+        if (widget.showFab && !_assistantVisible)
           Positioned(
             left: fabX,
             top: fabY,
@@ -211,73 +224,84 @@ class _AssistantOverlayLayerState extends State<AssistantOverlayLayer>
                   _fabPressed = false;
                 });
               },
-              child: Semantics(
-                label: 'Open assistant chat',
-                button: true,
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(999),
-                    onTapDown: (_) => setState(() => _fabPressed = true),
-                    onTapCancel: () => setState(() => _fabPressed = false),
-                    onTap: _toggleAssistant,
-                    child: AnimatedScale(
-                      duration: _fabPressAnimDuration,
-                      curve: Curves.easeOutCubic,
-                      scale: _fabDragging ? 0.9 : (_fabPressed ? 0.94 : 1),
-                      child: AnimatedContainer(
-                        duration: _fabPressAnimDuration,
-                        curve: Curves.easeOutCubic,
-                        width: _fabSize * s,
-                        height: _fabSize * s,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(
-                                alpha: _fabPressed ? 0.14 : 0.18,
-                              ),
-                              blurRadius: (_fabPressed ? 12 : 18) * s,
-                              offset: Offset(0, (_fabPressed ? 4 : 8) * s),
-                            ),
-                          ],
-                        ),
-                        child: ClipOval(
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              Center(
-                                child: Transform.scale(
-                                  scale: 1.88,
-                                  child: Image.asset(
-                                    'assets/images/ai_chatbot_icon.png',
-                                    fit: BoxFit.cover,
-                                    alignment: const Alignment(0, 0.34),
+              child: Builder(
+                builder: (context) {
+                  Widget fabButton = Semantics(
+                    label: 'Open assistant chat',
+                    button: true,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(999),
+                        onTapDown: (_) => setState(() => _fabPressed = true),
+                        onTapCancel: () => setState(() => _fabPressed = false),
+                        onTap: _toggleAssistant,
+                        child: AnimatedScale(
+                          duration: _fabPressAnimDuration,
+                          curve: Curves.easeOutCubic,
+                          scale: _fabDragging ? 0.9 : (_fabPressed ? 0.94 : 1),
+                          child: AnimatedContainer(
+                            duration: _fabPressAnimDuration,
+                            curve: Curves.easeOutCubic,
+                            width: _fabSize * s,
+                            height: _fabSize * s,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(
+                                    alpha: _fabPressed ? 0.14 : 0.18,
                                   ),
+                                  blurRadius: (_fabPressed ? 12 : 18) * s,
+                                  offset: Offset(0, (_fabPressed ? 4 : 8) * s),
                                 ),
-                              ),
-                              IgnorePointer(
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Colors.white.withValues(alpha: 0.08),
-                                        Colors.transparent,
-                                      ],
+                              ],
+                            ),
+                            child: ClipOval(
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  Center(
+                                    child: Transform.scale(
+                                      scale: 1.88,
+                                      child: Image.asset(
+                                        'assets/images/ai_chatbot_icon.png',
+                                        fit: BoxFit.cover,
+                                        alignment: const Alignment(0, 0.34),
+                                      ),
                                     ),
                                   ),
-                                ),
+                                  IgnorePointer(
+                                    child: DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topCenter,
+                                          end: Alignment.bottomCenter,
+                                          colors: [
+                                            Colors.white.withValues(alpha: 0.08),
+                                            Colors.transparent,
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ),
+                  );
+                  if (widget.tourAnchorId != null) {
+                    fabButton = TourAnchor(
+                      id: widget.tourAnchorId!,
+                      child: fabButton,
+                    );
+                  }
+                  return fabButton;
+                },
               ),
             ),
           ),
