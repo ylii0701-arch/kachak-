@@ -34,6 +34,7 @@ class _GlassBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = Adaptive.scale(context);
+    final bottomInset = MediaQuery.of(context).padding.bottom;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -45,7 +46,7 @@ class _GlassBottomNav extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: EdgeInsets.fromLTRB(4 * s, 8 * s, 4 * s, 8 * s),
+        padding: EdgeInsets.fromLTRB(4 * s, 8 * s, 4 * s, (8 * s) + bottomInset),
         child: Row(
           children: [
             _standardItem(context, 0, Icons.home_outlined, Icons.home, 'Home'),
@@ -355,6 +356,81 @@ class _MainShellState extends State<MainShell> {
           ],
           onComplete: () async {},
         );
+      } else if (tour == OnboardingTour.map) {
+        await SpotlightTour.show(
+          context,
+          steps: const [
+            SpotlightStep(
+              targetId: TourTargetIds.mapSearch,
+              title: 'Search species locations',
+              body:
+                  'Search a species name to quickly find where it has been spotted on the map.',
+              onEnterCommand: 'map.resetTourState',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapWeatherMarker,
+              title: 'Weather marker',
+              body:
+                  'These markers show city weather snapshots to help plan better shooting conditions.',
+              cardPlacement: SpotlightCardPlacement.above,
+              onEnterCommand: 'map.openWeatherPreview',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapAnimalMarker,
+              title: 'Animal marker',
+              body:
+                  'Animal markers show nearby species observations around your current location range. Tap View More Details to open species detail.',
+              cardPlacement: SpotlightCardPlacement.above,
+              onEnterCommand: 'map.openAnimalPreview',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapSpeciesViewMore,
+              title: 'View more details',
+              body:
+                  'Use View More Details to open the full species detail page and learn more before planning your shoot.',
+              cardPlacement: SpotlightCardPlacement.above,
+              onEnterCommand: 'map.openAnimalPreview',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapToolRefresh,
+              title: 'Refresh map weather',
+              body:
+                  'Tap to refresh city weather data shown on map markers.',
+              onEnterCommand: 'map.closePreview',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapToolWeather,
+              title: 'Toggle weather layer',
+              body:
+                  'Show or hide weather markers to focus on sightings or forecast context.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapToolFocus,
+              title: 'Focus wildlife hotspots',
+              body:
+                  'Jump the camera to fit known wildlife and photography hotspot coverage.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapToolMyLocation,
+              title: 'Go to my location',
+              body:
+                  'Center the map back to your current position quickly.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapToolZoomIn,
+              title: 'Zoom in',
+              body:
+                  'Increase map zoom for close-up marker and area details.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapToolZoomOut,
+              title: 'Zoom out',
+              body:
+                  'Reduce map zoom to see wider region context.',
+            ),
+          ],
+          onComplete: () async {},
+        );
       } else {
         await PageIntroSheet.show(context, content);
       }
@@ -489,7 +565,8 @@ class _MainShellState extends State<MainShell> {
     // Main page surface (tabs + bottom nav) that slides when menu opens.
     final pageSurface = AssistantOverlayLayer(
       reservedBottom: navBarHeight,
-      tourAnchorId: TourTargetIds.homeAiChat,
+      tourAnchorId: shell.index == 0 ? TourTargetIds.homeAiChat : null,
+      showFab: shell.index != 1,
       child: Scaffold(
         backgroundColor: Colors.transparent,
         extendBody: false,
@@ -550,15 +627,12 @@ class _MainShellState extends State<MainShell> {
             ),
           ],
         ),
-        bottomNavigationBar: SafeArea(
-          top: false,
-          child: _GlassBottomNav(
-            selectedIndex: shell.index,
-            onSelect: (i) {
-              _closeMenu();
-              context.read<AppShellController>().selectTab(i);
-            },
-          ),
+        bottomNavigationBar: _GlassBottomNav(
+          selectedIndex: shell.index,
+          onSelect: (i) {
+            _closeMenu();
+            context.read<AppShellController>().selectTab(i);
+          },
         ),
       ),
     );

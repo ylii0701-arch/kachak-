@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
@@ -14,6 +13,8 @@ import '../providers/app_shell_controller.dart';
 import '../services/openweather_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
+import '../widgets/onboarding/tour_anchor.dart';
+import '../widgets/onboarding/spotlight_tour.dart';
 import '../widgets/species_network_image.dart';
 import 'species_detail_screen.dart';
 
@@ -60,6 +61,15 @@ class _MapScreenState extends State<MapScreen> {
   );
   final Distance _distance = const Distance();
   bool _didSetInitialViewport = false;
+  bool _anchoredWeatherMarker = false;
+  bool _anchoredPhotoMarker = false;
+  bool _anchoredAnimalMarker = false;
+  bool _tourWeatherAutoOpened = false;
+  bool _tourPhotoAutoOpened = false;
+  bool _tourAnimalAutoOpened = false;
+  String? _activeTourPreviewType;
+  String? _pendingTourCommand;
+  VoidCallback? _dismissTourPreview;
 
   static const double _minZoom = 3;
   static const double _maxZoom = 18;
@@ -78,6 +88,7 @@ class _MapScreenState extends State<MapScreen> {
     );
     _initLocation();
     _loadCityWeather();
+    TourRuntimeCommand.command.addListener(_handleTourCommand);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _shell = context.read<AppShellController>();
@@ -116,6 +127,7 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   void dispose() {
+    TourRuntimeCommand.command.removeListener(_handleTourCommand);
     _speciesSearchController.dispose();
     _shell?.removeListener(_applyShellMapJump);
     _mapController.dispose();
@@ -161,6 +173,112 @@ class _MapScreenState extends State<MapScreen> {
       _selectedSpecies = null;
       _showNearbyAlongsideSelected = false;
     });
+  }
+
+  void _closeTourPreviewSheet() {
+    if (!mounted) return;
+    _dismissTourPreview?.call();
+    _dismissTourPreview = null;
+    _activeTourPreviewType = null;
+  }
+
+  void _handleTourCommand() {
+    if (!mounted) return;
+    final cmd = TourRuntimeCommand.command.value;
+    if (cmd == null) {
+      _closeTourPreviewSheet();
+      _pendingTourCommand = null;
+      return;
+    }
+
+    if (!cmd.startsWith('map.')) return;
+
+    if (cmd == 'map.resetTourState') {
+      _closeTourPreviewSheet();
+      _tourWeatherAutoOpened = false;
+      _tourPhotoAutoOpened = false;
+      _tourAnimalAutoOpened = false;
+      _pendingTourCommand = null;
+      return;
+    }
+
+    if (cmd == 'map.openWeatherPreview') {
+      if (_tourWeatherAutoOpened || _activeTourPreviewType == cmd) return;
+      final city = kMalaysianCities.where((c) => c.name == 'Petaling Jaya').firstOrNull;
+      if (city == null) return;
+      final weather = _cityWeatherByName[city.name];
+      if (weather == null) {
+        _pendingTourCommand = cmd;
+        if (!_loadingCityWeather) {
+          _loadCityWeather();
+        }
+        return;
+      }
+      _closeTourPreviewSheet();
+      _tourWeatherAutoOpened = true;
+      _activeTourPreviewType = cmd;
+      _dismissTourPreview = () {
+        final nav = Navigator.of(context, rootNavigator: true);
+        if (nav.canPop()) nav.pop();
+      };
+      _showCityWeatherSheet(context, city, weather, isTourPreview: true);
+      return;
+    }
+
+    if (cmd == 'map.openPhotoPreview') {
+      if (_tourPhotoAutoOpened || _activeTourPreviewType == cmd) return;
+      final petaling = kMalaysianCities.where((c) => c.name == 'Petaling Jaya').firstOrNull;
+      PhotographySpot? spot;
+      if (petaling != null) {
+        final candidates = photographySpots.where((p) => p.lat >= petaling.lat).toList();
+        candidates.sort((a, b) {
+          final latCmp = b.lat.compareTo(a.lat);
+          if (latCmp != 0) return latCmp;
+          return a.lng.compareTo(b.lng);
+        });
+        spot = candidates.firstOrNull;
+      }
+      spot ??= photographySpots.where((p) => p.name == 'FRIM Wildlife Reserve').firstOrNull;
+      spot ??= photographySpots.firstOrNull;
+      if (spot == null) return;
+      _closeTourPreviewSheet();
+      _tourPhotoAutoOpened = true;
+      _activeTourPreviewType = cmd;
+      _dismissTourPreview = () {
+        final nav = Navigator.of(context, rootNavigator: true);
+        if (nav.canPop()) nav.pop();
+      };
+      _showPhotographySpotSheet(context, spot, isTourPreview: true);
+      return;
+    }
+
+    if (cmd == 'map.openAnimalPreview') {
+      if (_tourAnimalAutoOpened || _activeTourPreviewType == cmd) return;
+      final loc = speciesLocations.where(_isWithinNearbyRange).firstOrNull ?? speciesLocations.firstOrNull;
+      if (loc == null) return;
+      final species = speciesById(loc.speciesId);
+      if (species == null) return;
+      _closeTourPreviewSheet();
+      _tourAnimalAutoOpened = true;
+      _activeTourPreviewType = cmd;
+      _dismissTourPreview = () {
+        final nav = Navigator.of(context, rootNavigator: true);
+        if (nav.canPop()) nav.pop();
+      };
+      _showSpeciesSheet(
+        context,
+        species,
+        loc,
+        closestWeather(loc.lat, loc.lng),
+        photographySpotForSpecies(species.id),
+        protectedAreaAt(loc.lat, loc.lng),
+        isInDangerZone(loc.lat, loc.lng),
+        isTourPreview: true,
+      );
+      return;
+    }
+
+    _closeTourPreviewSheet();
   }
 
   void _selectSpeciesSuggestion(Species species) {
@@ -327,6 +445,9 @@ class _MapScreenState extends State<MapScreen> {
           ..addAll(loaded);
         _loadingCityWeather = false;
       });
+      if (_pendingTourCommand == 'map.openWeatherPreview') {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _handleTourCommand());
+      }
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -342,6 +463,9 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _anchoredWeatherMarker = false;
+    _anchoredPhotoMarker = false;
+    _anchoredAnimalMarker = false;
     final s = Adaptive.scale(context);
     final q = _speciesQuery.trim().toLowerCase();
     final suggestions = _matchingSpeciesSuggestions(_speciesQuery);
@@ -374,6 +498,21 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ),
         );
+        if (!_anchoredWeatherMarker && city.name == 'Petaling Jaya') {
+          _anchoredWeatherMarker = true;
+          final anchored = cityWeatherMarkers.removeLast();
+          cityWeatherMarkers.add(
+            Marker(
+              point: anchored.point,
+              width: anchored.width,
+              height: anchored.height,
+              child: TourAnchor(
+                id: TourTargetIds.mapWeatherMarker,
+                child: anchored.child,
+              ),
+            ),
+          );
+        }
       }
     }
 
@@ -412,6 +551,21 @@ class _MapScreenState extends State<MapScreen> {
           ),
         ),
       );
+      if (!_anchoredPhotoMarker && spot.name == 'FRIM Wildlife Reserve') {
+        _anchoredPhotoMarker = true;
+        final anchored = photographyMarkers.removeLast();
+        photographyMarkers.add(
+          Marker(
+            point: anchored.point,
+            width: anchored.width,
+            height: anchored.height,
+            child: TourAnchor(
+              id: TourTargetIds.mapPhotoMarker,
+              child: anchored.child,
+            ),
+          ),
+        );
+      }
     }
 
     final speciesMarkers = <Marker>[];
@@ -473,6 +627,21 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ),
         );
+        if (!_anchoredAnimalMarker && isNearby) {
+          _anchoredAnimalMarker = true;
+          final anchored = speciesMarkers.removeLast();
+          speciesMarkers.add(
+            Marker(
+              point: anchored.point,
+              width: anchored.width,
+              height: anchored.height,
+              child: TourAnchor(
+                id: TourTargetIds.mapAnimalMarker,
+                child: anchored.child,
+              ),
+            ),
+          );
+        }
       }
     }
 
@@ -537,99 +706,63 @@ class _MapScreenState extends State<MapScreen> {
 
     return SafeArea(
       child: Padding(
-        padding: EdgeInsets.fromLTRB(16 * s, 14 * s, 16 * s, 0),
+        padding: EdgeInsets.fromLTRB(16 * s, 6 * s, 16 * s, 0),
         child: Column(
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Kachak',
-                        style: GoogleFonts.libreBaskerville(
-                          fontSize: Adaptive.clamp(context, 38, min: 30, max: 42),
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.accent,
-                        ),
-                      ),
-                      Text(
-                        'Malaysian Wildlife Explorer',
-                        style: GoogleFonts.inter(
-                          color: AppColors.textSubtitleOnFrost,
-                          fontSize: Adaptive.clamp(context, 17, min: 14, max: 19),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 10 * s),
+            SizedBox(height: 2 * s),
             Row(
               children: [
                 Expanded(
-                  child: _buildGlassCard(
-                    scale: s,
-                    radius: 18,
-                    child: SizedBox(
-                      height: Adaptive.clamp(context, 52, min: 46, max: 60),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 44 * s,
-                            child: Icon(
-                              Icons.search,
-                              color: AppColors.accent.withValues(alpha: 0.86),
-                              size: Adaptive.clamp(context, 20, min: 17, max: 23),
-                            ),
-                          ),
-                          Expanded(
-                            child: TextField(
-                              controller: _speciesSearchController,
-                              onChanged: _onSpeciesQueryChanged,
-                              textInputAction: TextInputAction.search,
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                color: AppColors.accent,
-                                fontWeight: FontWeight.w700,
-                                fontSize: Adaptive.clamp(context, 15, min: 13, max: 18),
+                  child: TourAnchor(
+                    id: TourTargetIds.mapSearch,
+                    child: _buildGlassCard(
+                      scale: s,
+                      radius: 18,
+                      child: SizedBox(
+                        height: Adaptive.clamp(context, 52, min: 46, max: 60),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 44 * s,
+                              child: Icon(
+                                Icons.search,
+                                color: AppColors.accent.withValues(alpha: 0.86),
+                                size: Adaptive.clamp(context, 20, min: 17, max: 23),
                               ),
-                              decoration: InputDecoration(
-                                hintText: 'Search species',
-                                hintStyle: TextStyle(
-                                  color: AppColors.accent.withValues(alpha: 0.84),
+                            ),
+                            Expanded(
+                              child: TextField(
+                                controller: _speciesSearchController,
+                                onChanged: _onSpeciesQueryChanged,
+                                textInputAction: TextInputAction.search,
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  color: AppColors.accent,
                                   fontWeight: FontWeight.w700,
+                                  fontSize: Adaptive.clamp(context, 15, min: 13, max: 18),
                                 ),
-                                filled: false,
-                                fillColor: Colors.transparent,
-                                isDense: true,
-                                border: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                disabledBorder: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 6 * s,
-                                  vertical: 10 * s,
+                                decoration: InputDecoration(
+                                  hintText: 'Search species',
+                                  hintStyle: TextStyle(
+                                    color: AppColors.accent.withValues(alpha: 0.84),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  filled: false,
+                                  fillColor: Colors.transparent,
+                                  isDense: true,
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  disabledBorder: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 6 * s,
+                                    vertical: 10 * s,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          SizedBox(
-                            width: 44 * s,
-                            child: q.isEmpty
-                                ? null
-                                : IconButton(
-                                    icon: Icon(
-                                      Icons.close,
-                                      color: AppColors.accent.withValues(alpha: 0.86),
-                                    ),
-                                    onPressed: _clearSpeciesSearch,
-                                  ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -639,7 +772,7 @@ class _MapScreenState extends State<MapScreen> {
                   scale: s,
                   radius: 18,
                   child: SizedBox(
-                    width: Adaptive.clamp(context, 52, min: 46, max: 58),
+                    width: Adaptive.clamp(context, 46, min: 42, max: 52),
                     height: Adaptive.clamp(context, 52, min: 46, max: 58),
                     child: IconButton(
                       tooltip: 'Clear search',
@@ -655,6 +788,8 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                   ),
                 ),
+                SizedBox(width: 8 * s),
+                SizedBox(width: 44 * s, height: 44 * s),
               ],
             ),
             if (showSuggestionList) ...[
@@ -707,7 +842,7 @@ class _MapScreenState extends State<MapScreen> {
                 ),
               ),
             ],
-            SizedBox(height: 12 * s),
+            SizedBox(height: 8 * s),
             Expanded(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -788,9 +923,12 @@ class _MapScreenState extends State<MapScreen> {
                               IconButton(
                                 tooltip: 'Refresh weather',
                                 onPressed: _loadCityWeather,
-                                icon: Icon(
-                                  _loadingCityWeather ? Icons.sync : Icons.refresh,
-                                  color: AppColors.primary,
+                                icon: TourAnchor(
+                                  id: TourTargetIds.mapToolRefresh,
+                                  child: Icon(
+                                    _loadingCityWeather ? Icons.sync : Icons.refresh,
+                                    color: AppColors.primary,
+                                  ),
                                 ),
                                 visualDensity: VisualDensity.compact,
                               ),
@@ -804,11 +942,14 @@ class _MapScreenState extends State<MapScreen> {
                                     _showCityWeatherMarkers = !_showCityWeatherMarkers;
                                   });
                                 },
-                                icon: Icon(
-                                  _showCityWeatherMarkers
-                                      ? Icons.cloud_rounded
-                                      : Icons.cloud_off_rounded,
-                                  color: AppColors.primary,
+                                icon: TourAnchor(
+                                  id: TourTargetIds.mapToolWeather,
+                                  child: Icon(
+                                    _showCityWeatherMarkers
+                                        ? Icons.cloud_rounded
+                                        : Icons.cloud_off_rounded,
+                                    color: AppColors.primary,
+                                  ),
                                 ),
                                 visualDensity: VisualDensity.compact,
                               ),
@@ -816,9 +957,12 @@ class _MapScreenState extends State<MapScreen> {
                               IconButton(
                                 tooltip: 'Show species & photo spots',
                                 onPressed: _fitWildlifeHotspots,
-                                icon: const Icon(
-                                  Icons.filter_center_focus,
-                                  color: AppColors.primary,
+                                icon: const TourAnchor(
+                                  id: TourTargetIds.mapToolFocus,
+                                  child: Icon(
+                                    Icons.filter_center_focus,
+                                    color: AppColors.primary,
+                                  ),
                                 ),
                                 visualDensity: VisualDensity.compact,
                               ),
@@ -826,21 +970,30 @@ class _MapScreenState extends State<MapScreen> {
                                 IconButton(
                                   tooltip: 'My location',
                                   onPressed: _goToMyLocation,
-                                  icon: const Icon(Icons.my_location, color: AppColors.primary),
+                                  icon: const TourAnchor(
+                                    id: TourTargetIds.mapToolMyLocation,
+                                    child: Icon(Icons.my_location, color: AppColors.primary),
+                                  ),
                                   visualDensity: VisualDensity.compact,
                                 ),
                               Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
                               IconButton(
                                 tooltip: 'Zoom in',
                                 onPressed: () => _zoomBy(1),
-                                icon: const Icon(Icons.add, color: AppColors.primary),
+                                icon: const TourAnchor(
+                                  id: TourTargetIds.mapToolZoomIn,
+                                  child: Icon(Icons.add, color: AppColors.primary),
+                                ),
                                 visualDensity: VisualDensity.compact,
                               ),
                               Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
                               IconButton(
                                 tooltip: 'Zoom out',
                                 onPressed: () => _zoomBy(-1),
-                                icon: const Icon(Icons.remove, color: AppColors.primary),
+                                icon: const TourAnchor(
+                                  id: TourTargetIds.mapToolZoomOut,
+                                  child: Icon(Icons.remove, color: AppColors.primary),
+                                ),
                                 visualDensity: VisualDensity.compact,
                               ),
                             ],
@@ -858,9 +1011,14 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  void _showPhotographySpotSheet(BuildContext context, PhotographySpot place) {
-    showModalBottomSheet<void>(
+  void _showPhotographySpotSheet(
+    BuildContext context,
+    PhotographySpot place, {
+    bool isTourPreview = false,
+  }) {
+    final bottomSheet = showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -914,6 +1072,12 @@ class _MapScreenState extends State<MapScreen> {
         );
       },
     );
+    bottomSheet.whenComplete(() {
+      if (isTourPreview) {
+        _dismissTourPreview = null;
+        _activeTourPreviewType = null;
+      }
+    });
   }
 
   void _showSpeciesSheet(
@@ -924,9 +1088,13 @@ class _MapScreenState extends State<MapScreen> {
     PhotographySpot? spot,
     ProtectedArea? protected,
     bool danger,
+    {
+    bool isTourPreview = false,
+  }
   ) {
-    showModalBottomSheet<void>(
+    final bottomSheet = showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -938,9 +1106,11 @@ class _MapScreenState extends State<MapScreen> {
           minChildSize: 0.35,
           maxChildSize: 0.9,
           builder: (_, scroll) {
+            final bottomSafe = MediaQuery.of(ctx).padding.bottom;
+            final showExtendedDetails = !isTourPreview;
             return ListView(
               controller: scroll,
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomSafe + 12),
               children: [
                 SizedBox(
                   height: 140,
@@ -975,7 +1145,7 @@ class _MapScreenState extends State<MapScreen> {
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                 ),
                 const SizedBox(height: 12),
-                if (protected != null)
+                if (showExtendedDetails && protected != null)
                   ListTile(
                     leading: const Text('🛡️', style: TextStyle(fontSize: 22)),
                     title: Text(
@@ -988,7 +1158,7 @@ class _MapScreenState extends State<MapScreen> {
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                   )
-                else if (danger)
+                else if (showExtendedDetails && danger)
                   ListTile(
                     leading: Icon(Icons.warning, color: Colors.red.shade700),
                     title: Text(
@@ -1001,7 +1171,7 @@ class _MapScreenState extends State<MapScreen> {
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                   )
-                else
+                else if (showExtendedDetails)
                   ListTile(
                     leading: Icon(
                       Icons.warning_amber,
@@ -1017,7 +1187,7 @@ class _MapScreenState extends State<MapScreen> {
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                   ),
-                if (spot != null)
+                if (showExtendedDetails && spot != null)
                   ListTile(
                     leading: const Text('📷'),
                     title: Text(
@@ -1027,24 +1197,30 @@ class _MapScreenState extends State<MapScreen> {
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                   ),
-                ListTile(
-                  leading: Text(weatherEmoji(weather.condition)),
-                  title: Text(
-                    '${weather.temperature}°C • ${weather.condition}',
+                if (showExtendedDetails)
+                  ListTile(
+                    leading: Text(weatherEmoji(weather.condition)),
+                    title: Text(
+                      '${weather.temperature}°C • ${weather.condition}',
+                    ),
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
                   ),
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 FilledButton(
+                  key: isTourPreview ? TourAnchors.key(TourTargetIds.mapSpeciesViewMore) : null,
                   onPressed: () {
-                    Navigator.pop(ctx);
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) =>
-                            SpeciesDetailScreen(speciesId: species.id),
-                      ),
-                    );
+                    if (isTourPreview) {
+                      Navigator.pop(ctx);
+                    } else {
+                      Navigator.pop(ctx);
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) =>
+                              SpeciesDetailScreen(speciesId: species.id),
+                        ),
+                      );
+                    }
                   },
                   child: const Text('View More Details'),
                 ),
@@ -1054,15 +1230,25 @@ class _MapScreenState extends State<MapScreen> {
         );
       },
     );
+    bottomSheet.whenComplete(() {
+      if (isTourPreview) {
+        _dismissTourPreview = null;
+        _activeTourPreviewType = null;
+      }
+    });
   }
 
   void _showCityWeatherSheet(
     BuildContext context,
     MalaysianCity city,
     CityWeatherBundle weather,
+    {
+    bool isTourPreview = false,
+  }
   ) {
-    showModalBottomSheet<void>(
+    final bottomSheet = showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -1199,6 +1385,12 @@ class _MapScreenState extends State<MapScreen> {
         );
       },
     );
+    bottomSheet.whenComplete(() {
+      if (isTourPreview) {
+        _dismissTourPreview = null;
+        _activeTourPreviewType = null;
+      }
+    });
   }
 }
 

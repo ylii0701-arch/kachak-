@@ -21,6 +21,18 @@ class TourTargetIds {
   static const homeNavMission = 'tour.home.nav.mission';
   static const homeNavSaved = 'tour.home.nav.saved';
   static const homeAiChat = 'tour.home.ai.chat';
+
+  static const mapSearch = 'tour.map.search';
+  static const mapWeatherMarker = 'tour.map.weather.marker';
+  static const mapPhotoMarker = 'tour.map.photo.marker';
+  static const mapAnimalMarker = 'tour.map.animal.marker';
+  static const mapToolRefresh = 'tour.map.tool.refresh';
+  static const mapToolWeather = 'tour.map.tool.weather';
+  static const mapToolFocus = 'tour.map.tool.focus';
+  static const mapToolMyLocation = 'tour.map.tool.my.location';
+  static const mapToolZoomIn = 'tour.map.tool.zoom.in';
+  static const mapToolZoomOut = 'tour.map.tool.zoom.out';
+  static const mapSpeciesViewMore = 'tour.map.species.view.more';
 }
 
 class TourRuntimeCommand {
@@ -135,11 +147,13 @@ class _SpotlightTourOverlayState extends State<_SpotlightTourOverlay> {
 
   Future<void> _next() async {
     if (_index >= widget.steps.length - 1) {
+      TourRuntimeCommand.send(null);
       await widget.onFinish();
       return;
     }
     setState(() {
       _index += 1;
+      _targetRect = null;
     });
     TourRuntimeCommand.send(_step.onEnterCommand);
     WidgetsBinding.instance.addPostFrameCallback((_) => _resolveTargetWithRetries());

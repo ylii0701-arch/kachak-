@@ -38,6 +38,7 @@ class AssistantOverlayLayer extends StatefulWidget {
     required this.child,
     this.reservedBottom = 0,
     this.tourAnchorId,
+    this.showFab = true,
   });
 
   final Widget child;
@@ -45,6 +46,7 @@ class AssistantOverlayLayer extends StatefulWidget {
   /// Space to keep clear at bottom (e.g. bottom nav height).
   final double reservedBottom;
   final String? tourAnchorId;
+  final bool showFab;
 
   @override
   State<AssistantOverlayLayer> createState() => _AssistantOverlayLayerState();
@@ -86,6 +88,14 @@ class _AssistantOverlayLayerState extends State<AssistantOverlayLayer>
     _fab.removeListener(_onFabPositionChanged);
     _fabSnapController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant AssistantOverlayLayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!widget.showFab && _assistantVisible) {
+      _closeAssistant();
+    }
   }
 
   void _onFabPositionChanged() {
@@ -195,7 +205,7 @@ class _AssistantOverlayLayerState extends State<AssistantOverlayLayer>
       fit: StackFit.expand,
       children: [
         widget.child,
-        if (!_assistantVisible)
+        if (widget.showFab && !_assistantVisible)
           Positioned(
             left: fabX,
             top: fabY,
