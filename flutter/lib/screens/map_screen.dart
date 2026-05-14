@@ -90,7 +90,7 @@ class _MapScreenState extends State<MapScreen> {
     // Handles map jump requests from other tabs/screens.
     if (!mounted) return;
     final shell = _shell ?? context.read<AppShellController>();
-    if (shell.index != 2) return;
+    if (shell.index != 1) return;
     final jump = shell.consumeMapJump();
     if (jump != null) {
       if (jump.speciesId != null) {

@@ -46,7 +46,7 @@ const Map<OnboardingTour, IntroContent> kOnboardingContent = {
         icon: Icons.tune_rounded,
         title: 'Filter & sort',
         body:
-            'Narrow results by category, conservation status, or difficulty.',
+            'Use tabs to filter by location, category, conservation status, and difficulty.',
       ),
       IntroStep(
         icon: Icons.grid_view_rounded,
@@ -59,30 +59,35 @@ const Map<OnboardingTour, IntroContent> kOnboardingContent = {
         title: 'Save favourites',
         body: 'Bookmark any card to revisit it later from the side menu.',
       ),
-    ],
-  ),
-  OnboardingTour.predict: IntroContent(
-    title: 'Top predictions',
-    subtitle:
-        'See which species are most likely to appear at popular Malaysian sites.',
-    steps: [
       IntroStep(
         icon: Icons.location_on_outlined,
-        title: 'Pick a site',
+        title: 'Area predictions in Home',
+        body: 'Choose a location in Filter to switch Home into prediction-ranked results.',
+      ),
+    ],
+  ),
+  OnboardingTour.saved: IntroContent(
+    title: 'Saved species',
+    subtitle:
+        'Revisit your bookmarked species and open details quickly.',
+    steps: [
+      IntroStep(
+        icon: Icons.favorite_outline_rounded,
+        title: 'Your favourites',
         body:
-            'The site label at the top shows the location used for predictions.',
+            'Species you bookmark from Home and details appear here automatically.',
       ),
       IntroStep(
-        icon: Icons.trending_up_rounded,
-        title: 'Read probabilities',
+        icon: Icons.open_in_new_rounded,
+        title: 'Open species details',
         body:
-            'Each card shows a probability tag and the best time of day to spot it.',
+            'Tap any saved card to jump into full species detail and prediction shortcuts.',
       ),
       IntroStep(
-        icon: Icons.bookmark_outline_rounded,
-        title: 'Save for alerts',
+        icon: Icons.delete_outline_rounded,
+        title: 'Clean up list',
         body:
-            'Bookmark a species to get notified when conditions look great.',
+            'Remove saved entries when your shortlist changes.',
       ),
     ],
   ),
@@ -170,7 +175,7 @@ const List<IntroStep> kWelcomeSlides = [
     icon: Icons.explore_outlined,
     title: 'Five tools, one journey',
     body:
-        'Discover species, see hot predictions, identify photos with AI, run guided missions, and explore on the map.',
+        'Discover species, save favourites, identify photos with AI, run guided missions, and explore on the map.',
   ),
   IntroStep(
     icon: Icons.touch_app_outlined,
