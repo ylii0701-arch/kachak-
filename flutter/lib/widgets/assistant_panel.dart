@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
 import '../config/map_keys.dart';
@@ -27,9 +29,13 @@ class AssistantPanel extends StatefulWidget {
 class _AssistantPanelState extends State<AssistantPanel> {
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final FocusNode _inputFocusNode = FocusNode();
   final List<_ChatMessage> _messages = [];
   _PendingRequest? _pendingRequest;
   bool _isAssistantTyping = false;
+  int? _copiedMessageIndex;
+  bool _showCopiedBanner = false;
+  Timer? _copiedFeedbackTimer;
   static const String _irrelevantMessage =
       'This is unrelated to wildlife photography. Please try another question.';
   static const Set<String> _wildlifePhotographyKeywords = {
@@ -110,18 +116,10 @@ class _AssistantPanelState extends State<AssistantPanel> {
   ];
 
   @override
-  void initState() {
-    super.initState();
-    _messages.add(
-      _ChatMessage.assistant(
-        "Hello! I'm your KaChak assistant. What would you like to know?",
-      ),
-    );
-  }
-
-  @override
   void dispose() {
+    _copiedFeedbackTimer?.cancel();
     _inputController.dispose();
+    _inputFocusNode.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -198,7 +196,12 @@ class _AssistantPanelState extends State<AssistantPanel> {
 
     setState(() {
       _isAssistantTyping = false;
-      _messages.add(_ChatMessage.assistant(reply));
+      _messages.add(
+        _ChatMessage.assistant(
+          reply,
+          sourcePrompt: userPrompt,
+        ),
+      );
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
@@ -429,7 +432,7 @@ Please answer using the preparation checklist template.
       Future<void> scrollOnce() async {
         if (!_scrollController.hasClients) return;
         await _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
+          _scrollController.position.minScrollExtent,
           duration: const Duration(milliseconds: 240),
           curve: Curves.easeOutCubic,
         );
@@ -444,16 +447,70 @@ Please answer using the preparation checklist template.
   }
 
   int get _itemCount {
-    final base = 2 + _suggestions.length;
-    final extra = _messages.length > 1 ? _messages.length - 1 : 0;
-    return base + extra + (_isAssistantTyping ? 1 : 0);
+    if (_messages.isEmpty) {
+      return _isAssistantTyping ? 1 : 0;
+    }
+    return _messages.length + (_isAssistantTyping ? 1 : 0);
+  }
+
+  Future<void> _copyMessage(_ChatMessage message, int index) async {
+    await Clipboard.setData(ClipboardData(text: message.text));
+    if (!mounted) return;
+    _copiedFeedbackTimer?.cancel();
+    setState(() {
+      _copiedMessageIndex = index;
+      _showCopiedBanner = true;
+    });
+    _copiedFeedbackTimer = Timer(const Duration(milliseconds: 1300), () {
+      if (!mounted) return;
+      setState(() {
+        _copiedMessageIndex = null;
+        _showCopiedBanner = false;
+      });
+    });
+  }
+
+  void _toggleReaction(int index, _MessageReaction reaction) {
+    if (_isAssistantTyping || index < 0 || index >= _messages.length) return;
+    final msg = _messages[index];
+    if (msg.isUser) return;
+    final next = msg.reaction == reaction ? _MessageReaction.none : reaction;
+    setState(() {
+      _messages[index] = msg.copyWith(reaction: next);
+    });
+  }
+
+  Future<void> _rewriteAnswer(int index) async {
+    if (_isAssistantTyping || index < 0 || index >= _messages.length) return;
+    final msg = _messages[index];
+    final prompt = msg.sourcePrompt;
+    if (msg.isUser || prompt == null || prompt.trim().isEmpty) return;
+
+    setState(() => _isAssistantTyping = true);
+    final reply = await _fetchGeminiReply(prompt);
+    if (!mounted) return;
+    setState(() {
+      _isAssistantTyping = false;
+      _messages[index] = msg.copyWith(
+        text: _normalizeMarkdownArtifacts(reply),
+        reaction: _MessageReaction.none,
+      );
+    });
+    _scrollToBottom();
   }
 
   @override
   Widget build(BuildContext context) {
     final s = Adaptive.scale(context);
-    return Column(
+    final media = MediaQuery.of(context);
+    final isKeyboardVisible = media.viewInsets.bottom > 0;
+    final bottomPadding = isKeyboardVisible ? 8 * s : 3 * s;
+    final baseFontSize = Adaptive.clamp(context, 13, min: 12, max: 16);
+
+    return Stack(
       children: [
+        Column(
+        children: [
         Container(
           padding: EdgeInsets.fromLTRB(14 * s, 14 * s, 8 * s, 12 * s),
           decoration: BoxDecoration(
@@ -525,107 +582,189 @@ Please answer using the preparation checklist template.
           ),
         ),
         Expanded(
-          child: ListView.builder(
-            controller: _scrollController,
-            padding: EdgeInsets.fromLTRB(14 * s, 10 * s, 14 * s, 10 * s),
-            itemCount: _itemCount,
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return _chatCard(_messages[0], showTime: true);
-              }
-              if (index == 1) {
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(2, 6, 2, 6),
-                  child: Text(
-                    'Try asking:',
-                    style: TextStyle(
-                      color: Colors.grey.shade700,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
+          child: _messages.isEmpty
+              ? _emptyStateLayout(s)
+              : ListView.builder(
+                  controller: _scrollController,
+                  reverse: true,
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: EdgeInsets.fromLTRB(
+                    14 * s,
+                    10 * s,
+                    14 * s,
+                    isKeyboardVisible ? 12 * s : 10 * s,
                   ),
-                );
-              }
-
-              final suggestionIndex = index - 2;
-              if (suggestionIndex < _suggestions.length) {
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 6),
-                  child: _suggestionCard(_suggestions[suggestionIndex]),
-                );
-              }
-
-              final extraMessageCount = _messages.length - 1;
-              final extraIndex = suggestionIndex - _suggestions.length;
-              if (extraIndex < extraMessageCount) {
-                return _chatCard(_messages[extraIndex + 1]);
-              }
-              return _typingCard();
-            },
+                  itemCount: _itemCount,
+                  itemBuilder: (context, index) {
+                    if (_isAssistantTyping && index == 0) {
+                      return _typingCard();
+                    }
+                    final offset = _isAssistantTyping ? 1 : 0;
+                    final messageIndex = _messages.length - 1 - (index - offset);
+                    if (messageIndex >= 0 && messageIndex < _messages.length) {
+                      return _chatCard(_messages[messageIndex], index: messageIndex);
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+        ),
+        SafeArea(
+          top: false,
+          minimum: EdgeInsets.zero,
+          child: Container(
+            padding: EdgeInsets.fromLTRB(10 * s, 8 * s, 10 * s, bottomPadding),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(top: BorderSide(color: Colors.grey.shade200)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _inputController,
+                        focusNode: _inputFocusNode,
+                        style: TextStyle(fontSize: baseFontSize),
+                        textInputAction: TextInputAction.send,
+                        onTap: _scrollToBottom,
+                        onSubmitted: (_) => _submitQuestion(),
+                        decoration: InputDecoration(
+                          hintText: 'Ask anything about wildlife photography...',
+                          hintStyle: TextStyle(
+                            fontSize: baseFontSize,
+                            color: Colors.grey.shade600,
+                          ),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 10,
+                          ),
+                        ),
+                      ),
+                    ),
+                    FilledButton(
+                      onPressed: _isAssistantTyping ? null : _submitQuestion,
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(44, 44),
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Icon(Icons.send_outlined),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 6 * s),
+                Text(
+                  'Photography AI chat can make mistakes. Please double check responses.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontSize: Adaptive.clamp(context, 11, min: 9, max: 12),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        Container(
-          padding: EdgeInsets.fromLTRB(10 * s, 8 * s, 10 * s, 10 * s),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(top: BorderSide(color: Colors.grey.shade200)),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _inputController,
-                  textInputAction: TextInputAction.send,
-                  onSubmitted: (_) => _submitQuestion(),
-                  decoration: const InputDecoration(
-                    hintText: 'Ask about settings, equipment, or tips...',
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 10,
+      ],
+    ),
+        AnimatedPositioned(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
+          top: _showCopiedBanner ? (86 * s) : (74 * s),
+          left: 16 * s,
+          right: 16 * s,
+          child: IgnorePointer(
+            ignoring: true,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 180),
+              opacity: _showCopiedBanner ? 1 : 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.85),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                  ),
+                  child: const Text(
+                    'Message copied',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
               ),
-              FilledButton(
-                onPressed: _isAssistantTyping ? null : _submitQuestion,
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size(44, 44),
-                  padding: EdgeInsets.zero,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Icon(Icons.send_outlined),
-              ),
-            ],
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _suggestionCard(String text) {
-    final s = Adaptive.scale(context);
+  Widget _emptyStateLayout(double s) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(10 * s, 0, 10 * s, 8 * s),
+      child: Column(
+        children: [
+          const Spacer(flex: 2),
+          Text(
+            'What can I help with?',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: Adaptive.clamp(context, 30, min: 22, max: 36),
+              fontWeight: FontWeight.w700,
+              color: Colors.black.withValues(alpha: 0.9),
+              letterSpacing: -0.3,
+            ),
+          ),
+          const Spacer(flex: 1),
+          SizedBox(
+            height: 76 * s,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: _suggestions.length,
+              padding: EdgeInsets.symmetric(horizontal: 2 * s),
+              separatorBuilder: (_, i) => SizedBox(width: 8 * s),
+              itemBuilder: (context, index) => _starterChip(_suggestions[index]),
+            ),
+          ),
+          SizedBox(height: 8 * s),
+        ],
+      ),
+    );
+  }
+
+  Widget _starterChip(String text) {
     return Material(
-      color: Colors.white.withValues(alpha: 0.9),
-      borderRadius: BorderRadius.circular(12 * s),
+      color: Colors.white.withValues(alpha: 0.95),
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12 * s),
+        borderRadius: BorderRadius.circular(16),
         onTap: _isAssistantTyping ? null : () => _onSuggestionTap(text),
         child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 12 * s, vertical: 10 * s),
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.sizeOf(context).width * 0.55,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12 * s),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.green.shade100),
           ),
           child: Text(
             text,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: Adaptive.clamp(context, 14, min: 12, max: 16),
-              height: 1.25,
+              height: 1.2,
+              fontSize: Adaptive.clamp(context, 13, min: 12, max: 16),
             ),
           ),
         ),
@@ -637,9 +776,10 @@ Please answer using the preparation checklist template.
     return _chatCard(const _ChatMessage(text: 'Thinking...', isUser: false));
   }
 
-  Widget _chatCard(_ChatMessage message, {bool showTime = false}) {
+  Widget _chatCard(_ChatMessage message, {int? index}) {
     final isUser = message.isUser;
     final maxBubbleWidth = MediaQuery.sizeOf(context).width * 0.76;
+    final iconColor = Colors.grey.shade600;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -682,14 +822,50 @@ Please answer using the preparation checklist template.
                       ),
                     ),
                   ),
-                  if (showTime) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      '17:38',
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 12,
-                      ),
+                  if (!isUser && index != null && !_isAssistantTyping) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        _miniActionIcon(
+                          icon: _copiedMessageIndex == index
+                              ? Icons.check_rounded
+                              : Icons.content_copy_rounded,
+                          tooltip: 'Copy',
+                          color: _copiedMessageIndex == index
+                              ? AppColors.primary
+                              : iconColor,
+                          onTap: () => _copyMessage(message, index),
+                        ),
+                        const SizedBox(width: 6),
+                        if (message.reaction != _MessageReaction.down) ...[
+                          _miniActionIcon(
+                            icon: Icons.thumb_up_alt_outlined,
+                            tooltip: 'Like',
+                            color: message.reaction == _MessageReaction.up
+                                ? AppColors.primary
+                                : iconColor,
+                            onTap: () => _toggleReaction(index, _MessageReaction.up),
+                          ),
+                          const SizedBox(width: 6),
+                        ],
+                        if (message.reaction != _MessageReaction.up) ...[
+                          _miniActionIcon(
+                            icon: Icons.thumb_down_alt_outlined,
+                            tooltip: 'Dislike',
+                            color: message.reaction == _MessageReaction.down
+                                ? Colors.red.shade400
+                                : iconColor,
+                            onTap: () => _toggleReaction(index, _MessageReaction.down),
+                          ),
+                          const SizedBox(width: 6),
+                        ],
+                        _miniActionIcon(
+                          icon: Icons.refresh_rounded,
+                          tooltip: 'Rewrite',
+                          color: iconColor,
+                          onTap: () => _rewriteAnswer(index),
+                        ),
+                      ],
                     ),
                   ],
                 ],
@@ -697,6 +873,25 @@ Please answer using the preparation checklist template.
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _miniActionIcon({
+    required IconData icon,
+    required String tooltip,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(99),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Icon(icon, size: 16, color: color),
+        ),
       ),
     );
   }
@@ -738,16 +933,39 @@ class _PendingRequest {
 }
 
 class _ChatMessage {
-  const _ChatMessage({required this.text, required this.isUser});
+  const _ChatMessage({
+    required this.text,
+    required this.isUser,
+    this.sourcePrompt,
+    this.reaction = _MessageReaction.none,
+  });
 
   final String text;
   final bool isUser;
+  final String? sourcePrompt;
+  final _MessageReaction reaction;
 
   factory _ChatMessage.user(String text) {
     return _ChatMessage(text: text, isUser: true);
   }
 
-  factory _ChatMessage.assistant(String text) {
-    return _ChatMessage(text: text, isUser: false);
+  factory _ChatMessage.assistant(String text, {String? sourcePrompt}) {
+    return _ChatMessage(text: text, isUser: false, sourcePrompt: sourcePrompt);
+  }
+
+  _ChatMessage copyWith({
+    String? text,
+    bool? isUser,
+    String? sourcePrompt,
+    _MessageReaction? reaction,
+  }) {
+    return _ChatMessage(
+      text: text ?? this.text,
+      isUser: isUser ?? this.isUser,
+      sourcePrompt: sourcePrompt ?? this.sourcePrompt,
+      reaction: reaction ?? this.reaction,
+    );
   }
 }
+
+enum _MessageReaction { none, up, down }

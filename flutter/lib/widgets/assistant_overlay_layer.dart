@@ -50,6 +50,8 @@ class AssistantOverlayLayer extends StatefulWidget {
 class _AssistantOverlayLayerState extends State<AssistantOverlayLayer>
     with SingleTickerProviderStateMixin {
   bool _assistantVisible = false;
+  bool _fabPressed = false;
+  bool _fabDragging = false;
 
   final _fab = _FabPosition.instance;
 
@@ -59,6 +61,8 @@ class _AssistantOverlayLayerState extends State<AssistantOverlayLayer>
 
   static const double _fabSize = 62;
   static const double _fabEdgeMargin = 18;
+  static const Duration _fabPressAnimDuration = Duration(milliseconds: 120);
+  static const Duration _overlayAnimDuration = Duration(milliseconds: 420);
   double? _fabDragX;
 
   @override
@@ -87,12 +91,16 @@ class _AssistantOverlayLayerState extends State<AssistantOverlayLayer>
 
   void _toggleAssistant() {
     setState(() {
+      _fabPressed = false;
+      _fabDragging = false;
       _assistantVisible = !_assistantVisible;
     });
   }
 
   void _closeAssistant() {
     setState(() {
+      _fabPressed = false;
+      _fabDragging = false;
       _assistantVisible = false;
     });
   }
@@ -153,6 +161,8 @@ class _AssistantOverlayLayerState extends State<AssistantOverlayLayer>
     _fabSnapTo = targetX;
     _fab.update(newOnRight: goRight);
     _fabDragX = null;
+    _fabDragging = false;
+    _fabPressed = false;
     _fabSnapController.forward(from: 0);
   }
 
@@ -161,6 +171,7 @@ class _AssistantOverlayLayerState extends State<AssistantOverlayLayer>
     final media = MediaQuery.of(context);
     final viewport = media.size;
     final safe = media.padding;
+    final keyboardInset = media.viewInsets.bottom;
     final s = Adaptive.scale(context);
     final fabY =
         _fab.y ??
@@ -180,8 +191,20 @@ class _AssistantOverlayLayerState extends State<AssistantOverlayLayer>
             left: fabX,
             top: fabY,
             child: GestureDetector(
+              onPanStart: (_) {
+                setState(() {
+                  _fabDragging = true;
+                  _fabPressed = true;
+                });
+              },
               onPanUpdate: (d) => _onFabDragUpdate(d, viewport, safe, s),
               onPanEnd: (_) => _onFabDragEnd(viewport.width, s),
+              onPanCancel: () {
+                setState(() {
+                  _fabDragging = false;
+                  _fabPressed = false;
+                });
+              },
               child: Semantics(
                 label: 'Open assistant chat',
                 button: true,
@@ -189,50 +212,61 @@ class _AssistantOverlayLayerState extends State<AssistantOverlayLayer>
                   color: Colors.transparent,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(999),
+                    onTapDown: (_) => setState(() => _fabPressed = true),
+                    onTapCancel: () => setState(() => _fabPressed = false),
                     onTap: _toggleAssistant,
-                    child: Container(
-                      width: _fabSize * s,
-                      height: _fabSize * s,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.18),
-                            blurRadius: 18 * s,
-                            offset: Offset(0, 8 * s),
-                          ),
-                        ],
-                      ),
-                      child: ClipOval(
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            Center(
-                              child: Transform.scale(
-                                scale: 1.88,
-                                child: Image.asset(
-                                  'assets/images/ai_chatbot_icon.png',
-                                  fit: BoxFit.cover,
-                                  alignment: const Alignment(0, 0.34),
-                                ),
+                    child: AnimatedScale(
+                      duration: _fabPressAnimDuration,
+                      curve: Curves.easeOutCubic,
+                      scale: _fabDragging ? 0.9 : (_fabPressed ? 0.94 : 1),
+                      child: AnimatedContainer(
+                        duration: _fabPressAnimDuration,
+                        curve: Curves.easeOutCubic,
+                        width: _fabSize * s,
+                        height: _fabSize * s,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(
+                                alpha: _fabPressed ? 0.14 : 0.18,
                               ),
+                              blurRadius: (_fabPressed ? 12 : 18) * s,
+                              offset: Offset(0, (_fabPressed ? 4 : 8) * s),
                             ),
-                            IgnorePointer(
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      Colors.white.withValues(alpha: 0.08),
-                                      Colors.transparent,
-                                    ],
+                          ],
+                        ),
+                        child: ClipOval(
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Center(
+                                child: Transform.scale(
+                                  scale: 1.88,
+                                  child: Image.asset(
+                                    'assets/images/ai_chatbot_icon.png',
+                                    fit: BoxFit.cover,
+                                    alignment: const Alignment(0, 0.34),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                              IgnorePointer(
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.white.withValues(alpha: 0.08),
+                                        Colors.transparent,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -241,28 +275,54 @@ class _AssistantOverlayLayerState extends State<AssistantOverlayLayer>
               ),
             ),
           ),
-        if (_assistantVisible) ...[
-          Positioned.fill(
-            child: GestureDetector(
-              onTap: _closeAssistant,
-              child: ColoredBox(color: Colors.black.withValues(alpha: 0.35)),
+        Positioned.fill(
+          child: IgnorePointer(
+            ignoring: !_assistantVisible,
+            child: AnimatedOpacity(
+              duration: _overlayAnimDuration,
+              curve: Curves.easeOutQuart,
+              opacity: _assistantVisible ? 1 : 0,
+              child: GestureDetector(
+                onTap: _closeAssistant,
+                child: ColoredBox(color: Colors.black.withValues(alpha: 0.35)),
+              ),
             ),
           ),
-          Positioned(
-            left: 10 * s,
-            right: 10 * s,
-            top: safe.top + 8,
-            bottom: safe.bottom + widget.reservedBottom + 4,
-            child: Material(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-              elevation: 16,
-              shadowColor: Colors.black.withValues(alpha: 0.3),
-              clipBehavior: Clip.antiAlias,
-              child: AssistantPanel(onClose: _closeAssistant),
+        ),
+        AnimatedPositioned(
+          duration: const Duration(milliseconds: 240),
+          curve: Curves.easeOutCubic,
+          left: 10 * s,
+          right: 10 * s,
+          top: safe.top + 8,
+          bottom: safe.bottom + widget.reservedBottom + 4 + keyboardInset,
+          child: IgnorePointer(
+            ignoring: !_assistantVisible,
+            child: AnimatedSlide(
+              duration: _overlayAnimDuration,
+              curve: Curves.easeOutQuart,
+              offset: _assistantVisible ? Offset.zero : const Offset(0, 0.15),
+              child: AnimatedScale(
+                duration: _overlayAnimDuration,
+                curve: Curves.easeOutBack,
+                scale: _assistantVisible ? 1 : 0.92,
+                child: AnimatedOpacity(
+                  duration: _overlayAnimDuration,
+                  curve: Curves.easeOutQuart,
+                  opacity: _assistantVisible ? 1 : 0,
+                  child: Material(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    elevation: 16,
+                    shadowColor: Colors.black.withValues(alpha: 0.3),
+                    clipBehavior: Clip.antiAlias,
+                    child: AssistantPanel(onClose: _closeAssistant),
+                  ),
+                ),
+              ),
             ),
           ),
-        ],
+        ),
       ],
     );
   }
