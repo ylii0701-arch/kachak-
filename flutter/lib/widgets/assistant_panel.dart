@@ -773,7 +773,43 @@ Please answer using the preparation checklist template.
   }
 
   Widget _typingCard() {
-    return _chatCard(const _ChatMessage(text: 'Thinking...', isUser: false));
+    final maxBubbleWidth = MediaQuery.sizeOf(context).width * 0.76;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxBubbleWidth),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.94),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                  bottomLeft: Radius.circular(4),
+                  bottomRight: Radius.circular(16),
+                ),
+                border: Border.all(color: Colors.green.shade100),
+              ),
+              child: _ShimmerLoader(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    _SkeletonLine(widthFactor: 0.9),
+                    SizedBox(height: 8),
+                    _SkeletonLine(widthFactor: 0.72),
+                    SizedBox(height: 8),
+                    _SkeletonLine(widthFactor: 0.56),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _chatCard(_ChatMessage message, {int? index}) {
@@ -969,3 +1005,86 @@ class _ChatMessage {
 }
 
 enum _MessageReaction { none, up, down }
+
+class _ShimmerLoader extends StatefulWidget {
+  const _ShimmerLoader({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_ShimmerLoader> createState() => _ShimmerLoaderState();
+}
+
+class _ShimmerLoaderState extends State<_ShimmerLoader>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1150),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return ShaderMask(
+          blendMode: BlendMode.srcATop,
+          shaderCallback: (bounds) {
+            final width = bounds.width <= 0 ? 1.0 : bounds.width;
+            final shift = (_controller.value * 2 - 1) * width;
+            return LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: const [
+                Color(0xFFE8EDE8),
+                Color(0xFFF7FAF7),
+                Color(0xFFE8EDE8),
+              ],
+              stops: const [0.25, 0.5, 0.75],
+              transform: _SlidingGradientTransform(shift),
+            ).createShader(bounds);
+          },
+          child: child,
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
+class _SkeletonLine extends StatelessWidget {
+  const _SkeletonLine({required this.widthFactor});
+
+  final double widthFactor;
+
+  @override
+  Widget build(BuildContext context) {
+    return FractionallySizedBox(
+      widthFactor: widthFactor,
+      child: Container(
+        height: 12,
+        decoration: BoxDecoration(
+          color: const Color(0xFFE7ECE7),
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+}
+
+class _SlidingGradientTransform extends GradientTransform {
+  const _SlidingGradientTransform(this.slidePercent);
+
+  final double slidePercent;
+
+  @override
+  Matrix4? transform(Rect bounds, {TextDirection? textDirection}) {
+    return Matrix4.translationValues(slidePercent, 0.0, 0.0);
+  }
+}
