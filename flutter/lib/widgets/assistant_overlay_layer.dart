@@ -172,6 +172,12 @@ class _AssistantOverlayLayerState extends State<AssistantOverlayLayer>
     final viewport = media.size;
     final safe = media.padding;
     final keyboardInset = media.viewInsets.bottom;
+    final fullLogicalHeight =
+        View.of(context).physicalSize.height / View.of(context).devicePixelRatio;
+    final alreadyResizedByKeyboard =
+        keyboardInset > 0 && (fullLogicalHeight - viewport.height) > (keyboardInset * 0.6);
+    final overlayKeyboardOffset =
+        (keyboardInset > 0 && !alreadyResizedByKeyboard) ? keyboardInset : 0.0;
     final s = Adaptive.scale(context);
     final fabY =
         _fab.y ??
@@ -295,7 +301,7 @@ class _AssistantOverlayLayerState extends State<AssistantOverlayLayer>
           left: 10 * s,
           right: 10 * s,
           top: safe.top + 8,
-          bottom: safe.bottom + widget.reservedBottom + 4 + keyboardInset,
+          bottom: safe.bottom + widget.reservedBottom + 4 + overlayKeyboardOffset,
           child: IgnorePointer(
             ignoring: !_assistantVisible,
             child: AnimatedSlide(
