@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../data/site_data.dart';
 import '../data/species_data.dart';
 import '../models/species.dart';
 import '../providers/saved_species_provider.dart';
+import '../services/prediction_manager.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
 import '../widgets/difficulty_stars.dart';
@@ -14,6 +16,8 @@ import 'species_detail_screen.dart';
 enum _SortBy { none, conservationStatus, difficultyLevel }
 
 enum _SortOrder { ascending, descending }
+
+enum _FilterPanelTab { location, species }
 
 /// Main species explorer with search, filter, sort, and pagination controls.
 class HomeScreen extends StatefulWidget {
@@ -32,12 +36,19 @@ class _HomeScreenState extends State<HomeScreen> {
   String _tempCategory = 'All';
   String _tempStatus = 'All';
   Object _tempDifficulty = 'All';
+  String? _tempSelectedCity;
+  String? _tempSelectedSiteId;
+  _FilterPanelTab _activeFilterPanelTab = _FilterPanelTab.location;
+  bool _showAllCities = false;
+  bool _showAllSites = false;
   bool _showSort = false;
   _SortBy _sortBy = _SortBy.none;
   _SortOrder _sortOrder = _SortOrder.ascending;
   _SortBy _tempSortBy = _SortBy.none;
   _SortOrder _tempSortOrder = _SortOrder.ascending;
   bool _gridView = false;
+  String? _selectedCity;
+  String? _selectedSiteId;
   int _currentPage = 1;
   static const int _pageSize = 6;
   final TextEditingController _searchController = TextEditingController();
@@ -68,6 +79,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  bool get _isAreaMode => _selectedCity != null;
+
   List<Species> get _filtered {
     // Apply text/category/status/difficulty filters first.
     var list = speciesData.where((s) {
@@ -83,7 +96,47 @@ class _HomeScreenState extends State<HomeScreen> {
       return matchSearch && matchCat && matchSt && matchDiff;
     }).toList();
 
-    // Apply sorting over the already-filtered list.
+    if (_isAreaMode) {
+      final matchingSites = siteData.where((site) {
+        if (site.cityName != _selectedCity) return false;
+        if (_selectedSiteId != null && site.id != _selectedSiteId) return false;
+        return true;
+      }).toList();
+
+      list = list.where((species) {
+        for (final site in matchingSites) {
+          if (site.supportedSpeciesIds.contains(species.id)) return true;
+        }
+        return false;
+      }).toList();
+
+      double speciesScore(Species species) {
+        var best = 0.0;
+        for (final site in matchingSites) {
+          final p = PredictionManager.instance.latestPredictions[site.id]?[species.id] ?? 0.0;
+          if (p > best) best = p;
+        }
+        return best;
+      }
+
+      list.sort((a, b) => speciesScore(b).compareTo(speciesScore(a)));
+      if (_sortBy == _SortBy.conservationStatus) {
+        list.sort((a, b) {
+          final c =
+              conservationStatusRank(a.conservationStatus) -
+              conservationStatusRank(b.conservationStatus);
+          return _sortOrder == _SortOrder.ascending ? c : -c;
+        });
+      } else if (_sortBy == _SortBy.difficultyLevel) {
+        list.sort((a, b) {
+          final c = a.difficultyLevel - b.difficultyLevel;
+          return _sortOrder == _SortOrder.ascending ? c : -c;
+        });
+      }
+      return list;
+    }
+
+    // Apply sorting over the already-filtered list (explore mode only).
     if (_sortBy == _SortBy.conservationStatus) {
       list.sort((a, b) {
         final c =
@@ -101,9 +154,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   int get _activeFilterCount =>
+      (_selectedCity != null ? 1 : 0) +
       (_category != 'All' ? 1 : 0) +
       (_status != 'All' ? 1 : 0) +
       (_difficulty != 'All' ? 1 : 0);
+
+  bool get _hasSortApplied => _sortBy != _SortBy.none;
+  bool get _hasFilterApplied => _activeFilterCount > 0;
 
   /// Clears active filter state and returns to page 1.
   void _resetFilters() {
@@ -111,11 +168,75 @@ class _HomeScreenState extends State<HomeScreen> {
       _category = 'All';
       _status = 'All';
       _difficulty = 'All';
+      _selectedCity = null;
+      _selectedSiteId = null;
       _tempCategory = 'All';
       _tempStatus = 'All';
       _tempDifficulty = 'All';
+      _tempSelectedCity = null;
+      _tempSelectedSiteId = null;
+      _showFilters = false;
       _currentPage = 1;
     });
+  }
+
+  void _clearSort() {
+    setState(() {
+      _sortBy = _SortBy.none;
+      _sortOrder = _SortOrder.ascending;
+      _tempSortBy = _SortBy.none;
+      _tempSortOrder = _SortOrder.ascending;
+      _showSort = false;
+      _currentPage = 1;
+    });
+  }
+
+  void _clearAppliedRefinements() {
+    _resetFilters();
+    _clearSort();
+  }
+
+  List<Site> _sitesForCity(String? cityName) {
+    if (cityName == null) return const [];
+    final list = siteData.where((s) => s.cityName == cityName).toList();
+    list.sort((a, b) => a.name.compareTo(b.name));
+    return list;
+  }
+
+  void _toggleFilterDropdown() {
+    setState(() {
+      if (_showFilters) {
+        _showFilters = false;
+      } else {
+        _tempCategory = _category;
+        _tempStatus = _status;
+        _tempDifficulty = _difficulty;
+        _tempSelectedCity = _selectedCity;
+        _tempSelectedSiteId = _selectedSiteId;
+        _activeFilterPanelTab = _FilterPanelTab.location;
+        _showAllCities = false;
+        _showAllSites = false;
+        _showFilters = true;
+        _showSort = false;
+      }
+    });
+  }
+
+  String _locationLabel() {
+    if (_selectedCity == null) return 'All regions';
+    if (_selectedSiteId == null) return _selectedCity!;
+    final site = siteData.where((s) => s.id == _selectedSiteId).firstOrNull;
+    return site == null ? _selectedCity! : '${_selectedCity!} · ${site.name}';
+  }
+
+  List<Site> _sitesForCurrentArea() {
+    if (_selectedCity == null) return const [];
+    return siteData.where((s) {
+      if (s.cityName != _selectedCity) return false;
+      if (_selectedSiteId != null && s.id != _selectedSiteId) return false;
+      return true;
+    }).toList()
+      ..sort((a, b) => a.name.compareTo(b.name));
   }
 
   /// Clears search input and resets paging.
@@ -147,32 +268,35 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final scale = Adaptive.scale(context);
-    final filtered = _filtered;
-    // Pagination is computed after all filters/sorts are applied.
-    final totalPages = filtered.isEmpty
-        ? 1
-        : (filtered.length / _pageSize).ceil();
-    final page = _currentPage.clamp(1, totalPages);
-    final start = filtered.isEmpty ? 0 : (page - 1) * _pageSize;
-    final displayed = filtered.skip(start).take(_pageSize).toList();
     final saved = context.watch<SavedSpeciesProvider>();
+    return ListenableBuilder(
+      listenable: PredictionManager.instance,
+      builder: (context, _) {
+        final filtered = _filtered;
+        // Pagination is computed after all filters/sorts are applied.
+        final totalPages = filtered.isEmpty
+            ? 1
+            : (filtered.length / _pageSize).ceil();
+        final page = _currentPage.clamp(1, totalPages);
+        final start = filtered.isEmpty ? 0 : (page - 1) * _pageSize;
+        final displayed = filtered.skip(start).take(_pageSize).toList();
 
-    return Material(
-      color: Colors.transparent,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: IgnorePointer(
-              child: Image.asset(
-                'assets/images/home_editorial_bg.png',
-                fit: BoxFit.fitWidth,
-                alignment: Alignment.topCenter,
+        return Material(
+          color: Colors.transparent,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Image.asset(
+                    'assets/images/home_editorial_bg.png',
+                    fit: BoxFit.fitWidth,
+                    alignment: Alignment.topCenter,
+                  ),
+                ),
               ),
-            ),
-          ),
-          CustomScrollView(
-            controller: _scrollController,
-            slivers: [
+              CustomScrollView(
+                controller: _scrollController,
+                slivers: [
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(
@@ -232,56 +356,125 @@ class _HomeScreenState extends State<HomeScreen> {
                       }),
                     ),
                     SizedBox(height: 12 * scale),
+                    if (_isAreaMode)
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12 * scale,
+                          vertical: 10 * scale,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.lightSage.withValues(alpha: 0.45),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: AppColors.primary.withValues(alpha: 0.24),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.location_on_outlined, color: AppColors.primary),
+                                SizedBox(width: 6 * scale),
+                                Expanded(
+                                  child: Text(
+                                    _locationLabel(),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: GoogleFonts.inter(
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.accent,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 6 * scale),
+                            Text(
+                              'Showing prediction-ranked species for selected area.',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: AppColors.textSubtitleOnFrost,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            if (_sitesForCurrentArea().isNotEmpty) ...[
+                              SizedBox(height: 8 * scale),
+                              Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: _sitesForCurrentArea()
+                                    .take(3)
+                                    .map(
+                                      (site) => Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(10),
+                                          border: Border.all(color: AppColors.border),
+                                        ),
+                                        child: Text(
+                                          site.name,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 11,
+                                            color: AppColors.accent,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    if (_isAreaMode) SizedBox(height: 12 * scale),
                     Row(
                       children: [
                         Expanded(
-                          child: Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              _chipButton(
-                                label: 'Filter',
-                                icon: Icons.filter_list,
-                                selected:
-                                    _showFilters || _activeFilterCount > 0,
-                                primary: true,
-                                badge: _activeFilterCount > 0
-                                    ? '$_activeFilterCount'
-                                    : null,
-                                onTap: () {
-                                  setState(() {
-                                    if (_showFilters) {
-                                      _showFilters = false;
-                                    } else {
-                                      _tempCategory = _category;
-                                      _tempStatus = _status;
-                                      _tempDifficulty = _difficulty;
-                                      _showFilters = true;
-                                      _showSort = false;
-                                    }
-                                  });
-                                },
-                              ),
-                              _chipButton(
-                                label: 'Sort',
-                                icon: Icons.swap_vert,
-                                selected: _showSort || _sortBy != _SortBy.none,
-                                primary: false,
-                                badge: _sortBy != _SortBy.none ? '✓' : null,
-                                onTap: () {
-                                  setState(() {
-                                    if (_showSort) {
-                                      _showSort = false;
-                                    } else {
-                                      _tempSortBy = _sortBy;
-                                      _tempSortOrder = _sortOrder;
-                                      _showSort = true;
-                                      _showFilters = false;
-                                    }
-                                  });
-                                },
-                              ),
-                            ],
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                _chipButton(
+                                  label: 'Filter',
+                                  icon: Icons.filter_list,
+                                  selected: _showFilters || _hasFilterApplied,
+                                  primary: true,
+                                  badge: _hasFilterApplied ? '$_activeFilterCount' : null,
+                                  onTap: _toggleFilterDropdown,
+                                ),
+                                SizedBox(width: 8 * scale),
+                                _chipButton(
+                                  label: 'Sort',
+                                  icon: Icons.swap_vert,
+                                  selected: _showSort || _sortBy != _SortBy.none,
+                                  primary: false,
+                                  badge: _sortBy != _SortBy.none ? '✓' : null,
+                                  onTap: () {
+                                    setState(() {
+                                      if (_showSort) {
+                                        _showSort = false;
+                                      } else {
+                                        _tempSortBy = _sortBy;
+                                        _tempSortOrder = _sortOrder;
+                                        _showSort = true;
+                                        _showFilters = false;
+                                      }
+                                    });
+                                  },
+                                ),
+                                if (_hasFilterApplied || _hasSortApplied) ...[
+                                  SizedBox(width: 8 * scale),
+                                  _iconActionButton(
+                                    icon: Icons.cleaning_services_outlined,
+                                    onTap: _clearAppliedRefinements,
+                                  ),
+                                ],
+                              ],
+                            ),
                           ),
                         ),
                         SizedBox(width: 8 * scale),
@@ -445,10 +638,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+                ],
+              ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -520,7 +715,48 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _iconActionButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: 52,
+          height: 50,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.red.withValues(alpha: 0.46)),
+          ),
+          child: Icon(
+            icon,
+            size: 20,
+            color: Colors.red.shade400,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _filterPanel() {
+    final allCityOptions = <String>[
+      'All',
+      ...{
+        ...siteData.map((s) => s.cityName),
+      }.toList()..sort(),
+    ];
+    final cityOptions = _showAllCities
+        ? allCityOptions
+        : allCityOptions.take(7).toList();
+    final allSiteOptions = <Site>[
+      ..._sitesForCity(_tempSelectedCity),
+    ];
+    final siteOptions = _showAllSites ? allSiteOptions : allSiteOptions.take(5).toList();
+
     return Card(
       margin: const EdgeInsets.only(top: 12),
       child: Padding(
@@ -528,67 +764,194 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Category',
-              style: TextStyle(fontWeight: FontWeight.w600),
+            Row(
+              children: [
+                Expanded(
+                  child: _filterTabTile(
+                    tab: _FilterPanelTab.location,
+                    title: 'Location',
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _filterTabTile(
+                    tab: _FilterPanelTab.species,
+                    title: 'Species',
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _categories.map((c) {
-                final sel = _tempCategory == c;
-                return ChoiceChip(
-                  label: Text(c),
-                  selected: sel,
-                  onSelected: (_) => setState(() => _tempCategory = c),
-                  selectedColor: AppColors.primary,
-                  labelStyle: TextStyle(color: sel ? Colors.white : null),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Conservation Status',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _statuses.map((c) {
-                final sel = _tempStatus == c;
-                return FilterChip(
-                  label: Text(c, style: const TextStyle(fontSize: 11)),
-                  selected: sel,
-                  onSelected: (_) => setState(() => _tempStatus = c),
-                  selectedColor: AppColors.accent,
-                  checkmarkColor: Colors.white,
-                  labelStyle: TextStyle(color: sel ? Colors.white : null),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Shooting Difficulty Level',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _difficulties.map((d) {
-                final sel = _tempDifficulty == d;
-                final label = d == 'All' ? 'All' : '$d ★';
-                return FilterChip(
-                  label: Text(label, style: const TextStyle(fontSize: 11)),
-                  selected: sel,
-                  onSelected: (_) => setState(() => _tempDifficulty = d),
-                  selectedColor: AppColors.accent,
-                  checkmarkColor: Colors.white,
-                  labelStyle: TextStyle(color: sel ? Colors.white : null),
-                );
-              }).toList(),
+            const SizedBox(height: 14),
+            SizedBox(
+              height: 340,
+              child: SingleChildScrollView(
+                child: _activeFilterPanelTab == _FilterPanelTab.location
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'City',
+                            style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              for (final city in cityOptions)
+                                ChoiceChip(
+                                  label: Text(city),
+                                  selected: (_tempSelectedCity ?? 'All') == city,
+                                  onSelected: (_) {
+                                    setState(() {
+                                      if (city == 'All') {
+                                        _tempSelectedCity = null;
+                                        _tempSelectedSiteId = null;
+                                        return;
+                                      }
+                                      _tempSelectedCity = city;
+                                      _tempSelectedSiteId = null;
+                                      _showAllSites = false;
+                                    });
+                                  },
+                                  selectedColor: AppColors.primary,
+                                  labelStyle: TextStyle(
+                                    color: (_tempSelectedCity ?? 'All') == city
+                                        ? Colors.white
+                                        : null,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          if (allCityOptions.length > 7) ...[
+                            const SizedBox(height: 8),
+                            TextButton.icon(
+                              onPressed: () => setState(() => _showAllCities = !_showAllCities),
+                              icon: Icon(
+                                _showAllCities
+                                    ? Icons.keyboard_arrow_up_rounded
+                                    : Icons.keyboard_arrow_down_rounded,
+                              ),
+                              label: Text(_showAllCities ? 'Show less' : 'Show more'),
+                            ),
+                          ],
+                          const SizedBox(height: 12),
+                          Text(
+                            'Site',
+                            style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              ChoiceChip(
+                                label: const Text('All'),
+                                selected: _tempSelectedSiteId == null,
+                                onSelected: (_) =>
+                                    setState(() => _tempSelectedSiteId = null),
+                                selectedColor: AppColors.primary,
+                                labelStyle: TextStyle(
+                                  color: _tempSelectedSiteId == null
+                                      ? Colors.white
+                                      : null,
+                                ),
+                              ),
+                              for (final site in siteOptions)
+                                ChoiceChip(
+                                  label: Text(site.name),
+                                  selected: _tempSelectedSiteId == site.id,
+                                  onSelected: (_) =>
+                                      setState(() => _tempSelectedSiteId = site.id),
+                                  selectedColor: AppColors.primary,
+                                  labelStyle: TextStyle(
+                                    color: _tempSelectedSiteId == site.id
+                                        ? Colors.white
+                                        : null,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          if (allSiteOptions.length > 5) ...[
+                            const SizedBox(height: 8),
+                            TextButton.icon(
+                              onPressed: () => setState(() => _showAllSites = !_showAllSites),
+                              icon: Icon(
+                                _showAllSites
+                                    ? Icons.keyboard_arrow_up_rounded
+                                    : Icons.keyboard_arrow_down_rounded,
+                              ),
+                              label: Text(_showAllSites ? 'Show less' : 'Show more'),
+                            ),
+                          ],
+                        ],
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Category',
+                            style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: _categories.map((c) {
+                              final sel = _tempCategory == c;
+                              return ChoiceChip(
+                                label: Text(c),
+                                selected: sel,
+                                onSelected: (_) => setState(() => _tempCategory = c),
+                                selectedColor: AppColors.primary,
+                                labelStyle: TextStyle(color: sel ? Colors.white : null),
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            'Conservation Status',
+                            style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: _statuses.map((c) {
+                              final sel = _tempStatus == c;
+                              return ChoiceChip(
+                                label: Text(c),
+                                selected: sel,
+                                onSelected: (_) => setState(() => _tempStatus = c),
+                                selectedColor: AppColors.accent,
+                                labelStyle: TextStyle(color: sel ? Colors.white : null),
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            'Shooting Difficulty Level',
+                            style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: _difficulties.map((d) {
+                              final sel = _tempDifficulty == d;
+                              final label = d == 'All' ? 'All' : '$d ★';
+                              return ChoiceChip(
+                                label: Text(label),
+                                selected: sel,
+                                onSelected: (_) => setState(() => _tempDifficulty = d),
+                                selectedColor: AppColors.accent,
+                                labelStyle: TextStyle(color: sel ? Colors.white : null),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+              ),
             ),
             const SizedBox(height: 16),
             Row(
@@ -597,6 +960,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: FilledButton(
                     onPressed: () {
                       setState(() {
+                        _selectedCity = _tempSelectedCity;
+                        _selectedSiteId = _tempSelectedSiteId;
                         _category = _tempCategory;
                         _status = _tempStatus;
                         _difficulty = _tempDifficulty;
@@ -609,16 +974,55 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(width: 12),
                 OutlinedButton(
-                  onPressed: () => setState(() {
-                    _tempCategory = 'All';
-                    _tempStatus = 'All';
-                    _tempDifficulty = 'All';
-                  }),
+                  onPressed: () {
+                    setState(() {
+                      _tempSelectedCity = null;
+                      _tempSelectedSiteId = null;
+                      _tempCategory = 'All';
+                      _tempStatus = 'All';
+                      _tempDifficulty = 'All';
+                    });
+                  },
                   child: const Text('Reset'),
                 ),
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _filterTabTile({
+    required _FilterPanelTab tab,
+    required String title,
+  }) {
+    final selected = _activeFilterPanelTab == tab;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => setState(() => _activeFilterPanelTab = tab),
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(
+            color: selected ? Colors.white : const Color(0xFFF8F6F0),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: selected
+                  ? AppColors.primary.withValues(alpha: 0.34)
+                  : AppColors.border,
+            ),
+          ),
+          child: Text(
+            title,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              color: selected ? AppColors.accent : AppColors.textSubtitleOnFrost,
+            ),
+          ),
         ),
       ),
     );

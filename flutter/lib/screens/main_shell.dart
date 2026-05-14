@@ -18,7 +18,6 @@ import 'about_us_screen.dart';
 import 'mission_screen.dart';
 import 'nature_first_principle_screen.dart';
 import 'photo_quality_screen.dart';
-import 'prediction_screen.dart';
 import 'saved_screen.dart';
 
 /// Editorial bottom navigation with calm, consistent styling.
@@ -51,9 +50,9 @@ class _GlassBottomNav extends StatelessWidget {
             _standardItem(
               context,
               1,
-              Icons.trending_up_outlined,
-              Icons.trending_up,
-              'Predict',
+              Icons.map_outlined,
+              Icons.map,
+              'Map',
             ),
             _standardItem(
               context,
@@ -69,7 +68,13 @@ class _GlassBottomNav extends StatelessWidget {
               Icons.adjust,
               'Mission',
             ),
-            _standardItem(context, 4, Icons.map_outlined, Icons.map, 'Map'),
+            _standardItem(
+              context,
+              4,
+              Icons.favorite_border_rounded,
+              Icons.favorite,
+              'Saved',
+            ),
           ],
         ),
       ),
@@ -214,13 +219,13 @@ class _MainShellState extends State<MainShell> {
       case 0:
         return OnboardingTour.home;
       case 1:
-        return OnboardingTour.predict;
+        return OnboardingTour.map;
       case 2:
         return OnboardingTour.identify;
       case 3:
         return OnboardingTour.mission;
       case 4:
-        return OnboardingTour.map;
+        return OnboardingTour.saved;
     }
     return null;
   }
@@ -287,23 +292,6 @@ class _MainShellState extends State<MainShell> {
     setState(() {
       _menuOpen = false;
     });
-  }
-
-  /// Opens Saved screen from side menu and jumps back to Home on explore CTA.
-  Future<void> _openSaved() async {
-    _closeMenu();
-    await Future<void>.delayed(const Duration(milliseconds: 200));
-    if (!mounted) return;
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => SavedScreen(
-          onExplore: () {
-            context.read<AppShellController>().selectTab(0);
-            Navigator.of(context).pop();
-          },
-        ),
-      ),
-    );
   }
 
   /// Opens the imageTest-style photo quality tool (standalone route).
@@ -416,10 +404,10 @@ class _MainShellState extends State<MainShell> {
               index: shell.index,
               children: const [
                 HomeScreen(),
-                PredictionScreen(),
+                MapScreen(),
                 IdentifyScreen(),
                 MissionScreen(),
-                MapScreen(),
+                SavedScreen(),
               ],
             ),
             // Dim backdrop captures taps to close menu.
@@ -511,11 +499,6 @@ class _MainShellState extends State<MainShell> {
                           ),
                         ),
                         SizedBox(height: 12 * s),
-                        _menuTile(
-                          icon: Icons.favorite_border_rounded,
-                          label: 'Saved',
-                          onTap: _openSaved,
-                        ),
                         _menuTile(
                           icon: Icons.photo_camera_back_outlined,
                           label: 'Photo quality',

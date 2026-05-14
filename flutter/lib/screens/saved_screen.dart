@@ -54,23 +54,6 @@ class SavedScreen extends StatelessWidget {
                       fillAlpha: 0.42,
                       child: Row(
                         children: [
-                          IconButton(
-                            padding: EdgeInsets.zero,
-                            onPressed: () => Navigator.of(context).pop(),
-                            icon: Container(
-                              padding: EdgeInsets.all(8 * scale),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.38),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.arrow_back,
-                                color: Colors.white,
-                                size: 20 * scale,
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 8 * scale),
                           Container(
                             padding: EdgeInsets.all(12 * scale),
                             decoration: BoxDecoration(
