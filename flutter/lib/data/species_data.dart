@@ -941,7 +941,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Canopy of primary rainforests',
     imageUrl:
-        'https://critter.science/wp-content/uploads/2021/07/wff1a-scaled.jpg',
+        'https://static.wikia.nocookie.net/animalofthewould/images/e/ef/Wallace%27s_Flying_Frog.jpg/revision/latest?cb=20120525084117',
     description:
         'A large, bright green tree frog with oversized, black-webbed feet that act as parachutes for gliding.',
     behaviorNotes:
@@ -1154,7 +1154,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.endangered,
     habitat: 'Coastal and hill forests',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/0/05/Dusky_Leaf_Monkey_%28Trachypithecus_obscurus%29.jpg',
+        'https://factanimal.com/wp-content/uploads/2025/06/Dusky-Leaf-Monkey-profile.jpg',
     description:
         'Cute, spectacled monkeys with distinctive white rings around their eyes. Babies are born bright orange.',
     behaviorNotes:
@@ -1174,7 +1174,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.vulnerable,
     habitat: 'Undisturbed forest clearings and riverbanks',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/0/0c/Gaur_in_Bandipur.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/1/1e/Gaur_bandipur.jpg',
     description:
         'The largest extant bovine in the world. Features a massive muscular ridge and white "socks" on its legs.',
     behaviorNotes:
@@ -1198,7 +1198,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.vulnerable,
     habitat: 'Rivers, lakes, and peat swamp forests',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/3/3a/Aonyx_cinerea_-_Asian_small-clawed_otter_03.jpg',
+        'https://www.rekoforest.org/wp-content/uploads/2019/07/Asian-Small-clawed-Otter-featured-image.jpg',
     description:
         'The smallest otter species in the world. Highly vocal and social.',
     behaviorNotes:
@@ -1218,7 +1218,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.vulnerable,
     habitat: 'Mangroves, large rivers, and urban wetlands',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/f/ff/Smooth-coated_Otter_%28Lutrogale_perspicillata%29_at_Sungei_Buloh_Wetland_Reserve_-_20120504.jpg',
+        'https://res.cloudinary.com/roundglass/image/upload/v1672312402/rg/collective/media/smooth-coated-otter-one-frontal-camera-sugandhi-gadadhar-and-rana-belur_qamzhy.jpg',
     description:
         'Larger than the small-clawed otter with a distinctively smooth, velvety coat.',
     behaviorNotes:
@@ -1238,7 +1238,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Secondary forests, palm oil plantations, and scrub',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/4/4b/Prionailurus_bengalensis_1_%28cropped%29.jpg',
+        'https://ars.els-cdn.com/content/image/3-s2.0-B9780128165034000052-u05-167-9780128165034.jpg',
     description:
         'A small wild cat roughly the size of a domestic cat, covered in beautiful leopard-like rosettes.',
     behaviorNotes:
@@ -1258,7 +1258,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.nearThreatened,
     habitat: 'Primary evergreen and mixed forests',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/e/ea/Marbled_cat_%28Pardofelis_marmorata%29.jpg',
+        'https://d4g0cdul6yygp.cloudfront.net/uploads/2023/05/shutterstock_1263535543.jpg',
     description:
         'Resembles a miniature clouded leopard with a massive, bushy tail used for balance.',
     behaviorNotes: 'Highly arboreal and solitary. Rarely seen on the ground.',
@@ -1277,7 +1277,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.endangered,
     habitat: 'Dipterocarp forests and logged forest clearings',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/6/6f/Banteng_in_Baluran_National_Park.jpg',
+        'https://www.iloveborneo.my/wp-content/uploads/2024/10/IMG_1007-1024x719.jpeg',
     description:
         'A rare species of wild cattle endemic to Borneo. Males are dark chestnut to black; females are reddish-brown.',
     behaviorNotes:
@@ -1297,7 +1297,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.endangered,
     habitat: 'Peat swamp forests and riverbanks',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/9/91/Flat-headed_Cat_%28Prionailurus_planiceps%29_%288339870505%29.jpg',
+        'https://images.squarespace-cdn.com/content/v1/66ec3b49803ab81bf84f89e4/1737817677564-59EFWG6AUX94VIYYKNII/Flat+Headed+Cat+photo+by+Dr+Jim+Sanderson+AI+background',
     description:
         'A bizarre, semi-aquatic wild cat with a flattened skull and partially webbed toes designed for catching fish.',
     behaviorNotes:
@@ -1317,7 +1317,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.vulnerable,
     habitat: 'Coastal forests, mangroves, and riverine areas',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/1/18/Silvery_lutong.jpg',
+        'https://esti.my/wp-content/uploads/2022/11/114-Sivered-leaf-monkey-scaled.jpg',
     description:
         'Named for its striking dark grey fur with silver-tipped hairs. Infants are born a brilliant golden-orange.',
     behaviorNotes:
@@ -1337,7 +1337,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.vulnerable,
     habitat: 'Highland and lowland primary forests of northern Borneo',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/8/87/Hose%27s_Langur_-_Presbytis_hosei_%2820309995543%29.jpg',
+        'https://i0.wp.com/borneomammals.online/wp-content/uploads/2018/10/02-boboi-brunei-roger-_raj1266.jpg?fit=816%2C1088&ssl=1',
     description:
         'A striking grey langur with a white belly, black crest, and a distinctive pinkish face mask.',
     behaviorNotes:
@@ -1357,7 +1357,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.vulnerable,
     habitat: 'Deep forests, grasslands, and swamps',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/9/94/Sambar_deer_%28Rusa_unicolor%29_male.jpg',
+        'https://www.rekoforest.org/wp-content/uploads/2019/09/sambar-deer-indonesia-2.jpg',
     description:
         'The largest deer species in Malaysia. Males grow massive, rugged antlers.',
     behaviorNotes:
@@ -1377,7 +1377,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.vulnerable,
     habitat: 'Primary forests and agricultural edges',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/7/77/Southern_pig-tailed_macaque_%28Macaca_nemestrina%29.jpg',
+        'https://www.rekoforest.org/wp-content/uploads/2019/06/Southern-Pig-tailed-Macaque-2-1024x683.jpg',
     description:
         'A robust macaque with a distinctively short, curled tail. Very strong and highly intelligent.',
     behaviorNotes:
@@ -1397,7 +1397,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.endangered,
     habitat: 'Mangroves, forests, cities, and temples',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/1/1f/Macaca_fascicularis_-_01.jpg',
+        'https://static.wixstatic.com/media/bac465_072390ec21284a8fae13c33a632c59d4~mv2.jpg/v1/fill/w_800,h_800,al_c,q_85/MWG_150423-B0A1832DT_edited.jpg',
     description:
         'The most common primate in Malaysia. Highly adaptable with a tail longer than its body.',
     behaviorNotes:
@@ -1417,7 +1417,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Forest edges and dense undergrowth',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/e/ea/Indian_Muntjac_or_Barking_Deer.jpg',
+        'https://zolimacitymag.com/wp-content/uploads/2020/12/barking-deer_kadoorie-farm_zolima-citymag-1.webp',
     description:
         'A small, reddish-brown deer. Named for its loud, dog-like alarm bark used to warn of predators.',
     behaviorNotes: 'Solitary and secretive. Moves quickly through dense brush.',
@@ -1436,7 +1436,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Coastal forests, islands, and secondary woodlands',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/0/07/Oriental_Pied_Hornbill_%28Anthracoceros_albirostris%29.jpg',
+        'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/186466511/900',
     description:
         'The smallest and most adaptable of Malaysia\'s hornbills. Black and white plumage with a pale yellow bill.',
     behaviorNotes:
@@ -1456,7 +1456,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Coasts, islands, and large inland lakes',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/5/5e/White-bellied_sea_eagle.jpg',
+        'https://lombokwildlifepark.com/wp-content/uploads/2022/08/whitebelliedseaeagle-1.jpg',
     description:
         'A majestic raptor with striking white underparts, grey wings, and a massive wingspan.',
     behaviorNotes:
@@ -1479,7 +1479,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.nearThreatened,
     habitat: 'Coastal mangroves and Nipa palm swamps',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/3/30/Mangrove_Pitta.jpg',
+        'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/186467971/900',
     description:
         'A spectacular, vibrant ground-dwelling bird with a massive bill designed for crushing crabs.',
     behaviorNotes:
@@ -1503,7 +1503,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.nearThreatened,
     habitat: 'Freshwater lakes, reservoirs, and slow rivers',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/f/fe/Oriental_darter_%28Anhinga_melanogaster%29_with_fish.jpg',
+        'https://observation.org/media/photo/15570419.jpg',
     description:
         'Also called the "Snakebird." Swims with its body submerged and only its long, snake-like neck above water.',
     behaviorNotes:
@@ -1523,7 +1523,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Marshes, lakes, and estuaries',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/5/5f/Grey_Heron_%28Ardea_cinerea%29.jpg',
+        'https://northkent.birdwise.org.uk/wp-content/uploads/2020/05/Grey-heron-800.jpg',
     description:
         'A tall, elegant wading bird with grey plumage and a heavy, dagger-like yellow bill.',
     behaviorNotes:
@@ -1543,7 +1543,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Montane and sub-montane broadleaf forests',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/b/b5/Silver-breasted_Broadbill.jpg',
+        'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/608721205/900',
     description:
         'An impossibly cute bird that looks like a plush toy. Features a silver breast, brown back, and a baby-blue eye ring.',
     behaviorNotes:
@@ -1563,7 +1563,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Montane evergreen forests',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/8/87/Long-tailed_broadbill.jpg',
+        'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/530199871/1200',
     description:
         'A striking, colorful bird with a green body, yellow face, and a distinctive black and blue helmet.',
     behaviorNotes:
@@ -1583,7 +1583,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Montane dipterocarp forests',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/2/25/Fire-tufted_Barbet_-_Malaysia_H8O1021_%2823616616474%29.jpg',
+        'https://fryap.wordpress.com/wp-content/uploads/2014/07/fire-tufted-barbet-110315-101eos1d-fyap0753a.jpg',
     description:
         'A chunky, green bird with a yellow face, maroon throat, and a bright red tuft of feathers over its beak.',
     behaviorNotes:
@@ -1603,7 +1603,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.nearThreatened,
     habitat: 'High-altitude montane forests of Borneo',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/9/90/Whitehead%27s_Trogon_%28Harpactes_whiteheadi%29.jpg',
+        'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/653559982/1200',
     description:
         'One of the "holy grail" endemics of Mount Kinabalu. Males are brilliant crimson with a silver frosted back.',
     behaviorNotes:
@@ -1627,7 +1627,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Montane rainforests of Borneo',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/3/30/Whitehead%27s_Broadbill_%28Calyptomena_whiteheadi%29.jpg',
+        'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/237707001/900',
     description:
         'A bizarre, bright emerald-green bird with a black throat and a crest of feathers that entirely hides its beak.',
     behaviorNotes:
@@ -1647,7 +1647,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.endangered,
     habitat: 'Peat swamps and riverine forests',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/4/4e/Storm%27s_stork.jpg',
+        'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/236500491/900',
     description:
         'One of the rarest storks in the world. Features striking black and white plumage with bright red facial skin.',
     behaviorNotes:
@@ -1670,7 +1670,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Wooded areas near water, mangroves, and plantations',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/8/87/Buffy_Fish_Owl.jpg',
+        'https://singaporebirds.com/wp-content/uploads/2021/07/buffy-fish-owl-210314-104msdcf-fry07651-n.jpg',
     description:
         'A large, yellowish-brown owl with prominent ear tufts. Specially adapted for hunting fish and frogs.',
     behaviorNotes:
@@ -1693,7 +1693,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.vulnerable,
     habitat: 'Lowland primary dipterocarp forests',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/1/1b/Malaysian_Peacock-Pheasant.jpg',
+        'https://cdn.download.ams.birds.cornell.edu/api/v2/asset/236142811/900',
     description:
         'An incredibly elusive, beautifully patterned ground bird. Males have striking iridescent blue-green eyespots.',
     behaviorNotes:
@@ -1717,7 +1717,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.vulnerable,
     habitat: 'Lowland primary and mature secondary forests',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/a/ae/Black_Hornbill_%28Anthracoceros_malayanus%29.jpg',
+        'https://singaporebirds.com/wp-content/uploads/2017/01/black-hornbill-170101-108eos1d-f1x24987.jpg',
     description:
         'A medium-sized hornbill entirely black except for white tail tips. Males have a pale yellow bill; females have a black bill.',
     behaviorNotes:
@@ -1737,7 +1737,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.vulnerable,
     habitat: 'Freshwater swamps, peat bogs, and slow rivers',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/0/07/Tomistoma_schlegelii_-_01.jpg',
+        'https://cdn.britannica.com/41/253541-050-3820F94B/False-gharial-Malayan-tomistoma-schlegelii-reptile.jpg',
     description:
         'A massive, elusive crocodilian characterized by an extremely long, thin snout filled with needle-like teeth.',
     behaviorNotes:
@@ -1757,7 +1757,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Highland and montane tropical forests',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/e/ec/Trimeresurus_sumatranus_%28Sumatran_Pit_Viper%29.jpg',
+        'https://www.ecologyasia.com/images-st/sumatran-pit-viper_6G5A0099_LIT.jpg',
     description:
         'A stunningly vibrant, emerald green venomous snake with red-tipped tail and red bands.',
     behaviorNotes:
@@ -1777,7 +1777,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Lowland and mid-hill rainforests of Borneo',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/3/30/Tropidolaemus_subannulatus.jpg',
+        'https://www.ecologyasia.com/images-ab/bornean-keeled-pit-viper_6233.jpg',
     description:
         'A beautiful, stocky viper. Females are bright green with blue and white bands, while males are much smaller and differently patterned.',
     behaviorNotes:
@@ -1797,7 +1797,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Mangroves, secondary forests, and urban parks',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/e/ef/Paradise_Tree_Snake_%28Chrysopelea_paradisi%29.jpg',
+        'https://media.hswstatic.com/eyJidWNrZXQiOiJjb250ZW50Lmhzd3N0YXRpYy5jb20iLCJrZXkiOiJnaWZcL2dldHR5aW1hZ2VzLTU5Njc5MjcxNS5qcGciLCJlZGl0cyI6eyJyZXNpemUiOnsid2lkdGgiOjgyOH19fQ==',
     description:
         'A vibrant black and green snake with red dorsal spots. Famous for its ability to glide from tree to tree.',
     behaviorNotes:
@@ -1817,7 +1817,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Mangrove swamps and lowland riparian forests',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/9/9d/Boiga_dendrophila.jpg',
+        'https://images.squarespace-cdn.com/content/v1/5b4b10e19d5abb222d2069fe/1649421453558-82QPC426GPWPFISA4S7U/Mangrove+Cat+Snake+-+Gold+Ringed+Cat+Snake+-+Boiga+melanota-5.jpg',
     description:
         'A strikingly beautiful, large snake with a glossy black body and bright yellow crossbands.',
     behaviorNotes:
@@ -1837,7 +1837,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Forests, gardens, and urban bushes',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/6/6f/Oriental_Whip_Snake_%28Ahaetulla_prasina%29.jpg',
+        'https://w0.peakpx.com/wallpaper/725/497/HD-wallpaper-stunning-green-vine-snake-ahaetulla-prasina-ultra-animals-reptiles-frogs-nature-wild-asia-forest-amazing-thailand-snake-oriental-closeup-asian-reptile-wildlife-fauna-nationalpark.jpg',
     description:
         'An impossibly thin, bright green snake with an elongated, pointed snout and horizontal pupils.',
     behaviorNotes:
@@ -1857,7 +1857,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.endangered,
     habitat: 'Clear forest streams in Sarawak',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/7/7b/Lanthanotus_borneensis_01.jpg',
+        'https://a-z-animals.com/media/2021/10/shutterstock_241587391.jpg',
     description:
         'A living fossil endemic to Borneo. Looks like a tiny, subterranean dragon with beaded, crocodilian scales.',
     behaviorNotes:
@@ -1877,7 +1877,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Primary and secondary tropical rainforests',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/c/cf/Rough-necked_Monitor_%28Varanus_rudicollis%29.jpg',
+        'https://i.ytimg.com/vi/rjbipNSoGpI/hq720.jpg?sqp=-oaymwE7CK4FEIIDSFryq4qpAy0IARUAAAAAGAElAADIQj0AgKJD8AEB-AH-CYAC0AWKAgwIABABGFogZSgSMA8=&rs=AOn4CLBqO8TAqKqoIrEZXlBnjUigH4ZgQw',
     description:
         'A large, slender monitor lizard with pronounced, enlarged scales on the back of its neck.',
     behaviorNotes:
@@ -1897,7 +1897,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.vulnerable,
     habitat: 'Swamps, marshes, and palm oil plantations',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/e/eb/Python_brongersmai_2.jpg',
+        'https://a-z-animals.com/media/2022/01/Blood-Python-header.jpg',
     description:
         'A very heavy, thick-bodied snake known for its stunning, deep brick-red and orange coloration.',
     behaviorNotes:
@@ -1917,7 +1917,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Forests, mangroves, and urban settlements',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/1/1a/Equatorial_Spitting_Cobra_%28Naja_sumatrana%29.jpg',
+        'https://static.wikia.nocookie.net/naturerules1/images/d/d0/E1911c3ec6ec2499a92b672b52b303de.jpg/revision/latest?cb=20210605060109',
     description:
         'A highly venomous cobra that can be solid black or golden-yellow depending on the region.',
     behaviorNotes:
@@ -1937,7 +1937,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Agricultural areas, forests, and near water',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/a/ae/Banded_krait.jpg',
+        'https://a-z-animals.com/media/2022/05/Bungarus-fasciatus.jpg',
     description:
         'An unmistakable, highly venomous snake with bold, alternating black and bright yellow bands.',
     behaviorNotes:
@@ -1957,7 +1957,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Rainforests and human habitations',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/2/2f/Tokay_Gecko.jpg',
+        'https://exoticskeeper.com/wp-content/uploads/shutterstock_51675310-1.jpg',
     description:
         'A large, colorful gecko known for its loud, distinctive "to-kay" call.',
     behaviorNotes:
@@ -1977,7 +1977,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Urban gardens, parks, and scrublands',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/7/7b/Oriental_garden_lizard_%28Calotes_versicolor%29.jpg',
+        'https://i0.wp.com/riyasownspace.wordpress.com/wp-content/uploads/2018/08/20180603084236_img_3373-01.jpeg?fit=1200%2C919&ssl=1',
     description:
         'Also known as the changeable lizard due to its ability to turn bright red during breeding season.',
     behaviorNotes:
@@ -1991,13 +1991,13 @@ const List<Species> speciesData = [
   ),
   Species(
     id: '92',
-    commonName: 'Flying Dragon (Draco volans)',
+    commonName: 'Flying Dragon',
     scientificName: 'Draco volans',
     category: Species.reptiles,
     conservationStatus: Species.leastConcern,
     habitat: 'Secondary forests, parks, and suburban trees',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/c/cd/Flying_dragon_%28Draco_volans%29.jpg',
+        'https://a-z-animals.com/media/2021/09/Draco-volans-in-sun-1024x535.jpg',
     description:
         'A small agamid lizard with extendable ribs connected by skin, creating brightly colored "wings" for gliding.',
     behaviorNotes:
@@ -2017,7 +2017,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Montane and sub-montane forest streams',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/5/5c/Rhacophorus_prominanus_%28Kopstein%27s_Tree_Frog%29.jpg',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9iBjXqk_6M1LBmaU-1sUZzyuHp-a3fD4sNg&s',
     description:
         'A striking green tree frog with purple and orange webbing on its toes.',
     behaviorNotes:
@@ -2037,7 +2037,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.nearThreatened,
     habitat: 'Primary rainforest canopy in Borneo',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/6/6f/Zhangixalus_dulitensis.jpg',
+        'https://www.ecologyasia.com/images-ij/jade-tree-frog_5784.jpg',
     description:
         'A bizarre, almost translucent pale-green frog that looks like it is made of smooth jade.',
     behaviorNotes:
@@ -2057,7 +2057,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'High-altitude montane leaf litter',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/e/ec/Megophrys_baluensis.jpg',
+        'https://inaturalist-open-data.s3.amazonaws.com/photos/106409/large.jpg',
     description:
         'A mountain specialist with supreme camouflage, mimicking dead leaves perfectly with "horns" over its eyes.',
     behaviorNotes:
@@ -2077,7 +2077,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Fast-flowing rocky streams in deep forests',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/5/53/Odorrana_hosii_%28Poisonous_Rock_Frog%29.jpg',
+        'https://www.ecologyasia.com/images-op/poisonous-rock-frog_0724.jpg',
     description:
         'A sleek, bright green frog commonly found clinging to wet boulders in rushing streams.',
     behaviorNotes:
@@ -2097,7 +2097,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Shaded understory of primary and secondary forests',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/5/57/Neorina_lowii.jpg',
+        'https://inaturalist-open-data.s3.amazonaws.com/photos/23221356/large.jpg',
     description:
         'A large, dark butterfly with massive eye-spots on its wings that closely resemble the eyes of an owl.',
     behaviorNotes:
@@ -2117,7 +2117,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Forest canopies and high altitude clearings',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/a/af/Troides_amphrysus.jpg',
+        'https://www.aureus-butterflies.de/WebRoot/Store18/Shops/17926950/589C/D038/30CD/1E6A/A55C/C0A8/2BBA/3CE0/P1390415.JPG',
     description:
         'A massive, breathtaking butterfly with striking jet-black forewings and brilliant golden-yellow hindwings.',
     behaviorNotes:
@@ -2137,7 +2137,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Sunlit clearings and river edges in rainforests',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/e/ee/Parthenos_sylvia_lilacinus.jpg',
+        'https://media.istockphoto.com/id/90682601/photo/clipper-butterfly-parthenos-sylvia.jpg?s=612x612&w=0&k=20&c=-Blh3zl65Unvj3dsXEu7GlSVYxqLa_8lCAoj2bry2cI=',
     description:
         'A highly energetic, large butterfly with intricate blue, brown, and white geometric patterns.',
     behaviorNotes:
@@ -2157,7 +2157,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.leastConcern,
     habitat: 'Dense tropical rainforest undergrowth',
     imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/6/67/Kallima_inachus.jpg',
+        'https://www.australiangeographic.com.au/wp-content/uploads/2018/09/dead-leaf-butterfly.jpg',
     description:
         'The master of disguise. When its wings are closed, it looks exactly like a dry, brown autumn leaf.',
     behaviorNotes:
