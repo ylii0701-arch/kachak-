@@ -11,24 +11,178 @@ import '../data/species_data.dart';
 import '../models/species.dart';
 import '../providers/app_shell_controller.dart';
 import '../providers/saved_species_provider.dart';
+import '../services/onboarding_service.dart';
 import '../services/prediction_manager.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
 import '../widgets/assistant_overlay_layer.dart';
 import '../widgets/difficulty_stars.dart';
 import '../widgets/glass.dart';
+import '../widgets/onboarding/spotlight_tour.dart';
+import '../widgets/onboarding/tour_anchor.dart';
 import '../widgets/species_network_image.dart';
 import 'species_prediction_screen.dart';
 
-class SpeciesDetailScreen extends StatelessWidget {
+class SpeciesDetailScreen extends StatefulWidget {
   const SpeciesDetailScreen({super.key, required this.speciesId});
 
   final String speciesId;
 
   @override
+  State<SpeciesDetailScreen> createState() => _SpeciesDetailScreenState();
+}
+
+class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
+  final ScrollController _scrollController = ScrollController();
+  bool _didCheckTour = false;
+  bool _showAllLocationRows = false;
+  int _scrollCommandToken = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    TourRuntimeCommand.command.addListener(_onTourCommandChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowSpeciesDetailTour());
+  }
+
+  @override
+  void dispose() {
+    TourRuntimeCommand.command.removeListener(_onTourCommandChanged);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _scrollToTarget(
+    String targetId, {
+    required int token,
+    double alignment = 0.16,
+  }) async {
+    const attempts = <Duration>[
+      Duration.zero,
+      Duration(milliseconds: 24),
+      Duration(milliseconds: 80),
+      Duration(milliseconds: 160),
+      Duration(milliseconds: 240),
+    ];
+    for (final delay in attempts) {
+      if (!mounted) return;
+      if (token != _scrollCommandToken) return;
+      if (delay != Duration.zero) {
+        await Future<void>.delayed(delay);
+      }
+      if (token != _scrollCommandToken) return;
+      final targetContext = TourAnchors.key(targetId).currentContext;
+      if (targetContext == null) continue;
+      if (!targetContext.mounted) continue;
+      await Scrollable.ensureVisible(
+        targetContext,
+        duration: Duration.zero,
+        curve: Curves.linear,
+        alignment: alignment,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 16));
+      return;
+    }
+  }
+
+  Future<void> _scrollToTop() async {
+    if (!_scrollController.hasClients) return;
+    await _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 380),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  void _onTourCommandChanged() {
+    final cmd = TourRuntimeCommand.command.value;
+    if (!mounted || cmd == null) return;
+    final token = ++_scrollCommandToken;
+    if (cmd == 'speciesDetail.focusAlert') {
+      _scrollToTarget(
+        TourTargetIds.detailNotification,
+        token: token,
+        alignment: 0.08,
+      );
+    } else if (cmd == 'speciesDetail.scrollPrediction') {
+      _scrollToTarget(
+        TourTargetIds.detailPredictionCard,
+        token: token,
+        alignment: 0.12,
+      );
+    } else if (cmd == 'speciesDetail.scrollHabitat') {
+      _scrollToTarget(
+        TourTargetIds.detailHabitatLocations,
+        token: token,
+        alignment: 0.12,
+      );
+    } else if (cmd == 'speciesDetail.scrollMapButton') {
+      _scrollToTarget(
+        TourTargetIds.detailFirstObservation,
+        token: token,
+        alignment: 0.18,
+      );
+    }
+  }
+
+  Future<void> _maybeShowSpeciesDetailTour() async {
+    if (!mounted || _didCheckTour) return;
+    _didCheckTour = true;
+    final species = speciesById(widget.speciesId);
+    if (species == null) return;
+
+    final onboarding = context.read<OnboardingService>();
+    if (onboarding.hasSeen(OnboardingTour.speciesDetail)) return;
+    // Give route transition + sliver layout a moment to settle before
+    // resolving the first spotlight target.
+    await Future<void>.delayed(const Duration(milliseconds: 320));
+    if (!mounted) return;
+
+    await SpotlightTour.show(
+      context,
+      steps: const [
+        SpotlightStep(
+          targetId: TourTargetIds.detailNotification,
+          title: 'Enable alerts',
+          body:
+              'After saving, tap this icon to enable species notifications for higher-probability sightings.',
+          onEnterCommand: 'speciesDetail.focusAlert',
+        ),
+        SpotlightStep(
+          targetId: TourTargetIds.detailPredictionCard,
+          title: 'Current prediction',
+          body:
+              'This card shows the best site and current weather-based probability for spotting this species.',
+          onEnterCommand: 'speciesDetail.scrollPrediction',
+        ),
+        SpotlightStep(
+          targetId: TourTargetIds.detailHabitatLocations,
+          title: 'Recorded observation',
+          body:
+              'This first recorded observation row includes the latest sighting and coordinates.',
+          onEnterCommand: 'speciesDetail.scrollHabitat',
+        ),
+        SpotlightStep(
+          targetId: TourTargetIds.detailFirstObservation,
+          title: 'Open on map',
+          body:
+              'Tap this map button to view the animal last occurrence directly on the map.',
+          onEnterCommand: 'speciesDetail.scrollMapButton',
+        ),
+      ],
+      onComplete: () async {
+        await _scrollToTop();
+      },
+    );
+
+    if (!mounted) return;
+    await onboarding.markSeen(OnboardingTour.speciesDetail);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final s = Adaptive.scale(context);
-    final species = speciesById(speciesId);
+    final species = speciesById(widget.speciesId);
 
     if (species == null) {
       return AssistantOverlayLayer(
@@ -104,6 +258,7 @@ class SpeciesDetailScreen extends StatelessWidget {
                 children: [
                   const MistBackdrop(backgroundBlurSigma: 5),
                   CustomScrollView(
+                    controller: _scrollController,
                     slivers: [
                       SliverAppBar(
                         expandedHeight: Adaptive.clamp(
@@ -134,61 +289,64 @@ class SpeciesDetailScreen extends StatelessWidget {
                         actions: [
                           Padding(
                             padding: EdgeInsets.only(right: 8 * s),
-                            child: IconButton(
-                              padding: EdgeInsets.zero,
-                              onPressed: () async {
-                                if (!isFav) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Please save this species to your favorites first to enable notifications',
-                                      ),
-                                    ),
-                                  );
-                                  return;
-                                }
-
-                                final success = await saved.toggleNotification(
-                                  species.id,
-                                );
-
-                                if (context.mounted) {
-                                  if (!success) {
+                            child: TourAnchor(
+                              id: TourTargetIds.detailNotification,
+                              child: IconButton(
+                                padding: EdgeInsets.zero,
+                                onPressed: () async {
+                                  if (!isFav) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text(
-                                          'Alert could not be enabled. Please allow notifications in settings.',
+                                          'Please save this species to your favorites first to enable notifications',
                                         ),
                                       ),
                                     );
-                                  } else {
-                                    final nowOn = saved.isNotified(species.id);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          nowOn
-                                              ? 'High probability alerts enabled for ${species.commonName}'
-                                              : 'Notifications disabled for ${species.commonName}',
-                                        ),
-                                      ),
-                                    );
+                                    return;
                                   }
-                                }
-                              },
-                              icon: Container(
-                                padding: EdgeInsets.all(8 * s),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.38),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  isNotified
-                                      ? Icons.notifications_active
-                                      : Icons.notifications_off_outlined,
-                                  color: isNotified
-                                      ? Colors.amber.shade400
-                                      : Colors.white,
-                                  size: 20 * s,
+
+                                  final success = await saved.toggleNotification(
+                                    species.id,
+                                  );
+
+                                  if (context.mounted) {
+                                    if (!success) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Alert could not be enabled. Please allow notifications in settings.',
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      final nowOn = saved.isNotified(species.id);
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            nowOn
+                                                ? 'High probability alerts enabled for ${species.commonName}'
+                                                : 'Notifications disabled for ${species.commonName}',
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                                icon: Container(
+                                  padding: EdgeInsets.all(8 * s),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.38),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    isNotified
+                                        ? Icons.notifications_active
+                                        : Icons.notifications_off_outlined,
+                                    color: isNotified
+                                        ? Colors.amber.shade400
+                                        : Colors.white,
+                                    size: 20 * s,
+                                  ),
                                 ),
                               ),
                             ),
@@ -381,47 +539,50 @@ class SpeciesDetailScreen extends StatelessWidget {
                               ),
                             ),
                             SizedBox(height: 12 * s),
-                            SizedBox(
-                              width: double.infinity,
-                              child: OutlinedButton.icon(
-                                onPressed: () async {
-                                  try {
-                                    await saved.toggleSaved(species.id);
-                                  } catch (_) {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            'Failed to update saved species. Please try again.',
+                            TourAnchor(
+                              id: TourTargetIds.detailSaveFavorite,
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: OutlinedButton.icon(
+                                  onPressed: () async {
+                                    try {
+                                      await saved.toggleSaved(species.id);
+                                    } catch (_) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Failed to update saved species. Please try again.',
+                                            ),
+                                            backgroundColor: Colors.red,
                                           ),
-                                          backgroundColor: Colors.red,
-                                        ),
-                                      );
+                                        );
+                                      }
                                     }
-                                  }
-                                },
-                                icon: Icon(
-                                  isFav
-                                      ? Icons.bookmark_rounded
-                                      : Icons.bookmark_border_rounded,
-                                  color: AppColors.accent,
-                                ),
-                                label: Text(
-                                  isFav ? 'Saved to Favorites' : 'Save to Favorites',
-                                  style: const TextStyle(fontWeight: FontWeight.w700),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: AppColors.accent,
-                                  backgroundColor: AppColors.surface.withValues(alpha: 0.92),
-                                  side: BorderSide(
-                                    color: AppColors.primary.withValues(alpha: 0.22),
+                                  },
+                                  icon: Icon(
+                                    isFav
+                                        ? Icons.bookmark_rounded
+                                        : Icons.bookmark_border_rounded,
+                                    color: AppColors.accent,
                                   ),
-                                  minimumSize: Size.fromHeight(56 * s),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(28 * s),
+                                  label: Text(
+                                    isFav ? 'Saved to Favorites' : 'Save to Favorites',
+                                    style: const TextStyle(fontWeight: FontWeight.w700),
                                   ),
-                                  elevation: 0,
-                                  shadowColor: Colors.transparent,
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: AppColors.accent,
+                                    backgroundColor: AppColors.surface.withValues(alpha: 0.92),
+                                    side: BorderSide(
+                                      color: AppColors.primary.withValues(alpha: 0.22),
+                                    ),
+                                    minimumSize: Size.fromHeight(56 * s),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(28 * s),
+                                    ),
+                                    elevation: 0,
+                                    shadowColor: Colors.transparent,
+                                  ),
                                 ),
                               ),
                             ),
@@ -435,11 +596,14 @@ class SpeciesDetailScreen extends StatelessWidget {
 
                             // 🟢 傳入我們剛剛找出的 bestSite 與 bestForecasts
                             if (bestSite != null && bestForecasts.isNotEmpty)
-                              _predictionSnapshotCard(
-                                context,
-                                species: species,
-                                site: bestSite,
-                                forecasts: bestForecasts,
+                              TourAnchor(
+                                id: TourTargetIds.detailPredictionCard,
+                                child: _predictionSnapshotCard(
+                                  context,
+                                  species: species,
+                                  site: bestSite,
+                                  forecasts: bestForecasts,
+                                ),
                               ),
 
                             _sectionCard(
@@ -616,6 +780,10 @@ class SpeciesDetailScreen extends StatelessWidget {
           'Last seen ${loc.lastSeen} · ${loc.lat.toStringAsFixed(4)}°, ${loc.lng.toStringAsFixed(4)}°',
           point: LatLng(loc.lat, loc.lng),
           speciesId: species.id,
+          tourAnchorId: n == 1 ? TourTargetIds.detailFirstObservation : null,
+          mapIconTourAnchorId: n == 1
+              ? TourTargetIds.detailFirstObservationMapButton
+              : null,
         ),
       );
     }
@@ -633,54 +801,79 @@ class SpeciesDetailScreen extends StatelessWidget {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: GlassPanel(
-        padding: const EdgeInsets.all(20),
-        borderRadius: 20,
-        blurSigma: 14,
-        fillAlpha: 0.62,
-        verticalFrostGradient: true,
-        child: _innerInfoCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.map_outlined,
-                    size: 22,
-                    color: AppColors.iconSectionOnFrost,
+    final visibleRows = _showAllLocationRows || rows.length <= 3
+        ? rows
+        : rows.take(3).toList(growable: false);
+
+    return TourAnchor(
+      id: TourTargetIds.detailHabitatLocations,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: GlassPanel(
+          padding: const EdgeInsets.all(20),
+          borderRadius: 20,
+          blurSigma: 14,
+          fillAlpha: 0.62,
+          verticalFrostGradient: true,
+          child: _innerInfoCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.map_outlined,
+                      size: 22,
+                      color: AppColors.iconSectionOnFrost,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Habitat & Locations',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 17,
+                        color: AppColors.textBodyOnFrost,
+                        letterSpacing: -0.15,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Tap a row to open the map centered on that pin.',
+                  style: GoogleFonts.plusJakartaSans(
+                    color: AppColors.textSubtitleOnFrost,
+                    fontSize: 13,
+                    height: 1.45,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.02,
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Habitat & Locations',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 17,
-                      color: AppColors.textBodyOnFrost,
-                      letterSpacing: -0.15,
+                ),
+                const SizedBox(height: 16),
+                for (var i = 0; i < visibleRows.length; i++) ...[
+                  visibleRows[i],
+                  if (i < visibleRows.length - 1) const SizedBox(height: 8),
+                ],
+                if (rows.length > 3) ...[
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: () {
+                        setState(() => _showAllLocationRows = !_showAllLocationRows);
+                      },
+                      icon: Icon(
+                        _showAllLocationRows
+                            ? Icons.keyboard_arrow_up_rounded
+                            : Icons.keyboard_arrow_down_rounded,
+                        color: AppColors.primary,
+                      ),
+                      label: Text(_showAllLocationRows ? 'Show less' : 'Show more'),
                     ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Tap a row to open the map centered on that pin.',
-                style: GoogleFonts.plusJakartaSans(
-                  color: AppColors.textSubtitleOnFrost,
-                  fontSize: 13,
-                  height: 1.45,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.02,
-                ),
-              ),
-              const SizedBox(height: 16),
-              for (var i = 0; i < rows.length; i++) ...[
-                rows[i],
-                if (i < rows.length - 1) const SizedBox(height: 8),
               ],
-            ],
+            ),
           ),
         ),
       ),
@@ -694,8 +887,10 @@ class SpeciesDetailScreen extends StatelessWidget {
         required String subtitle,
         required LatLng point,
         required String speciesId,
+        String? tourAnchorId,
+        String? mapIconTourAnchorId,
       }) {
-    return Material(
+    final row = Material(
       color: Colors.white.withValues(alpha: 0.84),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -756,16 +951,28 @@ class SpeciesDetailScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(
-                Icons.map_outlined,
-                size: 20,
-                color: AppColors.iconSectionOnFrost,
+              Builder(
+                builder: (_) {
+                  final icon = Icon(
+                    Icons.map_outlined,
+                    size: 20,
+                    color: AppColors.iconSectionOnFrost,
+                  );
+                  if (mapIconTourAnchorId != null) {
+                    return TourAnchor(id: mapIconTourAnchorId, child: icon);
+                  }
+                  return icon;
+                },
               ),
             ],
           ),
         ),
       ),
     );
+    if (tourAnchorId != null) {
+      return TourAnchor(id: tourAnchorId, child: row);
+    }
+    return row;
   }
 
   Widget _sectionCard(

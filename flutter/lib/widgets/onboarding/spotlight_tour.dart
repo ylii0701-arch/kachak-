@@ -33,6 +33,14 @@ class TourTargetIds {
   static const mapToolZoomIn = 'tour.map.tool.zoom.in';
   static const mapToolZoomOut = 'tour.map.tool.zoom.out';
   static const mapSpeciesViewMore = 'tour.map.species.view.more';
+
+  static const detailSaveFavorite = 'tour.detail.save.favorite';
+  static const detailNotification = 'tour.detail.notification';
+  static const detailPredictionCard = 'tour.detail.prediction.card';
+  static const detailHabitatLocations = 'tour.detail.habitat.locations';
+  static const detailFirstObservation = 'tour.detail.first.observation';
+  static const detailFirstObservationMapButton =
+      'tour.detail.first.observation.map.button';
 }
 
 class TourRuntimeCommand {
@@ -41,6 +49,10 @@ class TourRuntimeCommand {
   static final ValueNotifier<String?> command = ValueNotifier<String?>(null);
 
   static void send(String? value) {
+    // Force listeners to run even when the same command repeats across steps.
+    if (value != null && command.value == value) {
+      command.value = null;
+    }
     command.value = value;
   }
 }
@@ -236,7 +248,10 @@ class _SpotlightTourOverlayState extends State<_SpotlightTourOverlay> {
                     total: widget.steps.length,
                     step: _step,
                     onNext: _next,
-                    onSkip: widget.onFinish,
+                    onSkip: () async {
+                      TourRuntimeCommand.send(null);
+                      await widget.onFinish();
+                    },
                   ),
                 ),
               ),
