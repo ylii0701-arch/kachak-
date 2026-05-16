@@ -30,6 +30,8 @@ class OnnxPredictionService {
     if (_session != null) return;
 
     try {
+      _configureWebRuntimeForStability();
+
       // Load the model file from local assets
       final rawAssetFile = await rootBundle.load('assets/models/prediction_model.onnx');
       final bytes = rawAssetFile.buffer.asUint8List();
@@ -44,6 +46,27 @@ class OnnxPredictionService {
       debugPrint("✅ Web ONNX Model loaded successfully via WebAssembly!");
     } catch (e) {
       debugPrint("❌ Failed to load Web ONNX Model: $e");
+    }
+  }
+
+  static void _configureWebRuntimeForStability() {
+    try {
+      final ort = globalContext['ort'];
+      if (ort == null || !ort.isA<JSObject>()) return;
+      final ortObj = ort as JSObject;
+      final env = ortObj['env'];
+      if (env == null || !env.isA<JSObject>()) return;
+      final envObj = env as JSObject;
+      final wasm = envObj['wasm'];
+      if (wasm == null || !wasm.isA<JSObject>()) return;
+      final wasmObj = wasm as JSObject;
+
+      // iOS WebKit is sensitive to heavy WASM threading/proxy modes.
+      wasmObj['numThreads'] = 1.toJS;
+      wasmObj['proxy'] = false.toJS;
+      wasmObj['simd'] = false.toJS;
+    } catch (_) {
+      // Best-effort runtime tuning only; ignore if unavailable.
     }
   }
 
