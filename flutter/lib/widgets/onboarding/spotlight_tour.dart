@@ -141,11 +141,31 @@ class _SpotlightTourOverlayState extends State<_SpotlightTourOverlay> {
     if (context == null) return;
     final box = context.findRenderObject();
     if (box is! RenderBox || !box.hasSize) return;
-    final offset = box.localToGlobal(Offset.zero);
     final media = MediaQuery.of(context);
     final safe = media.padding;
     final screen = media.size;
-    final inflated = (offset & box.size).inflate(8);
+    final globalRect = MatrixUtils.transformRect(
+      box.getTransformTo(null),
+      Offset.zero & box.size,
+    );
+    Rect inflated = globalRect.inflate(8);
+
+    // Web can occasionally report a button anchor as a very wide strip.
+    // For target ids meant to be buttons, clamp width to a reasonable span.
+    final looksLikeButton = _step.targetId.endsWith('.button');
+    if (looksLikeButton && inflated.width > (screen.width * 0.78)) {
+      final preferredWidth = math.min(
+        math.max(inflated.height * 3.4, 88.0),
+        220.0,
+      );
+      inflated = Rect.fromLTWH(
+        inflated.left,
+        inflated.top,
+        preferredWidth,
+        inflated.height,
+      );
+    }
+
     final rect = Rect.fromLTRB(
       inflated.left.clamp(8.0, screen.width - 8.0),
       inflated.top.clamp(safe.top + 8.0, screen.height - safe.bottom - 12.0),
@@ -197,6 +217,7 @@ class _SpotlightTourOverlayState extends State<_SpotlightTourOverlay> {
     final size = MediaQuery.sizeOf(context);
     final safeTop = MediaQuery.paddingOf(context).top;
     final safeBottom = MediaQuery.paddingOf(context).bottom;
+    final hasResolvedTarget = _targetRect != null;
     final rect =
         _targetRect ??
         Rect.fromLTWH(
@@ -215,17 +236,38 @@ class _SpotlightTourOverlayState extends State<_SpotlightTourOverlay> {
     final cardTop = showAbove
         ? math.max(safeTop + 12, rect.top - cardHeight - 12)
         : math.min(size.height - safeBottom - cardHeight - 10, rect.bottom + 12);
+    final dimColor = Colors.black.withValues(alpha: 0.58);
 
     return SizedBox.expand(
       child: Material(
         color: Colors.transparent,
         child: Stack(
           children: [
-            Positioned.fill(
-              child: CustomPaint(
-                painter: _SpotlightPainter(cutout: rect),
+            if (hasResolvedTarget) ...[
+              Positioned.fill(
+                child: ClipPath(
+                  clipper: _SpotlightDimClipper(cutout: rect),
+                  child: ColoredBox(color: dimColor),
+                ),
               ),
-            ),
+              Positioned.fromRect(
+                rect: rect,
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0xFFE3F2D6),
+                        width: 2.2,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ] else
+              Positioned.fill(
+                child: ColoredBox(color: dimColor),
+              ),
             AnimatedPositioned(
               duration: const Duration(milliseconds: 180),
               curve: Curves.easeOutCubic,
@@ -363,31 +405,23 @@ class _TooltipCard extends StatelessWidget {
   }
 }
 
-class _SpotlightPainter extends CustomPainter {
-  const _SpotlightPainter({required this.cutout});
+class _SpotlightDimClipper extends CustomClipper<Path> {
+  const _SpotlightDimClipper({required this.cutout});
 
   final Rect cutout;
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final full = Path()..addRect(Offset.zero & size);
-    final hole = Path()
+  Path getClip(Size size) {
+    return Path()
+      ..fillType = PathFillType.evenOdd
+      ..addRect(Offset.zero & size)
       ..addRRect(
         RRect.fromRectAndRadius(cutout, const Radius.circular(16)),
       );
-    final dimmed = Path.combine(PathOperation.difference, full, hole);
-    canvas.drawPath(dimmed, Paint()..color = Colors.black.withValues(alpha: 0.58));
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(cutout, const Radius.circular(16)),
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.4
-        ..color = const Color(0xFFE3F2D6),
-    );
   }
 
   @override
-  bool shouldRepaint(covariant _SpotlightPainter oldDelegate) =>
-      oldDelegate.cutout != cutout;
+  bool shouldReclip(covariant _SpotlightDimClipper oldClipper) =>
+      oldClipper.cutout != cutout;
 }
 
