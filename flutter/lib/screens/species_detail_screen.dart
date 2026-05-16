@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
@@ -51,6 +52,15 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
     super.initState();
     TourRuntimeCommand.command.addListener(_onTourCommandChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowSpeciesDetailTour());
+    _ensurePredictionsForMobileWeb();
+  }
+
+  void _ensurePredictionsForMobileWeb() {
+    final isMobileWeb = kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.android);
+    if (!isMobileWeb) return;
+    PredictionManager.instance.fetchForSpecies(widget.speciesId);
   }
 
   @override
