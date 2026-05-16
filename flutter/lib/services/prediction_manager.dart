@@ -49,6 +49,10 @@ class PredictionManager extends ChangeNotifier {
   DateTime? _lastCalculationTime;
   bool _engineStarted = false;
   bool _engineStarting = false;
+  final bool _isMobileWeb =
+      kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.android);
 
   /// 1. Start the background engine
   Future<void> startEngine() async {
@@ -159,12 +163,16 @@ class PredictionManager extends ChangeNotifier {
             }
             forecastPredictions[site.id]![speciesId] = timeSeries;
             processedSpecies += 1;
-            if (kIsWeb && processedSpecies % 8 == 0) {
+            if (_isMobileWeb && processedSpecies % 3 == 0) {
+              await Future<void>.delayed(const Duration(milliseconds: 1));
+            } else if (kIsWeb && processedSpecies % 8 == 0) {
               await Future<void>.delayed(Duration.zero);
             }
           }
         }
-        if (kIsWeb) {
+        if (_isMobileWeb) {
+          await Future<void>.delayed(const Duration(milliseconds: 2));
+        } else if (kIsWeb) {
           await Future<void>.delayed(Duration.zero);
         }
       }
