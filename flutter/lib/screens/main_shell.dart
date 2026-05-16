@@ -233,12 +233,6 @@ class _MainShellState extends State<MainShell> {
         return OnboardingTour.home;
       case 1:
         return OnboardingTour.map;
-      case 2:
-        return OnboardingTour.identify;
-      case 3:
-        return OnboardingTour.mission;
-      case 4:
-        return OnboardingTour.saved;
     }
     return null;
   }
@@ -278,17 +272,10 @@ class _MainShellState extends State<MainShell> {
           context,
           steps: const [
             SpotlightStep(
-              targetId: TourTargetIds.homeSearch,
-              title: 'Search by name',
-              body:
-                  'Type a common or scientific name to jump straight to a species card.',
-            ),
-            SpotlightStep(
               targetId: TourTargetIds.homeFilterButton,
               title: 'Filter wildlife list',
               body:
                   'Use Filter to narrow by location and species attributes.',
-              onEnterCommand: 'home.openFilter',
             ),
             SpotlightStep(
               targetId: TourTargetIds.homeFilterTabs,
@@ -299,17 +286,11 @@ class _MainShellState extends State<MainShell> {
               onEnterCommand: 'home.openFilter',
             ),
             SpotlightStep(
-              targetId: TourTargetIds.homeSortButton,
-              title: 'Sort results',
-              body:
-                  'Sort species by conservation status or difficulty to suit your goals.',
-              onEnterCommand: 'home.closeFilter',
-            ),
-            SpotlightStep(
               targetId: TourTargetIds.homeLayoutButton,
               title: 'Switch layouts',
               body:
                   'Toggle between list and grid views depending on how you like to browse.',
+              onEnterCommand: 'home.closeFilter',
             ),
             SpotlightStep(
               targetId: TourTargetIds.homeAiChat,
@@ -341,18 +322,6 @@ class _MainShellState extends State<MainShell> {
               body:
                   'Saved keeps your bookmarked species so you can revisit quickly later.',
             ),
-            SpotlightStep(
-              targetId: TourTargetIds.homeSpeciesCard,
-              title: 'Species list cards',
-              body:
-                  'Scroll to explore species and tap any card for full species information.',
-            ),
-            SpotlightStep(
-              targetId: TourTargetIds.homeSaveButton,
-              title: 'Save species',
-              body:
-                  'Use this bookmark to save species and revisit them from the Saved tab.',
-            ),
           ],
           onComplete: () async {},
         );
@@ -361,42 +330,11 @@ class _MainShellState extends State<MainShell> {
           context,
           steps: const [
             SpotlightStep(
-              targetId: TourTargetIds.mapSearch,
-              title: 'Search species locations',
-              body:
-                  'Search a species name to quickly find where it has been spotted on the map.',
-              onEnterCommand: 'map.resetTourState',
-            ),
-            SpotlightStep(
-              targetId: TourTargetIds.mapWeatherMarker,
-              title: 'Weather marker',
-              body:
-                  'These markers show city weather snapshots to help plan better shooting conditions.',
-              cardPlacement: SpotlightCardPlacement.above,
-              onEnterCommand: 'map.openWeatherPreview',
-            ),
-            SpotlightStep(
-              targetId: TourTargetIds.mapAnimalMarker,
-              title: 'Animal marker',
-              body:
-                  'Animal markers show nearby species observations around your current location range. Tap View More Details to open species detail.',
-              cardPlacement: SpotlightCardPlacement.above,
-              onEnterCommand: 'map.openAnimalPreview',
-            ),
-            SpotlightStep(
-              targetId: TourTargetIds.mapSpeciesViewMore,
-              title: 'View more details',
-              body:
-                  'Use View More Details to open the full species detail page and learn more before planning your shoot.',
-              cardPlacement: SpotlightCardPlacement.above,
-              onEnterCommand: 'map.openAnimalPreview',
-            ),
-            SpotlightStep(
               targetId: TourTargetIds.mapToolRefresh,
               title: 'Refresh map weather',
               body:
                   'Tap to refresh city weather data shown on map markers.',
-              onEnterCommand: 'map.closePreview',
+              onEnterCommand: 'map.resetTourState',
             ),
             SpotlightStep(
               targetId: TourTargetIds.mapToolWeather,
@@ -427,6 +365,21 @@ class _MainShellState extends State<MainShell> {
               title: 'Zoom out',
               body:
                   'Reduce map zoom to see wider region context.',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapWeatherMarker,
+              title: 'Weather marker',
+              body:
+                  'These markers show city weather snapshots to help plan better shooting conditions.',
+              cardPlacement: SpotlightCardPlacement.above,
+              onEnterCommand: 'map.openWeatherPreview',
+            ),
+            SpotlightStep(
+              targetId: TourTargetIds.mapAnimalMarker,
+              title: 'Animal marker',
+              body:
+                  'Animal markers show nearby species observations around your current location range. Tap View More Details to open species detail.',
+              cardPlacement: SpotlightCardPlacement.above,
             ),
           ],
           onComplete: () async {},

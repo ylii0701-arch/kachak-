@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Tour identifiers persisted independently so that completing one tour
 /// (e.g. Home) does not skip another.
-enum OnboardingTour { welcome, home, saved, identify, mission, map }
+enum OnboardingTour { welcome, home, saved, identify, mission, map, speciesDetail }
 
 /// Tracks which onboarding flows the user has already seen.
 ///
