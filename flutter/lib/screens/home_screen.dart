@@ -1575,7 +1575,11 @@ class _HomeScreenState extends State<HomeScreen> {
     void openDetail() {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (_) => SpeciesDetailScreen(speciesId: s.id),
+          builder: (_) => SpeciesDetailScreen(
+            speciesId: s.id,
+            selectedCity: _selectedCity,       // 🟢 SEND THE CITY FILTER
+            selectedSiteId: _selectedSiteId,   // 🟢 SEND THE SITE FILTER
+          ),
         ),
       );
     }

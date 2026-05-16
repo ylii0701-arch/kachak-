@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import '../data/photography_assistant_data.dart';
 import '../data/map_data.dart';
 import '../data/predictions_data.dart';
-import '../data/site_data.dart'; // 加入 site_data
+import '../data/site_data.dart';
 import '../data/species_data.dart';
 import '../models/species.dart';
 import '../providers/app_shell_controller.dart';
@@ -24,9 +24,17 @@ import '../widgets/species_network_image.dart';
 import 'species_prediction_screen.dart';
 
 class SpeciesDetailScreen extends StatefulWidget {
-  const SpeciesDetailScreen({super.key, required this.speciesId});
+  // 🟢 Updated to receive filters from HomeScreen
+  const SpeciesDetailScreen({
+    super.key,
+    required this.speciesId,
+    this.selectedCity,
+    this.selectedSiteId,
+  });
 
   final String speciesId;
+  final String? selectedCity;
+  final String? selectedSiteId;
 
   @override
   State<SpeciesDetailScreen> createState() => _SpeciesDetailScreenState();
@@ -53,10 +61,10 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
   }
 
   Future<void> _scrollToTarget(
-    String targetId, {
-    required int token,
-    double alignment = 0.16,
-  }) async {
+      String targetId, {
+        required int token,
+        double alignment = 0.16,
+      }) async {
     const attempts = <Duration>[
       Duration.zero,
       Duration(milliseconds: 24),
@@ -133,8 +141,6 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
 
     final onboarding = context.read<OnboardingService>();
     if (onboarding.hasSeen(OnboardingTour.speciesDetail)) return;
-    // Give route transition + sliver layout a moment to settle before
-    // resolving the first spotlight target.
     await Future<void>.delayed(const Duration(milliseconds: 320));
     if (!mounted) return;
 
@@ -145,28 +151,28 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
           targetId: TourTargetIds.detailNotification,
           title: 'Enable alerts',
           body:
-              'After saving, tap this icon to enable species notifications for higher-probability sightings.',
+          'After saving, tap this icon to enable species notifications for higher-probability sightings.',
           onEnterCommand: 'speciesDetail.focusAlert',
         ),
         SpotlightStep(
           targetId: TourTargetIds.detailPredictionCard,
           title: 'Current prediction',
           body:
-              'This card shows the best site and current weather-based probability for spotting this species.',
+          'This card shows the best site and current weather-based probability for spotting this species.',
           onEnterCommand: 'speciesDetail.scrollPrediction',
         ),
         SpotlightStep(
           targetId: TourTargetIds.detailHabitatLocations,
           title: 'Recorded observation',
           body:
-              'This first recorded observation row includes the latest sighting and coordinates.',
+          'This first recorded observation row includes the latest sighting and coordinates.',
           onEnterCommand: 'speciesDetail.scrollHabitat',
         ),
         SpotlightStep(
           targetId: TourTargetIds.detailFirstObservation,
           title: 'Open on map',
           body:
-              'Tap this map button to view the animal last occurrence directly on the map.',
+          'Tap this map button to view the animal last occurrence directly on the map.',
           onEnterCommand: 'speciesDetail.scrollMapButton',
         ),
       ],
@@ -228,27 +234,55 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
     return AssistantOverlayLayer(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        // 🟢 核心升級：監聽預測引擎，動態找出最佳地點！
         body: ListenableBuilder(
             listenable: PredictionManager.instance,
             builder: (context, _) {
 
+              // 🟢 Using variables passed from HomeScreen directly
+              final String cleanCity = (widget.selectedCity ?? 'All').trim().toLowerCase();
+              final String cleanSite = (widget.selectedSiteId ?? 'All').trim().toLowerCase();
+
               String? bestSiteId;
               double maxProb = -1.0;
 
-              // 遍歷所有地點，找出這個物種當下機率最高的地點
-              PredictionManager.instance.latestPredictions.forEach((sId, spMap) {
-                final p = spMap[species.id];
-                if (p != null && p > maxProb) {
-                  maxProb = p;
-                  bestSiteId = sId;
+              final bool isAllCities = cleanCity.isEmpty || cleanCity.startsWith('all');
+              final bool isAllSites = cleanSite.isEmpty || cleanSite.startsWith('all');
+
+              if (!isAllSites) {
+                try {
+                  final targetSite = siteData.firstWhere(
+                        (s) => s.id.toLowerCase() == cleanSite || s.name.trim().toLowerCase() == cleanSite,
+                  );
+                  if (isAllCities || targetSite.cityName.trim().toLowerCase() == cleanCity) {
+                    bestSiteId = targetSite.id;
+                    maxProb = PredictionManager.instance.latestPredictions[bestSiteId]?[species.id] ?? -1.0;
+                  }
+                } catch (e) {
+                  // Fall through to all sites
                 }
-              });
+              }
+
+              if (bestSiteId == null) {
+                PredictionManager.instance.latestPredictions.forEach((sId, spMap) {
+                  final site = siteData.where((s) => s.id == sId).firstOrNull;
+                  if (site == null) return;
+
+                  final bool matchesCity = isAllCities || site.cityName.trim().toLowerCase() == cleanCity;
+
+                  if (matchesCity) {
+                    final p = spMap[species.id];
+                    if (p != null && p > maxProb) {
+                      maxProb = p;
+                      bestSiteId = sId;
+                    }
+                  }
+                });
+              }
 
               List<TimeSeriesPrediction> bestForecasts = [];
               dynamic bestSite;
 
-              if (bestSiteId != null) {
+              if (bestSiteId != null && maxProb != -1.0) {
                 bestForecasts = PredictionManager.instance.getSevenDayForecastForUI(bestSiteId!, species.id);
                 bestSite = siteData.where((site) => site.id == bestSiteId).firstOrNull;
               }
@@ -594,7 +628,6 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                               child: Text(species.description),
                             ),
 
-                            // 🟢 傳入我們剛剛找出的 bestSite 與 bestForecasts
                             if (bestSite != null && bestForecasts.isNotEmpty)
                               TourAnchor(
                                 id: TourTargetIds.detailPredictionCard,
@@ -612,7 +645,11 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                               icon: Icons.place_outlined,
                               child: Text(species.habitat),
                             ),
+
+                            // 🟢 RESTORED FULL HABITAT LOCATIONS
                             _habitatLocationsSection(context, species),
+
+                            // 🟢 RESTORED FULL BEHAVIOR & HABITS
                             _sectionCard(
                               context,
                               title: 'Behavior & Habits',
@@ -690,6 +727,8 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                 ],
                               ),
                             ),
+
+                            // 🟢 RESTORED FULL DIET
                             _sectionCard(
                               context,
                               title: 'Diet',
@@ -699,12 +738,16 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                     'Diet information is currently unavailable for this species.',
                               ),
                             ),
+
+                            // 🟢 RESTORED FULL PHOTOGRAPHY TIPS
                             _sectionCard(
                               context,
                               title: 'Photography Tips',
                               icon: Icons.camera_alt_outlined,
                               child: Text(species.photographyConditions),
                             ),
+
+                            // 🟢 RESTORED FULL RECOMMENDED GEAR
                             _sectionCard(
                               context,
                               title: 'Recommended Gear',
@@ -762,6 +805,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
     );
   }
 
+  // 🟢 RESTORED HABITAT LOCATIONS FUNCTION
   Widget _habitatLocationsSection(BuildContext context, Species species) {
     final locs = speciesLocationsForSpecies(species.id);
     final spots = photographySpotsForSpeciesId(species.id);
@@ -880,6 +924,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
     );
   }
 
+  // 🟢 RESTORED LOCATION ROW WIDGET
   Widget _locationMapRow(
       BuildContext context, {
         required int index,
@@ -975,12 +1020,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
     return row;
   }
 
-  Widget _sectionCard(
-      BuildContext context, {
-        required String title,
-        IconData? icon,
-        required Widget child,
-      }) {
+  Widget _sectionCard(BuildContext context, {required String title, IconData? icon, required Widget child}) {
     Widget content = child;
     if (child is Text && (child.data == null || child.data!.trim().isEmpty)) {
       content = Text(
@@ -1016,19 +1056,8 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
             children: [
               Row(
                 children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: 22, color: AppColors.iconSectionOnFrost),
-                    const SizedBox(width: 8),
-                  ],
-                  Text(
-                    title,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 17,
-                      color: AppColors.textBodyOnFrost,
-                      letterSpacing: -0.1,
-                    ),
-                  ),
+                  if (icon != null) ...[Icon(icon, size: 22, color: AppColors.iconSectionOnFrost), const SizedBox(width: 8)],
+                  Text(title, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: 17, color: AppColors.textBodyOnFrost)),
                 ],
               ),
               const SizedBox(height: 12),
@@ -1050,29 +1079,15 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
   }
 
   Color _probabilityBg(String probability) {
-    switch (probability) {
-      case 'High':
-        return Colors.green.shade100;
-      case 'Medium':
-        return Colors.amber.shade100;
-      case 'Low':
-        return Colors.red.shade100;
-      default:
-        return Colors.grey.shade200;
-    }
+    if (probability == 'High') return Colors.green.shade100;
+    if (probability == 'Medium') return Colors.amber.shade100;
+    return Colors.red.shade100;
   }
 
   Color _probabilityFg(String probability) {
-    switch (probability) {
-      case 'High':
-        return Colors.green.shade900;
-      case 'Medium':
-        return Colors.amber.shade900;
-      case 'Low':
-        return Colors.red.shade900;
-      default:
-        return Colors.black87;
-    }
+    if (probability == 'High') return Colors.green.shade900;
+    if (probability == 'Medium') return Colors.amber.shade900;
+    return Colors.red.shade900;
   }
 
   IconData _weatherIcon(String weather) {
@@ -1086,23 +1101,18 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
   Widget _predictionSnapshotCard(
       BuildContext context, {
         required Species species,
-        required dynamic site, // 傳入最佳 Site
-        required List<TimeSeriesPrediction> forecasts, // 傳入真實的 AI 預測數據
+        required dynamic site,
+        required List<TimeSeriesPrediction> forecasts,
       }) {
     final s = Adaptive.scale(context);
     final currentForecast = forecasts.isNotEmpty ? forecasts.first : null;
     if (currentForecast == null) return const SizedBox.shrink();
 
-    // 解析機率標籤
     String probLabel = 'Low';
-    if (currentForecast.probability >= 0.7) {
-      probLabel = 'High';
-    } else if (currentForecast.probability >= 0.4) {
-      probLabel = 'Medium';
-    }
+    if (currentForecast.probability >= 0.7) probLabel = 'High';
+    else if (currentForecast.probability >= 0.4) probLabel = 'Medium';
     final probPercent = (currentForecast.probability * 100).round();
 
-    // 🟢 從舊資料庫提取此物種專屬的活動時間 (timeOfDay)
     final fixedBestTime = speciesPredictions[species.id]?.forecast.first.timeOfDay ?? 'Night';
 
     return Padding(
@@ -1126,111 +1136,37 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(
-                              Icons.trending_up_rounded,
-                              size: 22 * s,
-                              color: AppColors.iconSectionOnFrost,
-                            ),
+                            Icon(Icons.trending_up_rounded, size: 22 * s, color: AppColors.iconSectionOnFrost),
                             SizedBox(width: 8 * s),
-                            Expanded(
-                              child: Text(
-                                'Current Prediction',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: Adaptive.clamp(
-                                    context,
-                                    17,
-                                    min: 14,
-                                    max: 21,
-                                  ),
-                                  color: AppColors.textBodyOnFrost,
-                                  letterSpacing: -0.1,
-                                ),
-                              ),
-                            ),
+                            Expanded(child: Text('Current Prediction', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: Adaptive.clamp(context, 17, min: 14, max: 21), color: AppColors.textBodyOnFrost, letterSpacing: -0.1))),
                           ],
                         ),
                         SizedBox(height: 6 * s),
-                        Text(
-                          'Best Site: ${site.name}',
-                          style: GoogleFonts.plusJakartaSans(
-                            color: AppColors.textSubtitleOnFrost,
-                            fontSize: Adaptive.clamp(context, 13, min: 11, max: 15),
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.05,
-                          ),
-                        ),
+                        Text('Best Site: ${site.name}', style: GoogleFonts.plusJakartaSans(color: AppColors.textSubtitleOnFrost, fontSize: Adaptive.clamp(context, 13, min: 11, max: 15), fontWeight: FontWeight.w600, letterSpacing: 0.05)),
                       ],
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 10 * s,
-                      vertical: 6 * s,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _probabilityBg(probLabel),
-                      borderRadius: BorderRadius.circular(20 * s),
-                      border: Border.all(color: Colors.grey.shade400),
-                    ),
-                    child: Text(
-                      '$probPercent% $probLabel',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontWeight: FontWeight.w800,
-                        fontSize: Adaptive.clamp(context, 12, min: 10, max: 14),
-                        color: _probabilityFg(probLabel),
-                        letterSpacing: 0.05,
-                      ),
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 10 * s, vertical: 6 * s),
+                    decoration: BoxDecoration(color: _probabilityBg(probLabel), borderRadius: BorderRadius.circular(20 * s), border: Border.all(color: Colors.grey.shade400)),
+                    child: Text('$probPercent% $probLabel', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: Adaptive.clamp(context, 12, min: 10, max: 14), color: _probabilityFg(probLabel), letterSpacing: 0.05)),
                   ),
                 ],
               ),
               SizedBox(height: 12 * s),
               Row(
                 children: [
-                  Expanded(
-                    child: _predictionMiniFact(
-                      context,
-                      icon: Icons.schedule_rounded,
-                      iconColor: AppColors.primary,
-                      label: 'Best Time',
-                      value: fixedBestTime, // 使用專屬習性時間
-                    ),
-                  ),
+                  Expanded(child: _predictionMiniFact(context, icon: Icons.schedule_rounded, iconColor: AppColors.primary, label: 'Best Time', value: fixedBestTime)),
                   SizedBox(width: 8 * s),
-                  Expanded(
-                    child: _predictionMiniFact(
-                      context,
-                      icon: _weatherIcon(currentForecast.weatherDescription),
-                      iconColor: Colors.orange.shade700,
-                      label: 'Weather',
-                      value: currentForecast.weatherDescription,
-                    ),
-                  ),
+                  Expanded(child: _predictionMiniFact(context, icon: _weatherIcon(currentForecast.weatherDescription), iconColor: Colors.orange.shade700, label: 'Weather', value: currentForecast.weatherDescription)),
                 ],
               ),
               SizedBox(height: 8 * s),
               Row(
                 children: [
-                  Expanded(
-                    child: _predictionMiniFact(
-                      context,
-                      icon: Icons.thermostat_rounded,
-                      iconColor: Colors.deepOrange.shade700,
-                      label: 'Temp',
-                      value: '${currentForecast.temperature.round()}°C',
-                    ),
-                  ),
+                  Expanded(child: _predictionMiniFact(context, icon: Icons.thermostat_rounded, iconColor: Colors.deepOrange.shade700, label: 'Temp', value: '${currentForecast.temperature.round()}°C')),
                   SizedBox(width: 8 * s),
-                  Expanded(
-                    child: _predictionMiniFact(
-                      context,
-                      icon: Icons.water_drop_rounded,
-                      iconColor: Colors.cyan.shade700,
-                      label: 'Humidity',
-                      value: '${currentForecast.humidity.round()}%',
-                    ),
-                  ),
+                  Expanded(child: _predictionMiniFact(context, icon: Icons.water_drop_rounded, iconColor: Colors.cyan.shade700, label: 'Humidity', value: '${currentForecast.humidity.round()}%')),
                 ],
               ),
               SizedBox(height: 12 * s),
@@ -1238,27 +1174,13 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                 width: double.infinity,
                 child: FilledButton(
                   onPressed: () {
-                    // 🟢 完美傳遞 siteId，徹底解決編譯報錯！
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
-                        builder: (_) => SpeciesPredictionScreen(
-                          speciesId: species.id,
-                          siteId: site.id,
-                          siteName: site.name,
-                        ),
+                        builder: (_) => SpeciesPredictionScreen(speciesId: species.id, siteId: site.id, siteName: site.name),
                       ),
                     );
                   },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.88),
-                    foregroundColor: Colors.white,
-                    minimumSize: Size.fromHeight(46 * s),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24 * s),
-                    ),
-                    elevation: 0,
-                    shadowColor: Colors.transparent,
-                  ),
+                  style: FilledButton.styleFrom(backgroundColor: AppColors.primary.withValues(alpha: 0.88), foregroundColor: Colors.white, minimumSize: Size.fromHeight(46 * s), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24 * s)), elevation: 0, shadowColor: Colors.transparent),
                   child: const Text('See more prediction details'),
                 ),
               ),
@@ -1269,57 +1191,21 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
     );
   }
 
-  Widget _predictionMiniFact(
-      BuildContext context, {
-        required IconData icon,
-        required Color iconColor,
-        required String label,
-        required String value,
-      }) {
+  Widget _predictionMiniFact(BuildContext context, {required IconData icon, required Color iconColor, required String label, required String value}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.86),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.82)),
-      ),
+      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.86), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white.withValues(alpha: 0.82))),
       child: Row(
         children: [
-          Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(9),
-            ),
-            child: Icon(icon, color: iconColor, size: 18),
-          ),
+          Container(width: 30, height: 30, decoration: BoxDecoration(color: iconColor.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(9)), child: Icon(icon, color: iconColor, size: 18)),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  label,
-                  style: GoogleFonts.plusJakartaSans(
-                    color: AppColors.textSubtitleOnFrost,
-                    fontSize: Adaptive.clamp(context, 11, min: 10, max: 13),
-                    fontWeight: FontWeight.w700,
-                    height: 1.2,
-                  ),
-                ),
-                Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.plusJakartaSans(
-                    color: AppColors.textBodyOnFrost,
-                    fontSize: Adaptive.clamp(context, 13, min: 11, max: 15),
-                    fontWeight: FontWeight.w800,
-                    height: 1.25,
-                  ),
-                ),
+                Text(label, style: GoogleFonts.plusJakartaSans(color: AppColors.textSubtitleOnFrost, fontSize: Adaptive.clamp(context, 11, min: 10, max: 13), fontWeight: FontWeight.w700, height: 1.2)),
+                Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.plusJakartaSans(color: AppColors.textBodyOnFrost, fontSize: Adaptive.clamp(context, 13, min: 11, max: 15), fontWeight: FontWeight.w800, height: 1.25)),
               ],
             ),
           ),
@@ -1332,11 +1218,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
     return Container(
       width: double.infinity,
       padding: padding ?? const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.86),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
-      ),
+      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.86), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withValues(alpha: 0.8))),
       child: child,
     );
   }
