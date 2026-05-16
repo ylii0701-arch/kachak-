@@ -456,7 +456,7 @@ class _MainShellState extends State<MainShell> {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
-    bool secondary = false,
+    bool muted = false,
   }) {
     return Material(
       color: Colors.transparent,
@@ -469,33 +469,107 @@ class _MainShellState extends State<MainShell> {
             children: [
               Icon(
                 icon,
-                size: secondary ? 18 : 22,
-                color: secondary
+                size: muted ? 18 : 20,
+                color: muted
                     ? AppColors.accent.withValues(alpha: 0.68)
                     : AppColors.accent,
               ),
               const SizedBox(width: 12),
-              Text(
-                label,
-                style: GoogleFonts.inter(
-                  fontSize: secondary ? 13 : 16,
-                  fontWeight: secondary ? FontWeight.w600 : FontWeight.w700,
-                  color: secondary
-                      ? AppColors.accent.withValues(alpha: 0.7)
-                      : AppColors.accent,
-                ),
-              ),
-              if (secondary) ...[
-                const SizedBox(width: 8),
-                Text(
-                  'soon',
+              Expanded(
+                child: Text(
+                  label,
                   style: GoogleFonts.inter(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.accent.withValues(alpha: 0.5),
+                    fontSize: muted ? 13.2 : 15,
+                    fontWeight: muted ? FontWeight.w600 : FontWeight.w700,
+                    color: muted
+                        ? AppColors.accent.withValues(alpha: 0.72)
+                        : AppColors.accent,
                   ),
                 ),
-              ],
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: muted ? 18 : 20,
+                color: AppColors.accent.withValues(alpha: muted ? 0.5 : 0.75),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _menuFeatureCard({
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Ink(
+          padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
+          decoration: BoxDecoration(
+            color: AppColors.lightSage.withValues(alpha: 0.38),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border.withValues(alpha: 0.9)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: const Icon(
+                  Icons.photo_camera_back_outlined,
+                  color: AppColors.accent,
+                  size: 21,
+                ),
+              ),
+              const SizedBox(width: 11),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Photo quality',
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.accent,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Adjust resolution and compression',
+                      style: GoogleFonts.inter(
+                        fontSize: 12.2,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textSubtitleOnFrost,
+                        height: 1.28,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 21,
+                color: AppColors.accent.withValues(alpha: 0.78),
+              ),
             ],
           ),
         ),
@@ -623,29 +697,41 @@ class _MainShellState extends State<MainShell> {
                             color: AppColors.accent,
                           ),
                         ),
-                        SizedBox(height: 12 * s),
-                        _menuTile(
-                          icon: Icons.photo_camera_back_outlined,
-                          label: 'Photo quality',
+                        SizedBox(height: 10 * s),
+                        _menuFeatureCard(
                           onTap: _openPhotoQuality,
+                        ),
+                        SizedBox(height: 14 * s),
+                        Divider(color: Colors.grey.shade200, thickness: 1),
+                        SizedBox(height: 10 * s),
+                        Text(
+                          'MORE INFO',
+                          style: GoogleFonts.inter(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                            color: AppColors.accent.withValues(alpha: 0.55),
+                          ),
+                        ),
+                        SizedBox(height: 6 * s),
+                        _menuTile(
+                          icon: Icons.forest_outlined,
+                          label: 'Nature First Principle',
+                          onTap: _openNatureFirst,
+                          muted: true,
                         ),
                         _menuTile(
                           icon: Icons.school_outlined,
                           label: 'Show tutorial',
                           onTap: _restartTutorial,
+                          muted: true,
                         ),
                         _menuTile(
                           icon: Icons.info_outline_rounded,
                           label: 'About us',
                           onTap: _openAboutUs,
+                          muted: true,
                         ),
-                        _menuTile(
-                          icon: Icons.forest_outlined,
-                          label: 'Nature First Principle',
-                          onTap: _openNatureFirst,
-                        ),
-                        SizedBox(height: 14 * s),
-                        Divider(color: Colors.grey.shade200, thickness: 1),
                       ],
                     ),
                   ),
