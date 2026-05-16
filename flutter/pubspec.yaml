@@ -75,12 +75,17 @@ flutter:
 
   assets:
     - assets/images/kachak_logo_green.png
+    - assets/images/malayantiger.jpg
+    - assets/images/team.png
+    - assets/images/wenyuan.png
+    - assets/images/tailin.png
+    - assets/images/calvin.png
+    - assets/images/zhenyu.png
+    - assets/images/yueyufei.png
+    - assets/images/yumeng.png
     - assets/images/forest_mist_backdrop.jpg
     - assets/images/leaf_branch.png
-    - assets/images/misty_terrace.png
-    - assets/images/misty_forest.png
     - assets/images/home_editorial_bg.png
-    - assets/images/card_leaf.png
     - assets/images/ai_chatbot_icon.png
     - assets/images/splash_bg.png
     - assets/images/identify_tips_right.png
