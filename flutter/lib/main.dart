@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -18,24 +19,34 @@ final FlutterLocalNotificationsPlugin localNotifs = FlutterLocalNotificationsPlu
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final isMobileWeb =
+      kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.android);
 
-  // Onnx initialize
-  await OnnxPredictionService.initModel();
-  PredictionManager.instance.startEngine();
+  // Heavy inference bootstrap can crash mobile browsers. Defer there.
+  if (!isMobileWeb) {
+    await OnnxPredictionService.initModel();
+    PredictionManager.instance.startEngine();
+  } else {
+    debugPrint('⚠️ Mobile web detected: deferred ONNX/prediction startup.');
+  }
 
   // Initialize Local Notifications
-  const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-  const initSettings = InitializationSettings(android: androidInit);
+  if (!kIsWeb) {
+    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initSettings = InitializationSettings(android: androidInit);
 
-  await localNotifs.initialize(
-    initSettings,
-    onDidReceiveNotificationResponse: (NotificationResponse response) {
-      // Handle when the user taps the notification
-      if (response.payload != null) {
-        _showNotificationDetails(response.payload!);
-      }
-    },
-  );
+    await localNotifs.initialize(
+      initSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse response) {
+        // Handle when the user taps the notification
+        if (response.payload != null) {
+          _showNotificationDetails(response.payload!);
+        }
+      },
+    );
+  }
 
   final prefs = await SharedPreferences.getInstance();
   runApp(

@@ -1,10 +1,8 @@
 @JS()
-library onnx_web;
 
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -68,8 +66,11 @@ class OnnxPredictionService {
     required String animalClass,
   }) async {
     if (_session == null) {
-      debugPrint("⚠️ Web ONNX Model is not initialized yet.");
-      return null;
+      await initModel();
+      if (_session == null) {
+        debugPrint("⚠️ Web ONNX Model is not initialized yet.");
+        return null;
+      }
     }
 
     // --- Spatial & Temporal Preprocessing ---
@@ -126,12 +127,18 @@ class OnnxPredictionService {
         if (probData != null) {
           if (probData.isA<JSFloat32Array>()) {
             final list = (probData as JSFloat32Array).toDart;
-            if (list.length > 1) finalProbability = list[1].toDouble();
-            else if (list.isNotEmpty) finalProbability = list[0].toDouble();
+            if (list.length > 1) {
+              finalProbability = list[1].toDouble();
+            } else if (list.isNotEmpty) {
+              finalProbability = list[0].toDouble();
+            }
           } else if (probData.isA<JSFloat64Array>()) {
             final list = (probData as JSFloat64Array).toDart;
-            if (list.length > 1) finalProbability = list[1].toDouble();
-            else if (list.isNotEmpty) finalProbability = list[0].toDouble();
+            if (list.length > 1) {
+              finalProbability = list[1].toDouble();
+            } else if (list.isNotEmpty) {
+              finalProbability = list[0].toDouble();
+            }
           } else if (probData.isA<JSArray>()) {
             final list = (probData as JSArray).toDart;
             if (list.isNotEmpty) {
@@ -144,8 +151,11 @@ class OnnxPredictionService {
                   finalProbability = (prob1 as JSNumber).toDartDouble;
                 }
               } else if (first.isA<JSNumber>()) {
-                if (list.length > 1) finalProbability = (list[1] as JSNumber).toDartDouble;
-                else finalProbability = (first as JSNumber).toDartDouble;
+                if (list.length > 1) {
+                  finalProbability = (list[1] as JSNumber).toDartDouble;
+                } else {
+                  finalProbability = (first as JSNumber).toDartDouble;
+                }
               }
             }
           }
