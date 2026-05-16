@@ -59,6 +59,7 @@ class PredictionManager extends ChangeNotifier {
     if (_engineStarted || _engineStarting) return;
     _engineStarting = true;
     try {
+      await OnnxPredictionService.initModel();
       await fetchAndCalculate();
       _scheduleNextHourlyFetch();
       _engineStarted = true;
@@ -265,5 +266,103 @@ class PredictionManager extends ChangeNotifier {
   Future<void> refreshManually() async {
     debugPrint('👆 Prediction Engine: Manual refresh triggered.');
     await fetchAndCalculate();
+  }
+
+  // ------------------------------------------------------------------
+  // On-demand per-species prediction (used on mobile web to avoid
+  // computing ALL species at boot which crashes mobile Safari).
+  // ------------------------------------------------------------------
+
+  final Set<String> _computedSpeciesSites = {};
+
+  /// Computes predictions for a single species across its relevant sites.
+  /// Returns immediately if already computed. Safe to call multiple times.
+  Future<void> fetchForSpecies(String speciesId) async {
+    final species = speciesById(speciesId);
+    if (species == null) return;
+
+    // Find all sites that support this species
+    final sites = siteData.where(
+      (s) => s.supportedSpeciesIds.contains(speciesId),
+    );
+
+    // Determine the ONNX animal class
+    String targetCategory = species.category;
+    if (targetCategory == Species.insects || targetCategory == Species.reptiles) {
+      targetCategory = Species.amphibians;
+    }
+
+    for (final site in sites) {
+      final key = '${site.id}:$speciesId';
+      if (_computedSpeciesSites.contains(key)) continue;
+
+      forecastPredictions[site.id] ??= {};
+      latestPredictions[site.id] ??= {};
+
+      // Fetch weather for the city (use cache if available from a prior call)
+      CityWeatherBundle? weatherBundle;
+      final city = kMalaysianCities.where((c) => c.name == site.cityName).firstOrNull;
+      if (city != null) {
+        try {
+          weatherBundle = await _weatherService.fetchCityWeather(
+            cityName: city.name, lat: city.lat, lon: city.lng,
+          );
+        } catch (_) {}
+      }
+
+      final fallback = siteWeatherDefaults[site.id] ?? siteWeatherDefaults['default']!;
+
+      double currentTemp = weatherBundle?.temperature ?? fallback.temp;
+      double currentRain = weatherBundle?.rainfall ?? fallback.rainfall;
+      double currentHumid = weatherBundle?.humidity.toDouble() ?? fallback.humidity;
+      double currentWind = weatherBundle?.windSpeed ?? fallback.windSpeed;
+
+      double currentProb = await _runInference(
+        site, targetCategory, currentTemp, currentRain, currentHumid, currentWind,
+      ) ?? 0.0;
+
+      latestPredictions[site.id]![speciesId] = currentProb;
+
+      // Build forecast time-series
+      List<TimeSeriesPrediction> timeSeries = [
+        TimeSeriesPrediction(
+          timestamp: DateTime.now().toLocal(),
+          probability: currentProb,
+          temperature: currentTemp,
+          humidity: currentHumid,
+          weatherDescription: weatherBundle?.description ?? 'Unknown',
+          iconCode: weatherBundle?.iconCode ?? '01d',
+        ),
+      ];
+
+      if (weatherBundle != null) {
+        for (final entry in weatherBundle.forecast) {
+          double? prob = await _runInference(
+            site, targetCategory, entry.temperature, entry.rainfall,
+            entry.humidity.toDouble(), entry.windSpeed,
+          );
+          if (prob != null) {
+            timeSeries.add(TimeSeriesPrediction(
+              timestamp: entry.timestamp.toLocal(),
+              probability: prob,
+              temperature: entry.temperature,
+              humidity: entry.humidity.toDouble(),
+              weatherDescription: entry.description,
+              iconCode: entry.iconCode,
+            ));
+          }
+        }
+      }
+
+      forecastPredictions[site.id]![speciesId] = timeSeries;
+      _computedSpeciesSites.add(key);
+
+      // Yield for mobile web
+      if (_isMobileWeb) {
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+      }
+    }
+
+    notifyListeners();
   }
 } ///end

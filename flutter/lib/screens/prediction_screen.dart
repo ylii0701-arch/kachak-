@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +25,20 @@ class PredictionScreen extends StatefulWidget {
 
 class _PredictionScreenState extends State<PredictionScreen> {
   String _selectedCity = 'Kuala Lumpur';
+
+  @override
+  void initState() {
+    super.initState();
+    _ensureEngineForMobileWeb();
+  }
+
+  void _ensureEngineForMobileWeb() {
+    final isMobileWeb = kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.android);
+    if (!isMobileWeb) return;
+    PredictionManager.instance.startEngine();
+  }
 
   // Helper: Convert decimal probability to UI text label
   String _getProbLabel(double p) {
