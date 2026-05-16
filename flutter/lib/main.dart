@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
@@ -59,6 +61,15 @@ Future<void> main() async {
       child: const KachakApp(),
     ),
   );
+
+  if (isMobileWeb) {
+    unawaited(
+      Future<void>(() async {
+        await OnnxPredictionService.initModel();
+        await PredictionManager.instance.startEngine();
+      }),
+    );
+  }
 }
 
 // Shows a dialog when a notification is tapped

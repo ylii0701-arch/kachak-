@@ -47,11 +47,20 @@ class PredictionManager extends ChangeNotifier {
   Timer? _hourlyTimer;
   bool isCalculating = false;
   DateTime? _lastCalculationTime;
+  bool _engineStarted = false;
+  bool _engineStarting = false;
 
   /// 1. Start the background engine
   Future<void> startEngine() async {
-    await fetchAndCalculate();
-    _scheduleNextHourlyFetch();
+    if (_engineStarted || _engineStarting) return;
+    _engineStarting = true;
+    try {
+      await fetchAndCalculate();
+      _scheduleNextHourlyFetch();
+      _engineStarted = true;
+    } finally {
+      _engineStarting = false;
+    }
   }
 
   /// 2. Core calculation logic (with 10-minute cooldown)
@@ -73,6 +82,7 @@ class PredictionManager extends ChangeNotifier {
     debugPrint('🔄 Prediction Engine: Starting full time-series calculations...');
 
     try {
+      var processedSpecies = 0;
       for (final city in kMalaysianCities) {
         CityWeatherBundle? weatherBundle;
 
@@ -148,7 +158,14 @@ class PredictionManager extends ChangeNotifier {
               }
             }
             forecastPredictions[site.id]![speciesId] = timeSeries;
+            processedSpecies += 1;
+            if (kIsWeb && processedSpecies % 8 == 0) {
+              await Future<void>.delayed(Duration.zero);
+            }
           }
+        }
+        if (kIsWeb) {
+          await Future<void>.delayed(Duration.zero);
         }
       }
 

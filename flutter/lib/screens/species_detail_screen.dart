@@ -144,38 +144,40 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
     await Future<void>.delayed(const Duration(milliseconds: 320));
     if (!mounted) return;
 
+    final steps = <SpotlightStep>[
+      const SpotlightStep(
+        targetId: TourTargetIds.detailNotification,
+        title: 'Enable alerts',
+        body:
+            'After saving, tap this icon to enable species notifications for higher-probability sightings.',
+        onEnterCommand: 'speciesDetail.focusAlert',
+      ),
+      const SpotlightStep(
+        targetId: TourTargetIds.detailPredictionCard,
+        title: 'Current prediction',
+        body:
+            'This card shows the best site and current weather-based probability for spotting this species.',
+        onEnterCommand: 'speciesDetail.scrollPrediction',
+      ),
+      const SpotlightStep(
+        targetId: TourTargetIds.detailHabitatLocations,
+        title: 'Recorded observation',
+        body:
+            'This first recorded observation row includes the latest sighting and coordinates.',
+        onEnterCommand: 'speciesDetail.scrollHabitat',
+      ),
+      const SpotlightStep(
+        targetId: TourTargetIds.detailFirstObservation,
+        title: 'Open on map',
+        body:
+            'Tap this map button to view the animal last occurrence directly on the map.',
+        onEnterCommand: 'speciesDetail.scrollMapButton',
+      ),
+    ];
+
     await SpotlightTour.show(
       context,
-      steps: const [
-        SpotlightStep(
-          targetId: TourTargetIds.detailNotification,
-          title: 'Enable alerts',
-          body:
-          'After saving, tap this icon to enable species notifications for higher-probability sightings.',
-          onEnterCommand: 'speciesDetail.focusAlert',
-        ),
-        SpotlightStep(
-          targetId: TourTargetIds.detailPredictionCard,
-          title: 'Current prediction',
-          body:
-          'This card shows the best site and current weather-based probability for spotting this species.',
-          onEnterCommand: 'speciesDetail.scrollPrediction',
-        ),
-        SpotlightStep(
-          targetId: TourTargetIds.detailHabitatLocations,
-          title: 'Recorded observation',
-          body:
-          'This first recorded observation row includes the latest sighting and coordinates.',
-          onEnterCommand: 'speciesDetail.scrollHabitat',
-        ),
-        SpotlightStep(
-          targetId: TourTargetIds.detailFirstObservation,
-          title: 'Open on map',
-          body:
-          'Tap this map button to view the animal last occurrence directly on the map.',
-          onEnterCommand: 'speciesDetail.scrollMapButton',
-        ),
-      ],
+      steps: steps,
       onComplete: () async {
         await _scrollToTop();
       },
@@ -628,16 +630,17 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                               child: Text(species.description),
                             ),
 
-                            if (bestSite != null && bestForecasts.isNotEmpty)
-                              TourAnchor(
-                                id: TourTargetIds.detailPredictionCard,
-                                child: _predictionSnapshotCard(
-                                  context,
-                                  species: species,
-                                  site: bestSite,
-                                  forecasts: bestForecasts,
-                                ),
-                              ),
+                            TourAnchor(
+                              id: TourTargetIds.detailPredictionCard,
+                              child: (bestSite != null && bestForecasts.isNotEmpty)
+                                  ? _predictionSnapshotCard(
+                                      context,
+                                      species: species,
+                                      site: bestSite,
+                                      forecasts: bestForecasts,
+                                    )
+                                  : _predictionPendingCard(context),
+                            ),
 
                             _sectionCard(
                               context,
@@ -1096,6 +1099,58 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
     if (w.contains('partly') || w.contains('cloud')) return Icons.wb_cloudy_rounded;
     if (w.contains('rain')) return Icons.umbrella_rounded;
     return Icons.wb_cloudy_rounded;
+  }
+
+  Widget _predictionPendingCard(BuildContext context) {
+    final s = Adaptive.scale(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: GlassPanel(
+        padding: const EdgeInsets.all(20),
+        borderRadius: 20,
+        blurSigma: 14,
+        fillAlpha: 0.62,
+        verticalFrostGradient: true,
+        child: _innerInfoCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.trending_up_rounded,
+                    size: 22 * s,
+                    color: AppColors.iconSectionOnFrost,
+                  ),
+                  SizedBox(width: 8 * s),
+                  Expanded(
+                    child: Text(
+                      'Current Prediction',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.w800,
+                        fontSize: Adaptive.clamp(context, 17, min: 14, max: 21),
+                        color: AppColors.textBodyOnFrost,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8 * s),
+              Text(
+                'Loading weather-based prediction data...',
+                style: GoogleFonts.plusJakartaSans(
+                  color: AppColors.textSubtitleOnFrost,
+                  fontSize: Adaptive.clamp(context, 13, min: 11, max: 15),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: 12 * s),
+              const LinearProgressIndicator(minHeight: 5),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _predictionSnapshotCard(
