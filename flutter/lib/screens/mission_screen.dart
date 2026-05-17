@@ -569,7 +569,7 @@ class _MissionScreenState extends State<MissionScreen> {
             ),
             child: Icon(icon, color: AppColors.primary),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             title,
             style: GoogleFonts.libreBaskerville(
@@ -578,13 +578,23 @@ class _MissionScreenState extends State<MissionScreen> {
               fontSize: 16,
               height: 1.2,
             ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 6),
+          Expanded(
+            child: Text(
+              subtitle,
+              style: TextStyle(
+                color: Colors.grey.shade700,
+                fontSize: 11.5,
+                height: 1.35,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           const SizedBox(height: 8),
-          Text(
-            subtitle,
-            style: TextStyle(color: Colors.grey.shade700, fontSize: 11.5, height: 1.35),
-          ),
-          const SizedBox(height: 10),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(

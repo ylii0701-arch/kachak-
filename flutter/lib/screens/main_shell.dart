@@ -513,12 +513,17 @@ class _MainShellState extends State<MainShell> {
             // Keep tab states alive while switching bottom navigation.
             IndexedStack(
               index: shell.index,
-              children: const [
-                HomeScreen(),
-                MapScreen(),
-                IdentifyScreen(),
-                MissionScreen(),
-                SavedScreen(),
+              children: [
+                const HomeScreen(),
+                const MapScreen(),
+                const IdentifyScreen(),
+                const MissionScreen(),
+                SavedScreen(
+                  onExplore: () {
+                    _closeMenu();
+                    context.read<AppShellController>().selectTab(0);
+                  },
+                ),
               ],
             ),
             // Dim backdrop captures taps to close menu.
