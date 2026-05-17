@@ -1,9 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import '../data/predictions_data.dart'; // 重新加回來提取生物習性
+import '../data/predictions_data.dart'; // Restored to extract biological habits
 import '../data/species_data.dart';
 import '../providers/saved_species_provider.dart';
 import '../services/prediction_manager.dart';
@@ -38,23 +37,14 @@ class SpeciesPredictionScreen extends StatefulWidget {
 
 class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
 
-  @override
-  void initState() {
-    super.initState();
-    final isMobileWeb = kIsWeb &&
-        (defaultTargetPlatform == TargetPlatform.iOS ||
-            defaultTargetPlatform == TargetPlatform.android);
-    if (isMobileWeb) {
-      PredictionManager.instance.fetchForSpecies(widget.speciesId);
-    }
-  }
-
+  // Helper to convert probability decimal to text label
   String _getProbLabel(double p) {
     if (p >= 0.7) return 'High';
     if (p >= 0.4) return 'Medium';
     return 'Low';
   }
 
+  // Toggles the notification alert for the selected species
   Future<void> _toggleNotif(
       BuildContext context,
       SavedSpeciesProvider saved,
@@ -98,6 +88,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
     );
   }
 
+  // Formats the timestamp into a readable daily format (e.g., Today, Tomorrow)
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -112,6 +103,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
     return names[(w - 1).clamp(0, 6)];
   }
 
+  // Maps weather descriptions to corresponding emojis
   String _weatherEmoji(String w) {
     final weather = w.toLowerCase();
     if (weather.contains('sun') || weather.contains('clear')) return '☀️';
@@ -121,6 +113,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
     return '☁️';
   }
 
+  // Returns the background color based on probability label
   Color _probBg(String p) {
     switch (p) {
       case 'High':
@@ -134,6 +127,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
     }
   }
 
+  // Returns the text color based on probability label
   Color _probFg(String p) {
     switch (p) {
       case 'High':
@@ -153,6 +147,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
     final species = speciesById(widget.speciesId);
     final saved = context.watch<SavedSpeciesProvider>();
 
+    // Retrieve daily forecast data for the specific site and species
     final dailyForecasts = PredictionManager.instance.getSevenDayForecastForUI(widget.siteId, widget.speciesId);
 
     if (species == null || dailyForecasts.isEmpty) {
@@ -181,6 +176,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
       );
     }
 
+    // Calculate dynamic UI dimensions and safe area insets
     final topInset =
         MediaQuery.paddingOf(context).top + kToolbarHeight + (6 * s);
     final bottomPad = MediaQuery.paddingOf(context).bottom + (20 * s);
@@ -191,8 +187,10 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
             ((textScale - 1.0) * 40);
     final isNotified = saved.isNotified(species.id);
 
+    // Define the primary highlighted environmental factor
     final primaryFactor = 'Time';
 
+    // Extract the static best time of day for this species from predictions data
     final fixedBestTime = speciesPredictions[widget.speciesId]?.forecast.first.timeOfDay ?? 'Night';
 
     return AssistantOverlayLayer(
@@ -703,7 +701,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                               child: _forecastCell(
                                                 icon: Icons.schedule,
                                                 label: 'Best Time',
-                                                value: fixedBestTime, // 使用預先設定好的習性
+                                                value: fixedBestTime, // Uses pre-configured habits
                                                 iconColor: AppColors.primary,
                                               ),
                                             ),
