@@ -11,6 +11,7 @@ import '../data/species_data.dart';
 import '../models/species.dart';
 import '../services/gemini_recognition_service.dart';
 import '../services/photo_quality_analyzer.dart';
+import '../services/web_permission_bridge.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
 import '../utils/image_validator.dart';
@@ -36,7 +37,7 @@ class IdentifyScreen extends StatefulWidget {
 
 class _IdentifyScreenState extends State<IdentifyScreen>
     with SingleTickerProviderStateMixin {
-  static const double _speciesCardMinHeight = 270;
+  static const double _speciesCardMinHeight = 236;
 
   final ImagePicker _picker = ImagePicker();
 
@@ -49,6 +50,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
   QualityResult? _qualityResult;
   String? _message;
   bool _isLoading = false;
+  DateTime? _loadingStartedAt;
 
   // Set to true only for dev testing internet images.
   final bool _bypassExifCheck = true;
@@ -161,6 +163,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
     setState(() {
       _isLoading = true;
       _perceivedProgress = 0.02;
+      _loadingStartedAt = DateTime.now();
       _predicted = null;
       _confidence = null;
       _qualityResult = null;
@@ -186,14 +189,20 @@ class _IdentifyScreenState extends State<IdentifyScreen>
       }
       final result = await analyzePhotoQuality(bytes);
       if (!mounted) return;
-      await _endLoading(() {
+      await _endLoading(
+        () {
         _qualityResult = result;
-      });
+        },
+        minVisible: const Duration(milliseconds: 1200),
+      );
     } catch (_) {
       if (!mounted) return;
-      await _endLoading(() {
+      await _endLoading(
+        () {
         _message = 'Failed to analyze image. Please try again.';
-      });
+        },
+        minVisible: const Duration(milliseconds: 1200),
+      );
     }
   }
 
@@ -325,12 +334,24 @@ class _IdentifyScreenState extends State<IdentifyScreen>
     });
   }
 
-  Future<void> _endLoading(VoidCallback updateState) async {
+  Future<void> _endLoading(
+    VoidCallback updateState, {
+    Duration minVisible = Duration.zero,
+  }) async {
+    final startedAt = _loadingStartedAt;
+    if (startedAt != null && minVisible > Duration.zero) {
+      final elapsed = DateTime.now().difference(startedAt);
+      final remaining = minVisible - elapsed;
+      if (remaining > Duration.zero) {
+        await Future<void>.delayed(remaining);
+      }
+    }
     await _finishPerceivedProgress();
     if (!mounted) return;
     setState(() {
       updateState();
       _isLoading = false;
+      _loadingStartedAt = null;
     });
   }
 
@@ -372,7 +393,19 @@ class _IdentifyScreenState extends State<IdentifyScreen>
   }
 
   Future<bool> _ensurePermissionForSource(ImageSource source) async {
-    if (kIsWeb) return true;
+    if (kIsWeb) {
+      if (source == ImageSource.camera) {
+        final granted = await requestWebCameraPermission();
+        if (!granted) {
+          _showPermissionMessage(
+            'Camera access is blocked. Please allow camera in your browser settings.',
+          );
+        }
+        return granted;
+      }
+      // Gallery/file selection on web is handled by browser file picker.
+      return true;
+    }
 
     if (source == ImageSource.camera) {
       var status = await Permission.camera.status;

@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../main.dart';
+import '../services/web_permission_bridge.dart';
 
 /// Stores favorite species and local alert preferences in SharedPreferences.
 class SavedSpeciesProvider extends ChangeNotifier {
@@ -64,7 +65,9 @@ class SavedSpeciesProvider extends ChangeNotifier {
       // Extra 1: Automatically turn off notifications if no longer a favorite.
       if (wasNotified) {
         _notifiedIds.remove(speciesId);
-        await localNotifs.cancel(speciesId.hashCode);
+        if (!kIsWeb) {
+          await localNotifs.cancel(speciesId.hashCode);
+        }
         await _prefs.setString(_notifKey, jsonEncode(_notifiedIds.toList()));
       }
     } else {
@@ -99,10 +102,15 @@ class SavedSpeciesProvider extends ChangeNotifier {
     final wasNotified = _notifiedIds.contains(speciesId);
 
     if (!wasNotified) {
-      // Prompt OS notification permission.
-      final status = await Permission.notification.request();
-      if (status.isDenied || status.isPermanentlyDenied) {
-        return false;
+      if (kIsWeb) {
+        final granted = await requestWebNotificationPermission();
+        if (!granted) return false;
+      } else {
+        // Prompt OS notification permission.
+        final status = await Permission.notification.request();
+        if (status.isDenied || status.isPermanentlyDenied) {
+          return false;
+        }
       }
 
       _notifiedIds.add(speciesId);
@@ -110,7 +118,9 @@ class SavedSpeciesProvider extends ChangeNotifier {
       await _scheduleLocalAlert(speciesId);
     } else {
       _notifiedIds.remove(speciesId);
-      await localNotifs.cancel(speciesId.hashCode);
+      if (!kIsWeb) {
+        await localNotifs.cancel(speciesId.hashCode);
+      }
     }
 
     notifyListeners();
@@ -120,19 +130,26 @@ class SavedSpeciesProvider extends ChangeNotifier {
 
   /// Schedules a short-delay demo alert so users can verify notification flow.
   Future<void> _scheduleLocalAlert(String speciesId) async {
-    const androidDetails = AndroidNotificationDetails(
-      'high_prob_channel',
-      'High Probability Alerts',
-      channelDescription: 'Alerts for optimal photography conditions',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
-    const notifDetails = NotificationDetails(android: androidDetails);
-
     // Simulation: Firing the alert 10 seconds after toggle for verification.
-    Future.delayed(const Duration(seconds: 10), () {
+    Future.delayed(const Duration(seconds: 10), () async {
       if (_notifiedIds.contains(speciesId)) {
-        localNotifs.show(
+        if (kIsWeb) {
+          await showWebNotification(
+            title: 'Optimal Conditions Detected!',
+            body: 'High activity expected tomorrow morning in your area.',
+          );
+          return;
+        }
+
+        const androidDetails = AndroidNotificationDetails(
+          'high_prob_channel',
+          'High Probability Alerts',
+          channelDescription: 'Alerts for optimal photography conditions',
+          importance: Importance.max,
+          priority: Priority.high,
+        );
+        const notifDetails = NotificationDetails(android: androidDetails);
+        await localNotifs.show(
           speciesId.hashCode,
           'Optimal Conditions Detected!',
           'High activity expected tomorrow morning in your area.',

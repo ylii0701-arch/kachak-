@@ -358,9 +358,11 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                   if (context.mounted) {
                                     if (!success) {
                                       ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
+                                        SnackBar(
                                           content: Text(
-                                            'Alert could not be enabled. Please allow notifications in settings.',
+                                            kIsWeb
+                                                ? 'Alert permission unavailable in this mobile browser. Try enabling browser notifications or install to home screen.'
+                                                : 'Alert could not be enabled. Please allow notifications in settings.',
                                           ),
                                         ),
                                       );

@@ -48,6 +48,7 @@ class _MapScreenState extends State<MapScreen> {
   LatLng? _user;
   String? _locationToast;
   bool _loadingLocation = true;
+  bool _requestingLocation = false;
   bool _loadingCityWeather = false;
   bool _showCityWeatherMarkers = true;
   final TextEditingController _speciesSearchController =
@@ -358,7 +359,10 @@ class _MapScreenState extends State<MapScreen> {
   /// Centers camera on current user location.
   void _goToMyLocation() {
     final u = _user;
-    if (u == null) return;
+    if (u == null) {
+      _initLocation();
+      return;
+    }
     _didSetInitialViewport = true;
     _mapController.move(u, 12);
   }
@@ -374,6 +378,8 @@ class _MapScreenState extends State<MapScreen> {
 
   /// Gets device location and applies initial camera focus.
   Future<void> _initLocation() async {
+    if (_requestingLocation) return;
+    _requestingLocation = true;
     try {
       var perm = await Geolocator.checkPermission();
       if (perm == LocationPermission.denied) {
@@ -420,6 +426,9 @@ class _MapScreenState extends State<MapScreen> {
           if (mounted) setState(() => _locationToast = null);
         });
       }
+    }
+    finally {
+      _requestingLocation = false;
     }
   }
 
