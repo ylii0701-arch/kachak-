@@ -609,6 +609,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                           final day = e.value;
                           final first = e.key == 0;
                           final probLabel = _getProbLabel(day.probability);
+                          final probPercent = (day.probability * 100).round();
 
                           return Padding(
                             padding: EdgeInsets.only(bottom: 8 * s),
@@ -673,7 +674,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                             ),
                                           ),
                                           child: Text(
-                                            '$probLabel Chance',
+                                            '$probPercent% $probLabel',
                                             style: GoogleFonts.plusJakartaSans(
                                               fontSize: Adaptive.clamp(
                                                 context,
