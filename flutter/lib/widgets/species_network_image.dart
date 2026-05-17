@@ -23,6 +23,7 @@ class SpeciesNetworkImage extends StatelessWidget {
     // Normalize accidental whitespace in data URLs before rendering.
     final normalizedUrl = url.trim();
     final imageWidget = Image.network(
+      key: ValueKey<String>('species-network-image-$normalizedUrl'),
       normalizedUrl,
       fit: fit,
       height: height,

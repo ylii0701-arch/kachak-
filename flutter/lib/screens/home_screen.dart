@@ -1586,6 +1586,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (compact) {
       Widget card = Card(
+        key: ValueKey<String>('species-card-${s.id}-compact'),
         clipBehavior: Clip.antiAlias,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
@@ -1599,6 +1600,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Expanded(
                 child: SpeciesNetworkImage(
+                  key: ValueKey<String>('species-image-${s.id}-${s.imageUrl}'),
                   url: s.imageUrl,
                   fit: BoxFit.cover,
                 ),
@@ -1618,6 +1620,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     Widget card = Card(
+      key: ValueKey<String>('species-card-${s.id}-list'),
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
@@ -1632,6 +1635,7 @@ class _HomeScreenState extends State<HomeScreen> {
               width: double.infinity,
               height: imgH,
               child: SpeciesNetworkImage(
+                key: ValueKey<String>('species-image-${s.id}-${s.imageUrl}'),
                 url: s.imageUrl,
                 fit: BoxFit.cover,
               ),
