@@ -10,7 +10,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.vulnerable,
     habitat: 'Tropical rainforests, lowland areas',
     imageUrl:
-        'https://i.natgeofe.com/k/c483a663-f10b-41f9-ad47-14f08b1b2595/sun-bear-tongue.jpg?wp=1&w=1884.75&h=1060.5',
+        'https://www.wonderfulmalaysia.com/attractions/files/2015/04/sunbear-malaysia-1.jpg',
     description:
         'The smallest bear species, known for its distinctive chest marking and excellent tree-climbing abilities.',
     behaviorNotes:
