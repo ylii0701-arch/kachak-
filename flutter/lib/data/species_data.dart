@@ -328,7 +328,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.vulnerable,
     habitat: 'Primary evergreen tropical forests in Peninsular Malaysia',
     imageUrl:
-        'https://images.unsplash.com/photo-1768726649407-4c24eb9102be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjbG91ZGVkJTIwbGVvcGFyZCUyMHdpbGRsaWZlfGVufDF8fHx8MTc3NTE0NDczM3ww&ixlib=rb-4.1.0&q=80&w=1080',
+        'https://cdn.i-scmp.com/sites/default/files/styles/1020x680/public/images/methode/2017/09/28/4abe3e5c-a410-11e7-84b5-dfc1701cb40c_1280x720_150757.JPG?itok=WaGGzexJ',
     description:
         'Found exclusively in Peninsular (West) Malaysia. It features slightly larger "cloud" markings compared to its Bornean cousin.',
     behaviorNotes:
@@ -353,7 +353,7 @@ const List<Species> speciesData = [
     conservationStatus: Species.vulnerable,
     habitat: 'Tropical rainforests of Malaysian Borneo',
     imageUrl:
-        'https://images.unsplash.com/photo-1768726649407-4c24eb9102be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjbG91ZGVkJTIwbGVvcGFyZCUyMHdpbGRsaWZlfGVufDF8fHx8MTc3NTE0NDczM3ww&ixlib=rb-4.1.0&q=80&w=1080',
+        'https://www.thewildlifediaries.com/wp-content/uploads/2019/06/Clouded-leopard-AdobeStock_177858806-1024x683.jpg.webp',
     description:
         'Found exclusively in Malaysian Borneo. Separated from the mainland species over a million years ago, it features darker fur and tighter spots.',
     behaviorNotes:
@@ -2168,25 +2168,6 @@ const List<Species> speciesData = [
     activityPattern: 'Diurnal (Day-active)',
     bestSeasons: ['Dry season'],
     difficultyLevel: 3,
-  ),
-  // --- TEST DUMMY SPECIES (Trigger Fallbacks) ---
-  Species(
-    id: '101',
-    commonName: '', // Tests "Unknown Species"
-    scientificName: '', // Tests "Scientific name unavailable" (space trimming)
-    category: '', // Tests "Category N/A"
-    conservationStatus: '', // Tests "Status Unavailable" and Grey Chip
-    habitat: '', // Tests section card empty text fallback
-    imageUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Blank_square.svg/800px-Blank_square.svg.png', // Blank image so the network widget doesn't crash
-    description: '', // Tests section card empty text fallback
-    behaviorNotes: '   ', // Tests section card empty text fallback
-    photographyConditions: '', // Tests section card empty text fallback
-    recommendedGear:
-        [], // Tests "No recommendations currently available" list fallback
-    activityPattern: '', // Tests "Activity N/A"
-    bestSeasons: [], // Tests hiding the best seasons row
-    difficultyLevel: 0, // Fallback difficulty
   ),
 ];
 
