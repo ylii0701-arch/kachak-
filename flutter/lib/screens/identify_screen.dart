@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../l10n/app_localizations.dart';
 
 import '../data/species_data.dart';
 import '../models/species.dart';
@@ -84,6 +85,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
 
   Future<void> _chooseImageSource() async {
     if (_isLoading) return;
+    final l = AppLocalizations.of(context);
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -98,12 +100,12 @@ class _IdentifyScreenState extends State<IdentifyScreen>
               children: [
                 ListTile(
                   leading: const Icon(Icons.photo_camera_outlined),
-                  title: const Text('Take photo'),
+                  title: Text(l?.identifyTakePhoto ?? 'Take photo'),
                   onTap: () => Navigator.of(context).pop(ImageSource.camera),
                 ),
                 ListTile(
                   leading: const Icon(Icons.photo_library_outlined),
-                  title: const Text('Upload from gallery'),
+                  title: Text(l?.identifyUploadGallery ?? 'Upload from gallery'),
                   onTap: () => Navigator.of(context).pop(ImageSource.gallery),
                 ),
               ],
@@ -178,6 +180,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
   }
 
   Future<void> _runQualityAnalysis() async {
+    final l = AppLocalizations.of(context);
     try {
       final bytes = _imageBytes;
       if (bytes == null) {
@@ -198,7 +201,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
       if (!mounted) return;
       await _endLoading(
         () {
-        _message = 'Failed to analyze image. Please try again.';
+        _message = l?.identifyFailed ?? 'Failed to analyze image. Please try again.';
         },
         minVisible: const Duration(milliseconds: 1200),
       );
@@ -455,11 +458,12 @@ class _IdentifyScreenState extends State<IdentifyScreen>
   @override
   Widget build(BuildContext context) {
     final s = Adaptive.scale(context);
+    final l = AppLocalizations.of(context);
     final canPop = Navigator.of(context).canPop();
-    final title = _isMissionMode ? 'Species Recognition' : 'Image Recognition';
+    final title = _isMissionMode ? 'Species Recognition' : (l?.identifyTitle ?? 'Image Recognition');
     final subtitle = _tool == _RecognitionTool.species
-        ? 'Scan a wildlife photo with AI species identification.'
-        : 'Scan your photo and get image quality scoring.';
+        ? (l?.identifySpeciesSubtitle ?? 'Scan a wildlife photo with AI species identification.')
+        : (l?.identifyQualitySubtitle ?? 'Analyze your photo\'s sharpness, exposure, and framing.');
     final rightMenuAllowance = canPop ? 0.0 : (56 * s);
 
     return Material(
@@ -553,6 +557,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
   }
 
   Widget _toolToggle(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final selected = _tool;
     return Container(
       padding: const EdgeInsets.all(4),
@@ -566,14 +571,14 @@ class _IdentifyScreenState extends State<IdentifyScreen>
           Expanded(
             child: _toggleButton(
               selected: selected == _RecognitionTool.species,
-              label: 'Species',
+              label: l?.identifySpeciesTab ?? 'Species',
               onTap: () => _switchTool(_RecognitionTool.species),
             ),
           ),
           Expanded(
             child: _toggleButton(
               selected: selected == _RecognitionTool.quality,
-              label: 'Image Quality',
+              label: l?.identifyQualityTab ?? 'Image Quality',
               onTap: () => _switchTool(_RecognitionTool.quality),
             ),
           ),
@@ -583,6 +588,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
   }
 
   Widget _modeContent(BuildContext context, double s) {
+    final l = AppLocalizations.of(context);
     return Column(
       key: ValueKey(_tool),
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -604,7 +610,9 @@ class _IdentifyScreenState extends State<IdentifyScreen>
               ),
             ),
             child: Text(
-              _tool == _RecognitionTool.species ? 'Scan Now' : 'Score Now',
+              _tool == _RecognitionTool.species
+                  ? (l?.identifyScanNow ?? 'Scan Now')
+                  : (l?.identifyScoreNow ?? 'Score Now'),
             ),
           ),
         ),
@@ -644,7 +652,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
             child: TextButton.icon(
               onPressed: _clearAll,
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Try another photo'),
+              label: Text(l?.identifyTryAnother ?? 'Try another photo'),
             ),
           ),
         ],
@@ -692,6 +700,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
   }
 
   Widget _pickerCard() {
+    final l = AppLocalizations.of(context);
     return Material(
       color: AppColors.surface.withValues(alpha: 0.95),
       borderRadius: BorderRadius.circular(20),
@@ -725,7 +734,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
               ),
               const SizedBox(height: 10),
               Text(
-                'Tap to take photo or upload from gallery',
+                l?.identifyPickerHint ?? 'Tap to take photo or upload from gallery',
                 style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -756,9 +765,10 @@ class _IdentifyScreenState extends State<IdentifyScreen>
   }
 
   Widget _loadingFeedbackCard() {
+    final l = AppLocalizations.of(context);
     final loadingText = _tool == _RecognitionTool.species
-        ? 'Scanning species...'
-        : 'Scoring photo quality...';
+        ? (l?.identifyScanningSpecies ?? 'Scanning species...')
+        : (l?.identifyScoringQuality ?? 'Scoring photo quality...');
     final progressPct = (_perceivedProgress * 100).clamp(1, 100).round();
     return Container(
       width: double.infinity,
@@ -989,6 +999,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
   }
 
   Widget _speciesTipsCard() {
+    final l = AppLocalizations.of(context);
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -1000,30 +1011,30 @@ class _IdentifyScreenState extends State<IdentifyScreen>
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Tips for best species scan',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
+                l?.identifyTipsTitle ?? 'Tips for best species scan',
+                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
               ),
             ),
             const SizedBox(height: 10),
             _tipRow(
               icon: Icons.wb_sunny_outlined,
-              title: 'Use good lighting',
-              subtitle: 'Natural light gives better identification.',
+              title: l?.identifyTipLighting ?? 'Use good lighting',
+              subtitle: l?.identifyTipLightingBody ?? 'Natural light gives better identification.',
             ),
             const SizedBox(height: 10),
             _tipRow(
               icon: Icons.center_focus_strong_rounded,
-              title: 'Keep animal centered',
-              subtitle: 'Avoid cutting the animal out of frame.',
+              title: l?.identifyTipCentered ?? 'Keep animal centered',
+              subtitle: l?.identifyTipCenteredBody ?? 'Avoid cutting the animal out of frame.',
             ),
             const SizedBox(height: 10),
             _tipRow(
               icon: Icons.blur_off_rounded,
-              title: 'Avoid blur',
-              subtitle: 'Hold steady or tap to focus before shooting.',
+              title: l?.identifyTipBlur ?? 'Avoid blur',
+              subtitle: l?.identifyTipBlurBody ?? 'Hold steady or tap to focus before shooting.',
             ),
           ],
         ),
@@ -1065,6 +1076,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
   }
 
   Widget _speciesResultCard(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final uncertain = (_confidence ?? 0) < 0.6;
     return Container(
       width: double.infinity,
@@ -1080,9 +1092,9 @@ class _IdentifyScreenState extends State<IdentifyScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Prediction',
-            style: TextStyle(fontWeight: FontWeight.w700),
+          Text(
+            l?.identifyPrediction ?? 'Prediction',
+            style: const TextStyle(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 6),
           Text(
@@ -1108,7 +1120,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
                 ),
               );
             },
-            child: const Text('Open species details'),
+            child: Text(l?.identifyOpenDetails ?? 'Open species details'),
           ),
           if (widget.allowMissionProofReturn) ...[
             const SizedBox(height: 8),
@@ -1117,7 +1129,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
               child: OutlinedButton.icon(
                 onPressed: () => Navigator.of(context).pop(_predicted),
                 icon: const Icon(Icons.verified_rounded),
-                label: const Text('Use as mission proof'),
+                label: Text(l?.identifyUseMissionProof ?? 'Use as mission proof'),
               ),
             ),
           ],
@@ -1127,6 +1139,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
   }
 
   Widget _qualityResultCard(QualityResult r) {
+    final l = AppLocalizations.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
@@ -1153,7 +1166,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Total score',
+                      l?.identifyTotalScore ?? 'Total score',
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         letterSpacing: 1.2,
@@ -1205,11 +1218,11 @@ class _IdentifyScreenState extends State<IdentifyScreen>
             ),
           ),
           const SizedBox(height: 16),
-          _scoreRow('Sharpness', r.sharpness, _improveSharpnessText(r.sharpness)),
+          _scoreRow(l?.identifySharpness ?? 'Sharpness', r.sharpness, _improveSharpnessText(r.sharpness)),
           const SizedBox(height: 10),
-          _scoreRow('Exposure', r.exposure, _improveExposureText(r.exposure)),
+          _scoreRow(l?.identifyExposure ?? 'Exposure', r.exposure, _improveExposureText(r.exposure)),
           const SizedBox(height: 10),
-          _scoreRow('Contrast', r.contrast, _improveContrastText(r.contrast)),
+          _scoreRow(l?.identifyContrast ?? 'Contrast', r.contrast, _improveContrastText(r.contrast)),
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(12),
@@ -1230,7 +1243,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Subject framing',
+                      l?.identifySubjectFraming ?? 'Subject framing',
                       style: GoogleFonts.libreBaskerville(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -1320,6 +1333,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
   }
 
   Widget _improvementCard(QualityResult r) {
+    final l = AppLocalizations.of(context);
     final tips = _qualityImprovementTips(r);
     return Container(
       width: double.infinity,
@@ -1333,7 +1347,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'How to improve this photo',
+            l?.identifyHowToImprove ?? 'How to improve this photo',
             style: GoogleFonts.libreBaskerville(
               fontSize: 14,
               fontWeight: FontWeight.w700,
@@ -1412,11 +1426,12 @@ class _IdentifyScreenState extends State<IdentifyScreen>
   }
 
   Widget _scoreBadge(double total) {
+    final l = AppLocalizations.of(context);
     final label = total >= 80
-        ? 'Good'
+        ? (l?.identifyHigh ?? 'High')
         : total >= 65
-            ? 'OK'
-            : 'Low';
+            ? (l?.identifyMedium ?? 'Medium')
+            : (l?.identifyLow ?? 'Low');
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(

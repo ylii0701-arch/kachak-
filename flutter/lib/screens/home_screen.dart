@@ -13,6 +13,8 @@ import '../widgets/difficulty_stars.dart';
 import '../widgets/onboarding/spotlight_tour.dart';
 import '../widgets/onboarding/tour_anchor.dart';
 import '../widgets/species_network_image.dart';
+import '../l10n/app_localizations.dart';
+import '../utils/l10n_helpers.dart';
 import 'species_detail_screen.dart';
 
 enum _SortBy { none, conservationStatus, difficultyLevel }
@@ -267,7 +269,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _locationLabel() {
-    if (_selectedCity == null) return 'All regions';
+    final l = AppLocalizations.of(context);
+    if (_selectedCity == null) return l?.homeAllRegions ?? 'All regions';
     if (_selectedSiteId == null) return _selectedCity!;
     final site = siteData.where((s) => s.id == _selectedSiteId).firstOrNull;
     return site == null ? _selectedCity! : '${_selectedCity!} · ${site.name}';
@@ -312,6 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final scale = Adaptive.scale(context);
+    final l = AppLocalizations.of(context);
     final saved = context.watch<SavedSpeciesProvider>();
     return ListenableBuilder(
       listenable: PredictionManager.instance,
@@ -370,7 +374,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Malaysian Wildlife Explorer',
+                      l?.homeTitle ?? 'Malaysian Wildlife Explorer',
                       style: GoogleFonts.inter(
                         fontSize: Adaptive.clamp(context, 17, min: 15, max: 19),
                         fontWeight: FontWeight.w500,
@@ -384,7 +388,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: TextField(
                         controller: _searchController,
                         decoration: InputDecoration(
-                          hintText: 'Search species name',
+                          hintText: l?.homeSearchHint ?? 'Search species name',
                           prefixIcon: const Icon(
                             Icons.search_rounded,
                             color: AppColors.iconSectionOnFrost,
@@ -439,7 +443,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             SizedBox(height: 6 * scale),
                             Text(
-                              'Showing prediction-ranked species for selected area.',
+                              l?.homeAreaPrediction ?? 'Showing prediction-ranked species for selected area.',
                               style: GoogleFonts.inter(
                                 fontSize: 12,
                                 color: AppColors.textSubtitleOnFrost,
@@ -488,7 +492,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 TourAnchor(
                                   id: TourTargetIds.homeFilterButton,
                                   child: _chipButton(
-                                  label: 'Filter',
+                                  label: l?.homeFilter ?? 'Filter',
                                   icon: Icons.filter_list,
                                   selected: _showFilters || _hasFilterApplied,
                                   primary: true,
@@ -500,7 +504,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 TourAnchor(
                                   id: TourTargetIds.homeSortButton,
                                   child: _chipButton(
-                                  label: 'Sort',
+                                  label: l?.homeSort ?? 'Sort',
                                   icon: Icons.swap_vert,
                                   selected: _showSort || _sortBy != _SortBy.none,
                                   primary: false,
@@ -584,9 +588,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: Colors.grey.shade400,
                       ),
                       SizedBox(height: 12 * scale),
-                      const Text(
-                        'No species found',
-                        style: TextStyle(
+                      Text(
+                        l?.homeNoResults ?? 'No species found',
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
                         ),
@@ -596,7 +600,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       SizedBox(height: 16 * scale),
                       FilledButton(
                         onPressed: _clearSearchInput,
-                        child: const Text('Clear search'),
+                        child: Text(l?.homeClearSearch ?? 'Clear search'),
                       ),
                     ],
                   ),
@@ -617,11 +621,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: Colors.grey.shade400,
                       ),
                       SizedBox(height: 12 * scale),
-                      const Text('No results match your filters'),
+                      Text(l?.homeNoFilterResults ?? 'No results match your filters'),
                       SizedBox(height: 16 * scale),
                       FilledButton(
                         onPressed: _resetFilters,
-                        child: const Text('Reset filters'),
+                        child: Text(l?.homeResetFilters ?? 'Reset filters'),
                       ),
                     ],
                   ),
@@ -811,6 +815,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _filterPanel() {
+    final l = AppLocalizations.of(context);
     final allCityOptions = <String>[
       'All',
       ...{
@@ -839,14 +844,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: _filterTabTile(
                       tab: _FilterPanelTab.location,
-                      title: 'Location',
+                      title: l?.homeLocationTab ?? 'Location',
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: _filterTabTile(
                       tab: _FilterPanelTab.species,
-                      title: 'Species',
+                      title: l?.homeSpeciesTab ?? 'Species',
                     ),
                   ),
                 ],
@@ -861,7 +866,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'City',
+                            l?.homeCity ?? 'City',
                             style: GoogleFonts.inter(fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(height: 8),
@@ -903,12 +908,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ? Icons.keyboard_arrow_up_rounded
                                     : Icons.keyboard_arrow_down_rounded,
                               ),
-                              label: Text(_showAllCities ? 'Show less' : 'Show more'),
+                              label: Text(_showAllCities ? (l?.homeShowLess ?? 'Show less') : (l?.homeShowMore ?? 'Show more')),
                             ),
                           ],
                           const SizedBox(height: 12),
                           Text(
-                            'Site',
+                            l?.homeSite ?? 'Site',
                             style: GoogleFonts.inter(fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(height: 8),
@@ -952,7 +957,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ? Icons.keyboard_arrow_up_rounded
                                     : Icons.keyboard_arrow_down_rounded,
                               ),
-                              label: Text(_showAllSites ? 'Show less' : 'Show more'),
+                              label: Text(_showAllSites ? (l?.homeShowLess ?? 'Show less') : (l?.homeShowMore ?? 'Show more')),
                             ),
                           ],
                         ],
@@ -961,7 +966,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Category',
+                            l?.homeCategory ?? 'Category',
                             style: GoogleFonts.inter(fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(height: 8),
@@ -971,7 +976,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: _categories.map((c) {
                               final sel = _tempCategory == c;
                               return ChoiceChip(
-                                label: Text(c),
+                                label: Text(c == 'All' ? (l?.homeAll ?? 'All') : localizedCategory(l, c)),
                                 selected: sel,
                                 onSelected: (_) => setState(() => _tempCategory = c),
                                 selectedColor: AppColors.primary,
@@ -981,7 +986,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(height: 14),
                           Text(
-                            'Conservation Status',
+                            l?.homeConservationStatus ?? 'Conservation Status',
                             style: GoogleFonts.inter(fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(height: 8),
@@ -991,7 +996,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: _statuses.map((c) {
                               final sel = _tempStatus == c;
                               return ChoiceChip(
-                                label: Text(c),
+                                label: Text(c == 'All' ? (l?.homeAll ?? 'All') : localizedStatus(l, c)),
                                 selected: sel,
                                 onSelected: (_) => setState(() => _tempStatus = c),
                                 selectedColor: AppColors.accent,
@@ -1001,7 +1006,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(height: 14),
                           Text(
-                            'Shooting Difficulty Level',
+                            l?.homeDifficultyLevel ?? 'Shooting Difficulty Level',
                             style: GoogleFonts.inter(fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(height: 8),
@@ -1040,7 +1045,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         _currentPage = 1;
                       });
                     },
-                    child: const Text('Confirm'),
+                    child: Text(l?.homeConfirm ?? 'Confirm'),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -1054,7 +1059,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       _tempDifficulty = 'All';
                     });
                   },
-                  child: const Text('Reset'),
+                  child: Text(l?.homeReset ?? 'Reset'),
                 ),
               ],
             ),
@@ -1100,6 +1105,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _sortPanel() {
+    final l = AppLocalizations.of(context);
     return Card(
       margin: const EdgeInsets.only(top: 12),
       child: Padding(
@@ -1107,17 +1113,17 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Sort By',
-              style: TextStyle(fontWeight: FontWeight.w600),
+            Text(
+              l?.homeSortBy ?? 'Sort By',
+              style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               children: [
-                _sortChip('None', _SortBy.none),
-                _sortChip('Conservation Status', _SortBy.conservationStatus),
-                _sortChip('Difficulty Level', _SortBy.difficultyLevel),
+                _sortChip(l?.homeSortNone ?? 'None', _SortBy.none),
+                _sortChip(l?.homeSortConservation ?? 'Conservation Status', _SortBy.conservationStatus),
+                _sortChip(l?.homeSortDifficulty ?? 'Difficulty Level', _SortBy.difficultyLevel),
               ],
             ),
             if (_tempSortBy != _SortBy.none) ...[
@@ -1181,13 +1187,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         _currentPage = 1;
                       });
                     },
-                    child: const Text('Confirm'),
+                    child: Text(l?.homeConfirm ?? 'Confirm'),
                   ),
                 ),
                 const SizedBox(width: 12),
                 OutlinedButton(
                   onPressed: () => setState(() => _tempSortBy = _SortBy.none),
-                  child: const Text('Reset'),
+                  child: Text(l?.homeReset ?? 'Reset'),
                 ),
               ],
             ),
@@ -1227,6 +1233,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _paginationControls({required int page, required int totalPages}) {
+    final l = AppLocalizations.of(context);
     if (totalPages <= 1) return const SizedBox.shrink();
     return Column(
       children: [
@@ -1236,7 +1243,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: OutlinedButton.icon(
                 onPressed: page > 1 ? () => _goToPage(page - 1) : null,
                 icon: const Icon(Icons.chevron_left),
-                label: const Text('Previous'),
+                label: Text(l?.commonPrevious ?? 'Previous'),
                 style: _pagerButtonStyle(),
               ),
             ),
@@ -1245,7 +1252,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: OutlinedButton.icon(
                 onPressed: page < totalPages ? () => _goToPage(page + 1) : null,
                 icon: const Icon(Icons.chevron_right),
-                label: const Text('Next'),
+                label: Text(l?.commonNext ?? 'Next'),
                 style: _pagerButtonStyle(),
               ),
             ),
@@ -1372,6 +1379,7 @@ class _HomeScreenState extends State<HomeScreen> {
     bool tourAnchorCard = false,
     bool tourAnchorSave = false,
   }) {
+    final l = AppLocalizations.of(context);
     final imgH = compact
         ? Adaptive.clamp(context, 120, min: 92, max: 150)
         : Adaptive.clamp(context, 180, min: 140, max: 240);
@@ -1385,7 +1393,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final statusText = hasStatus
         ? (compact
               ? statusAbbreviation(s.conservationStatus)
-              : s.conservationStatus)
+              : localizedStatus(l, s.conservationStatus))
         : (compact ? 'N/A' : 'Status Unavailable');
     final commonName = s.commonName.trim().isNotEmpty
         ? s.commonName
@@ -1394,7 +1402,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ? s.scientificName
         : 'Scientific name unavailable';
     final categoryText = s.category.trim().isNotEmpty
-        ? s.category
+        ? localizedCategory(l, s.category)
         : 'Category N/A';
 
     final scale = Adaptive.scale(context);
@@ -1550,7 +1558,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             children: [
               Text(
-                'Difficulty:',
+                l?.homeDifficulty ?? 'Difficulty:',
                 style: GoogleFonts.inter(
                   fontSize: compact
                       ? Adaptive.clamp(context, 10, min: 9, max: 12)

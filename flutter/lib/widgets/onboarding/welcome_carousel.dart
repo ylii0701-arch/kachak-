@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import 'onboarding_content.dart';
 
@@ -44,7 +45,8 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
   }
 
   void _next() {
-    final last = kWelcomeSlides.length - 1;
+    final slides = kWelcomeSlides(context);
+    final last = slides.length - 1;
     if (_page >= last) {
       Navigator.of(context).maybePop();
       return;
@@ -57,7 +59,9 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    final isLast = _page == kWelcomeSlides.length - 1;
+    final l = AppLocalizations.of(context);
+    final slides = kWelcomeSlides(context);
+    final isLast = _page == slides.length - 1;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
@@ -103,7 +107,7 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
                                   MaterialTapTargetSize.shrinkWrap,
                             ),
                             child: Text(
-                              'Skip',
+                              l?.onboardingSkip ?? 'Skip',
                               style: GoogleFonts.inter(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 13,
@@ -118,16 +122,16 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
                         child: PageView.builder(
                           controller: _controller,
                           onPageChanged: (i) => setState(() => _page = i),
-                          itemCount: kWelcomeSlides.length,
+                          itemCount: slides.length,
                           itemBuilder: (_, i) =>
-                              _WelcomeSlide(step: kWelcomeSlides[i]),
+                              _WelcomeSlide(step: slides[i]),
                         ),
                       ),
                       const SizedBox(height: 12),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(
-                          kWelcomeSlides.length,
+                          slides.length,
                           (i) => AnimatedContainer(
                             duration: const Duration(milliseconds: 220),
                             margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -159,7 +163,9 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
                             ),
                           ),
                           child: Text(
-                            isLast ? "Let's go" : 'Next',
+                            isLast
+                                ? (l?.onboardingGetStarted ?? "Let's go")
+                                : (l?.onboardingNext ?? 'Next'),
                             style: GoogleFonts.inter(
                               fontWeight: FontWeight.w700,
                               fontSize: 15,

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/app_shell_controller.dart';
+import '../providers/locale_controller.dart';
 import '../services/onboarding_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
@@ -46,39 +48,18 @@ class _GlassBottomNav extends StatelessWidget {
       ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(4 * s, 8 * s, 4 * s, (8 * s) + bottomInset),
-        child: Row(
-          children: [
-            _standardItem(context, 0, Icons.home_outlined, Icons.home, 'Home'),
-            _standardItem(
-              context,
-              1,
-              Icons.map_outlined,
-              Icons.map,
-              'Map',
-            ),
-            _standardItem(
-              context,
-              2,
-              Icons.center_focus_weak_outlined,
-              Icons.center_focus_strong,
-              'Identify',
-            ),
-            _standardItem(
-              context,
-              3,
-              Icons.adjust_outlined,
-              Icons.adjust,
-              'Mission',
-            ),
-            _standardItem(
-              context,
-              4,
-              Icons.favorite_border_rounded,
-              Icons.favorite,
-              'Saved',
-            ),
-          ],
-        ),
+        child: Builder(builder: (context) {
+          final l = AppLocalizations.of(context);
+          return Row(
+            children: [
+              _standardItem(context, 0, Icons.home_outlined, Icons.home, l?.navHome ?? 'Home'),
+              _standardItem(context, 1, Icons.map_outlined, Icons.map, l?.navMap ?? 'Map'),
+              _standardItem(context, 2, Icons.center_focus_weak_outlined, Icons.center_focus_strong, l?.navIdentify ?? 'Identify'),
+              _standardItem(context, 3, Icons.adjust_outlined, Icons.adjust, l?.navMission ?? 'Mission'),
+              _standardItem(context, 4, Icons.favorite_border_rounded, Icons.favorite, l?.navSaved ?? 'Saved'),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -260,7 +241,7 @@ class _MainShellState extends State<MainShell> {
     if (_tourInProgress) return;
     final tour = _tourForTab(idx);
     if (tour == null) return;
-    final content = kOnboardingContent[tour];
+    final content = kOnboardingContent(context)[tour];
     if (content == null) return;
     final onboarding = context.read<OnboardingService>();
     if (onboarding.hasSeen(tour)) return;
@@ -604,16 +585,18 @@ class _MainShellState extends State<MainShell> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Menu',
+                          AppLocalizations.of(context)?.menuTitle ?? 'Menu',
                           style: GoogleFonts.libreBaskerville(
                             fontSize: 22,
                             fontWeight: FontWeight.w700,
                             color: AppColors.accent,
                           ),
                         ),
-                        SizedBox(height: 12 * s),
+                        SizedBox(height: 14 * s),
+                        _LanguageSelector(scale: s),
+                        SizedBox(height: 18 * s),
                         Text(
-                          'MORE INFO',
+                          AppLocalizations.of(context)?.menuMoreInfo ?? 'MORE INFO',
                           style: GoogleFonts.inter(
                             fontSize: 11.5,
                             fontWeight: FontWeight.w700,
@@ -624,19 +607,19 @@ class _MainShellState extends State<MainShell> {
                         SizedBox(height: 6 * s),
                         _menuTile(
                           icon: Icons.forest_outlined,
-                          label: 'Nature First Principle',
+                          label: AppLocalizations.of(context)?.menuNatureFirst ?? 'Nature First Principle',
                           onTap: _openNatureFirst,
                           muted: true,
                         ),
                         _menuTile(
                           icon: Icons.school_outlined,
-                          label: 'Show tutorial',
+                          label: AppLocalizations.of(context)?.menuShowTutorial ?? 'Show tutorial',
                           onTap: _restartTutorial,
                           muted: true,
                         ),
                         _menuTile(
                           icon: Icons.info_outline_rounded,
-                          label: 'About us',
+                          label: AppLocalizations.of(context)?.menuAboutUs ?? 'About us',
                           onTap: _openAboutUs,
                           muted: true,
                         ),
@@ -653,6 +636,79 @@ class _MainShellState extends State<MainShell> {
           curve: Curves.easeOutCubic,
           offset: Offset(_menuOpen ? -panelWidth / screenWidth : 0, 0),
           child: pageSurface,
+        ),
+      ],
+    );
+  }
+}
+
+class _LanguageSelector extends StatelessWidget {
+  const _LanguageSelector({required this.scale});
+  final double scale;
+
+  static const _options = [
+    ('en', 'EN'),
+    ('ms', 'BM'),
+    ('zh', '中文'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final localeCtrl = context.watch<LocaleController>();
+    final current = localeCtrl.locale.languageCode;
+    final l = AppLocalizations.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l?.menuLanguage ?? 'Language',
+          style: GoogleFonts.inter(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+            color: AppColors.accent.withValues(alpha: 0.55),
+          ),
+        ),
+        SizedBox(height: 8 * scale),
+        Row(
+          children: _options.map((opt) {
+            final code = opt.$1;
+            final label = opt.$2;
+            final selected = current == code;
+            return Padding(
+              padding: EdgeInsets.only(right: 8 * scale),
+              child: GestureDetector(
+                onTap: () => localeCtrl.setLocale(Locale(code)),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 14 * scale,
+                    vertical: 7 * scale,
+                  ),
+                  decoration: BoxDecoration(
+                    color: selected
+                        ? AppColors.accent
+                        : AppColors.lightSage.withValues(alpha: 0.45),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: selected
+                          ? AppColors.accent
+                          : AppColors.border,
+                    ),
+                  ),
+                  child: Text(
+                    label,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: selected ? Colors.white : AppColors.accent,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
         ),
       ],
     );
