@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -68,11 +67,9 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
 
     if (!success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text(
-            kIsWeb
-                ? 'Alert permission unavailable in this mobile browser. Try enabling browser notifications or install to home screen.'
-                : 'Alert could not be enabled. Please allow notifications in settings.',
+            'Alert could not be enabled. Please allow notifications in settings.',
           ),
         ),
       );

@@ -11,7 +11,6 @@ import '../data/species_data.dart';
 import '../models/species.dart';
 import '../services/gemini_recognition_service.dart';
 import '../services/photo_quality_analyzer.dart';
-import '../services/web_permission_bridge.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
 import '../utils/image_validator.dart';
@@ -393,19 +392,10 @@ class _IdentifyScreenState extends State<IdentifyScreen>
   }
 
   Future<bool> _ensurePermissionForSource(ImageSource source) async {
-    if (kIsWeb) {
-      if (source == ImageSource.camera) {
-        final granted = await requestWebCameraPermission();
-        if (!granted) {
-          _showPermissionMessage(
-            'Camera access is blocked. Please allow camera in your browser settings.',
-          );
-        }
-        return granted;
-      }
-      // Gallery/file selection on web is handled by browser file picker.
-      return true;
-    }
+    // On web, image_picker uses the browser's native file input / camera
+    // capture attribute. It handles its own permission flow — no need for
+    // getUserMedia or permission_handler pre-checks.
+    if (kIsWeb) return true;
 
     if (source == ImageSource.camera) {
       var status = await Permission.camera.status;
