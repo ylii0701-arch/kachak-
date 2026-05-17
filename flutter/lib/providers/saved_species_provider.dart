@@ -6,7 +6,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../main.dart';
-import '../services/web_permission_bridge.dart';
 
 /// Stores favorite species and local alert preferences in SharedPreferences.
 class SavedSpeciesProvider extends ChangeNotifier {
@@ -96,17 +95,15 @@ class SavedSpeciesProvider extends ChangeNotifier {
   }
 
   /// Enables/disables local notifications for a saved species.
+  /// On web, alerts are handled in-app (no browser notification needed).
+  /// On native, uses permission_handler + flutter_local_notifications.
   Future<bool> toggleNotification(String speciesId) async {
     if (!_ids.contains(speciesId)) return false;
 
     final wasNotified = _notifiedIds.contains(speciesId);
 
     if (!wasNotified) {
-      if (kIsWeb) {
-        final granted = await requestWebNotificationPermission();
-        if (!granted) return false;
-      } else {
-        // Prompt OS notification permission.
+      if (!kIsWeb) {
         final status = await Permission.notification.request();
         if (status.isDenied || status.isPermanentlyDenied) {
           return false;
@@ -114,8 +111,9 @@ class SavedSpeciesProvider extends ChangeNotifier {
       }
 
       _notifiedIds.add(speciesId);
-      // Simulate backend engine detecting high probability conditions.
-      await _scheduleLocalAlert(speciesId);
+      if (!kIsWeb) {
+        await _scheduleNativeAlert(speciesId);
+      }
     } else {
       _notifiedIds.remove(speciesId);
       if (!kIsWeb) {
@@ -128,19 +126,10 @@ class SavedSpeciesProvider extends ChangeNotifier {
     return true;
   }
 
-  /// Schedules a short-delay demo alert so users can verify notification flow.
-  Future<void> _scheduleLocalAlert(String speciesId) async {
-    // Simulation: Firing the alert 10 seconds after toggle for verification.
+  /// Native-only: schedules a demo alert via flutter_local_notifications.
+  Future<void> _scheduleNativeAlert(String speciesId) async {
     Future.delayed(const Duration(seconds: 10), () async {
       if (_notifiedIds.contains(speciesId)) {
-        if (kIsWeb) {
-          await showWebNotification(
-            title: 'Optimal Conditions Detected!',
-            body: 'High activity expected tomorrow morning in your area.',
-          );
-          return;
-        }
-
         const androidDetails = AndroidNotificationDetails(
           'high_prob_channel',
           'High Probability Alerts',
