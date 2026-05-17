@@ -19,7 +19,6 @@ import 'map_screen.dart';
 import 'about_us_screen.dart';
 import 'mission_screen.dart';
 import 'nature_first_principle_screen.dart';
-import 'photo_quality_screen.dart';
 import 'saved_screen.dart';
 
 /// Editorial bottom navigation with calm, consistent styling.
@@ -420,18 +419,6 @@ class _MainShellState extends State<MainShell> {
     });
   }
 
-  /// Opens the imageTest-style photo quality tool (standalone route).
-  Future<void> _openPhotoQuality() async {
-    _closeMenu();
-    await Future<void>.delayed(const Duration(milliseconds: 200));
-    if (!mounted) return;
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
-        builder: (_) => const PhotoQualityScreen(),
-      ),
-    );
-  }
-
   Future<void> _openAboutUs() async {
     _closeMenu();
     await Future<void>.delayed(const Duration(milliseconds: 200));
@@ -491,84 +478,6 @@ class _MainShellState extends State<MainShell> {
                 Icons.chevron_right_rounded,
                 size: muted ? 18 : 20,
                 color: AppColors.accent.withValues(alpha: muted ? 0.5 : 0.75),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _menuFeatureCard({
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Ink(
-          padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
-          decoration: BoxDecoration(
-            color: AppColors.lightSage.withValues(alpha: 0.38),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border.withValues(alpha: 0.9)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(11),
-                ),
-                child: const Icon(
-                  Icons.photo_camera_back_outlined,
-                  color: AppColors.accent,
-                  size: 21,
-                ),
-              ),
-              const SizedBox(width: 11),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Photo quality',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.accent,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'Adjust resolution and compression',
-                      style: GoogleFonts.inter(
-                        fontSize: 12.2,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textSubtitleOnFrost,
-                        height: 1.28,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 21,
-                color: AppColors.accent.withValues(alpha: 0.78),
               ),
             ],
           ),
@@ -697,13 +606,7 @@ class _MainShellState extends State<MainShell> {
                             color: AppColors.accent,
                           ),
                         ),
-                        SizedBox(height: 10 * s),
-                        _menuFeatureCard(
-                          onTap: _openPhotoQuality,
-                        ),
-                        SizedBox(height: 14 * s),
-                        Divider(color: Colors.grey.shade200, thickness: 1),
-                        SizedBox(height: 10 * s),
+                        SizedBox(height: 12 * s),
                         Text(
                           'MORE INFO',
                           style: GoogleFonts.inter(
