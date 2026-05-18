@@ -247,59 +247,60 @@ class _MainShellState extends State<MainShell> {
     if (onboarding.hasSeen(tour)) return;
     _tourInProgress = true;
     try {
+      final sl = AppLocalizations.of(context);
       if (tour == OnboardingTour.home) {
         await SpotlightTour.show(
           context,
-          steps: const [
+          steps: [
             SpotlightStep(
               targetId: TourTargetIds.homeFilterButton,
-              title: 'Filter wildlife list',
-              body:
+              title: sl?.spotlightFilterTitle ?? 'Filter wildlife list',
+              body: sl?.spotlightFilterBody ??
                   'Use Filter to narrow by location and species attributes.',
             ),
             SpotlightStep(
               targetId: TourTargetIds.homeFilterTabs,
-              title: 'Location and species filters',
-              body:
+              title: sl?.spotlightFilterTabsTitle ?? 'Location and species filters',
+              body: sl?.spotlightFilterTabsBody ??
                   'Location helps area-specific discovery, while Species tab refines category, status, and difficulty.',
               cardPlacement: SpotlightCardPlacement.above,
               onEnterCommand: 'home.openFilter',
             ),
             SpotlightStep(
               targetId: TourTargetIds.homeLayoutButton,
-              title: 'Switch layouts',
-              body:
+              title: sl?.spotlightLayoutTitle ?? 'Switch layouts',
+              body: sl?.spotlightLayoutBody ??
                   'Toggle between list and grid views depending on how you like to browse.',
               onEnterCommand: 'home.closeFilter',
             ),
             SpotlightStep(
               targetId: TourTargetIds.homeAiChat,
-              title: 'AI assistant',
-              body:
+              title: sl?.spotlightAiChatTitle ?? 'AI assistant',
+              body: sl?.spotlightAiChatBody ??
                   'Ask about wildlife photography planning, preparation, and field tips.',
             ),
             SpotlightStep(
               targetId: TourTargetIds.homeNavMap,
-              title: 'Map page',
-              body:
+              title: sl?.spotlightMapPageTitle ?? 'Map page',
+              body: sl?.spotlightMapPageBody ??
                   'Map helps you view wildlife locations and explore areas by place.',
             ),
             SpotlightStep(
               targetId: TourTargetIds.homeNavIdentify,
-              title: 'Identify page',
-              body:
+              title: sl?.spotlightIdentifyPageTitle ?? 'Identify page',
+              body: sl?.spotlightIdentifyPageBody ??
                   'Identify lets you identify wildlife from your captured photo.',
             ),
             SpotlightStep(
               targetId: TourTargetIds.homeNavMission,
-              title: 'Mission page',
-              body:
+              title: sl?.spotlightMissionPageTitle ?? 'Mission page',
+              body: sl?.spotlightMissionPageBody ??
                   'Mission gives guided tasks and learning challenges while exploring.',
             ),
             SpotlightStep(
               targetId: TourTargetIds.homeNavSaved,
-              title: 'Saved page',
-              body:
+              title: sl?.spotlightSavedPageTitle ?? 'Saved page',
+              body: sl?.spotlightSavedPageBody ??
                   'Saved keeps your bookmarked species so you can revisit quickly later.',
             ),
           ],
@@ -308,56 +309,56 @@ class _MainShellState extends State<MainShell> {
       } else if (tour == OnboardingTour.map) {
         await SpotlightTour.show(
           context,
-          steps: const [
+          steps: [
             SpotlightStep(
               targetId: TourTargetIds.mapToolRefresh,
-              title: 'Refresh map weather',
-              body:
+              title: sl?.spotlightMapRefreshTitle ?? 'Refresh map weather',
+              body: sl?.spotlightMapRefreshBody ??
                   'Tap to refresh city weather data shown on map markers.',
               onEnterCommand: 'map.resetTourState',
             ),
             SpotlightStep(
               targetId: TourTargetIds.mapToolWeather,
-              title: 'Toggle weather layer',
-              body:
+              title: sl?.spotlightMapWeatherTitle ?? 'Toggle weather layer',
+              body: sl?.spotlightMapWeatherBody ??
                   'Show or hide weather markers to focus on sightings or forecast context.',
             ),
             SpotlightStep(
               targetId: TourTargetIds.mapToolFocus,
-              title: 'Focus wildlife hotspots',
-              body:
+              title: sl?.spotlightMapFocusTitle ?? 'Focus wildlife hotspots',
+              body: sl?.spotlightMapFocusBody ??
                   'Jump the camera to fit known wildlife and photography hotspot coverage.',
             ),
             SpotlightStep(
               targetId: TourTargetIds.mapToolMyLocation,
-              title: 'Go to my location',
-              body:
+              title: sl?.spotlightMapMyLocTitle ?? 'Go to my location',
+              body: sl?.spotlightMapMyLocBody ??
                   'Center the map back to your current position quickly.',
             ),
             SpotlightStep(
               targetId: TourTargetIds.mapToolZoomIn,
-              title: 'Zoom in',
-              body:
+              title: sl?.spotlightMapZoomInTitle ?? 'Zoom in',
+              body: sl?.spotlightMapZoomInBody ??
                   'Increase map zoom for close-up marker and area details.',
             ),
             SpotlightStep(
               targetId: TourTargetIds.mapToolZoomOut,
-              title: 'Zoom out',
-              body:
+              title: sl?.spotlightMapZoomOutTitle ?? 'Zoom out',
+              body: sl?.spotlightMapZoomOutBody ??
                   'Reduce map zoom to see wider region context.',
             ),
             SpotlightStep(
               targetId: TourTargetIds.mapWeatherMarker,
-              title: 'Weather marker',
-              body:
+              title: sl?.spotlightMapWeatherMarkerTitle ?? 'Weather marker',
+              body: sl?.spotlightMapWeatherMarkerBody ??
                   'These markers show city weather snapshots to help plan better shooting conditions.',
               cardPlacement: SpotlightCardPlacement.above,
               onEnterCommand: 'map.openWeatherPreview',
             ),
             SpotlightStep(
               targetId: TourTargetIds.mapAnimalMarker,
-              title: 'Animal marker',
-              body:
+              title: sl?.spotlightMapAnimalMarkerTitle ?? 'Animal marker',
+              body: sl?.spotlightMapAnimalMarkerBody ??
                   'Animal markers show nearby species observations around your current location range. Tap View More Details to open species detail.',
               cardPlacement: SpotlightCardPlacement.above,
             ),

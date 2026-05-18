@@ -804,4 +804,212 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get missionAmphibians => 'Amphibians';
+
+  @override
+  String get detailRecordedObservation => 'Recorded observation';
+
+  @override
+  String get detailLastSeen => 'Last seen';
+
+  @override
+  String get detailTapRowHint =>
+      'Tap a row to open the map centered on that pin.';
+
+  @override
+  String get detailShowMore => 'Show more';
+
+  @override
+  String get detailShowLess => 'Show less';
+
+  @override
+  String get detailNationalPark => 'National Park';
+
+  @override
+  String get detailDifficult => 'Difficult';
+
+  @override
+  String get spotlightFilterTitle => 'Filter wildlife list';
+
+  @override
+  String get spotlightFilterBody =>
+      'Use Filter to narrow by location and species attributes.';
+
+  @override
+  String get spotlightFilterTabsTitle => 'Location and species filters';
+
+  @override
+  String get spotlightFilterTabsBody =>
+      'Use the Location tab to filter by city or site. Switch to Species to set category, conservation status, and difficulty.';
+
+  @override
+  String get spotlightLayoutTitle => 'Switch layouts';
+
+  @override
+  String get spotlightLayoutBody =>
+      'Tap to toggle between card grid and compact list.';
+
+  @override
+  String get spotlightAiChatTitle => 'AI assistant';
+
+  @override
+  String get spotlightAiChatBody =>
+      'Ask about wildlife photography planning, preparation, and field tips.';
+
+  @override
+  String get spotlightMapPageTitle => 'Map page';
+
+  @override
+  String get spotlightMapPageBody =>
+      'Map helps you view wildlife locations and explore areas by place.';
+
+  @override
+  String get spotlightIdentifyPageTitle => 'Identify page';
+
+  @override
+  String get spotlightIdentifyPageBody =>
+      'Identify lets you identify wildlife from your captured photo.';
+
+  @override
+  String get spotlightMissionPageTitle => 'Mission page';
+
+  @override
+  String get spotlightMissionPageBody =>
+      'Mission gives guided tasks and learning challenges while exploring.';
+
+  @override
+  String get spotlightSavedPageTitle => 'Saved page';
+
+  @override
+  String get spotlightSavedPageBody =>
+      'Saved keeps your bookmarked species for quick access.';
+
+  @override
+  String get spotlightMapRefreshTitle => 'Refresh map weather';
+
+  @override
+  String get spotlightMapRefreshBody =>
+      'Reload weather information from all city marker stations.';
+
+  @override
+  String get spotlightMapWeatherTitle => 'Toggle weather layer';
+
+  @override
+  String get spotlightMapWeatherBody =>
+      'Show or hide weather markers to focus on sightings or forecast context.';
+
+  @override
+  String get spotlightMapFocusTitle => 'Focus wildlife hotspots';
+
+  @override
+  String get spotlightMapFocusBody =>
+      'Jump the camera to fit known wildlife and photography hotspot coverage.';
+
+  @override
+  String get spotlightMapMyLocTitle => 'Go to my location';
+
+  @override
+  String get spotlightMapMyLocBody =>
+      'Center the map back to your current position quickly.';
+
+  @override
+  String get spotlightMapZoomInTitle => 'Zoom in';
+
+  @override
+  String get spotlightMapZoomInBody =>
+      'Increase map zoom for close-up marker and area details.';
+
+  @override
+  String get spotlightMapZoomOutTitle => 'Zoom out';
+
+  @override
+  String get spotlightMapZoomOutBody =>
+      'Reduce map zoom to see wider region context.';
+
+  @override
+  String get spotlightMapWeatherMarkerTitle => 'Weather marker';
+
+  @override
+  String get spotlightMapWeatherMarkerBody =>
+      'City weather shows current conditions and short forecast for planning shoots.';
+
+  @override
+  String get spotlightMapAnimalMarkerTitle => 'Animal marker';
+
+  @override
+  String get spotlightMapAnimalMarkerBody =>
+      'Tap an animal marker to see species information, photos, and nearby weather.';
+
+  @override
+  String get spotlightDetailAlertTitle => 'Enable alerts';
+
+  @override
+  String get spotlightDetailAlertBody =>
+      'After saving, tap this icon to enable species notifications for higher-probability sightings.';
+
+  @override
+  String get spotlightDetailPredictionTitle => 'Current prediction';
+
+  @override
+  String get spotlightDetailPredictionBody =>
+      'This card shows the best site and current weather-based probability for spotting this species.';
+
+  @override
+  String get spotlightDetailObservationTitle => 'Recorded observation';
+
+  @override
+  String get spotlightDetailObservationBody =>
+      'This first recorded observation row includes the latest sighting and coordinates.';
+
+  @override
+  String get spotlightDetailMapTitle => 'Open on map';
+
+  @override
+  String get spotlightDetailMapBody =>
+      'Tap this map button to view the animal last occurrence directly on the map.';
+
+  @override
+  String get chatTitle => 'Photo Assistant';
+
+  @override
+  String get chatSubtitle => 'Camera settings & tips';
+
+  @override
+  String get chatWelcome => 'What can I help with?';
+
+  @override
+  String get chatHint => 'Ask anything about wildlife photography...';
+
+  @override
+  String get chatDisclaimer =>
+      'Photography AI chat can make mistakes. Please double check responses.';
+
+  @override
+  String get chatCopied => 'Message copied';
+
+  @override
+  String get chatIrrelevant =>
+      'This is unrelated to wildlife photography. Please try another question.';
+
+  @override
+  String get chatSuggestion1 =>
+      'What camera settings should I use for birds in flight?';
+
+  @override
+  String get chatSuggestion2 =>
+      'Recommend equipment for photographing nocturnal animals';
+
+  @override
+  String get chatSuggestion3 =>
+      'Best settings for macro photography of insects';
+
+  @override
+  String get chatSuggestion4 => 'What should I bring for a rainforest shoot?';
+
+  @override
+  String get chatClarifyGear =>
+      'Please share your camera and lens so I can tailor the settings.';
+
+  @override
+  String get chatClarifyAnimal =>
+      'Please clarify your target animal first so I can prepare the right checklist.';
 }

@@ -156,32 +156,33 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
     await Future<void>.delayed(const Duration(milliseconds: 320));
     if (!mounted) return;
 
+    final dl = AppLocalizations.of(context);
     final steps = <SpotlightStep>[
-      const SpotlightStep(
+      SpotlightStep(
         targetId: TourTargetIds.detailNotification,
-        title: 'Enable alerts',
-        body:
+        title: dl?.spotlightDetailAlertTitle ?? 'Enable alerts',
+        body: dl?.spotlightDetailAlertBody ??
             'After saving, tap this icon to enable species notifications for higher-probability sightings.',
         onEnterCommand: 'speciesDetail.focusAlert',
       ),
-      const SpotlightStep(
+      SpotlightStep(
         targetId: TourTargetIds.detailPredictionCard,
-        title: 'Current prediction',
-        body:
+        title: dl?.spotlightDetailPredictionTitle ?? 'Current prediction',
+        body: dl?.spotlightDetailPredictionBody ??
             'This card shows the best site and current weather-based probability for spotting this species.',
         onEnterCommand: 'speciesDetail.scrollPrediction',
       ),
-      const SpotlightStep(
+      SpotlightStep(
         targetId: TourTargetIds.detailHabitatLocations,
-        title: 'Recorded observation',
-        body:
+        title: dl?.spotlightDetailObservationTitle ?? 'Recorded observation',
+        body: dl?.spotlightDetailObservationBody ??
             'This first recorded observation row includes the latest sighting and coordinates.',
         onEnterCommand: 'speciesDetail.scrollHabitat',
       ),
-      const SpotlightStep(
+      SpotlightStep(
         targetId: TourTargetIds.detailFirstObservation,
-        title: 'Open on map',
-        body:
+        title: dl?.spotlightDetailMapTitle ?? 'Open on map',
+        body: dl?.spotlightDetailMapBody ??
             'Tap this map button to view the animal last occurrence directly on the map.',
         onEnterCommand: 'speciesDetail.scrollMapButton',
       ),
@@ -838,9 +839,9 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
         _locationMapRow(
           context,
           index: n,
-          title: 'Recorded observation',
+          title: l?.detailRecordedObservation ?? 'Recorded observation',
           subtitle:
-          'Last seen ${loc.lastSeen} · ${loc.lat.toStringAsFixed(4)}°, ${loc.lng.toStringAsFixed(4)}°',
+          '${l?.detailLastSeen ?? 'Last seen'} ${loc.lastSeen} · ${loc.lat.toStringAsFixed(4)}°, ${loc.lng.toStringAsFixed(4)}°',
           point: LatLng(loc.lat, loc.lng),
           speciesId: species.id,
           tourAnchorId: n == 1 ? TourTargetIds.detailFirstObservation : null,
@@ -903,7 +904,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Tap a row to open the map centered on that pin.',
+                  l?.detailTapRowHint ?? 'Tap a row to open the map centered on that pin.',
                   style: GoogleFonts.plusJakartaSans(
                     color: AppColors.textSubtitleOnFrost,
                     fontSize: 13,
@@ -931,7 +932,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                             : Icons.keyboard_arrow_down_rounded,
                         color: AppColors.primary,
                       ),
-                      label: Text(_showAllLocationRows ? 'Show less' : 'Show more'),
+                      label: Text(_showAllLocationRows ? (l?.detailShowLess ?? 'Show less') : (l?.detailShowMore ?? 'Show more')),
                     ),
                   ),
                 ],

@@ -804,4 +804,213 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get missionAmphibians => 'Amfibia';
+
+  @override
+  String get detailRecordedObservation => 'Pemerhatian tercatat';
+
+  @override
+  String get detailLastSeen => 'Terakhir dilihat';
+
+  @override
+  String get detailTapRowHint =>
+      'Ketik baris untuk buka peta berpusat pada pin tersebut.';
+
+  @override
+  String get detailShowMore => 'Tunjuk lagi';
+
+  @override
+  String get detailShowLess => 'Tunjuk kurang';
+
+  @override
+  String get detailNationalPark => 'Taman Negara';
+
+  @override
+  String get detailDifficult => 'Sukar';
+
+  @override
+  String get spotlightFilterTitle => 'Tapis senarai hidupan liar';
+
+  @override
+  String get spotlightFilterBody =>
+      'Gunakan Tapis untuk mengecilkan mengikut lokasi dan atribut spesies.';
+
+  @override
+  String get spotlightFilterTabsTitle => 'Penapis lokasi dan spesies';
+
+  @override
+  String get spotlightFilterTabsBody =>
+      'Gunakan tab Lokasi untuk menapis mengikut bandar atau tapak. Tukar ke Spesies untuk tetapkan kategori, status pemuliharaan, dan kesukaran.';
+
+  @override
+  String get spotlightLayoutTitle => 'Tukar susun atur';
+
+  @override
+  String get spotlightLayoutBody =>
+      'Ketik untuk bertukar antara grid kad dan senarai padat.';
+
+  @override
+  String get spotlightAiChatTitle => 'Pembantu AI';
+
+  @override
+  String get spotlightAiChatBody =>
+      'Tanya tentang perancangan fotografi hidupan liar, persediaan, dan tips lapangan.';
+
+  @override
+  String get spotlightMapPageTitle => 'Halaman Peta';
+
+  @override
+  String get spotlightMapPageBody =>
+      'Peta membantu anda melihat lokasi hidupan liar dan meneroka kawasan mengikut tempat.';
+
+  @override
+  String get spotlightIdentifyPageTitle => 'Halaman Kenal Pasti';
+
+  @override
+  String get spotlightIdentifyPageBody =>
+      'Kenal pasti membolehkan anda mengenal pasti hidupan liar dari foto yang dirakam.';
+
+  @override
+  String get spotlightMissionPageTitle => 'Halaman Misi';
+
+  @override
+  String get spotlightMissionPageBody =>
+      'Misi memberikan tugas berpandu dan cabaran pembelajaran semasa meneroka.';
+
+  @override
+  String get spotlightSavedPageTitle => 'Halaman Disimpan';
+
+  @override
+  String get spotlightSavedPageBody =>
+      'Disimpan menyimpan spesies yang ditandakan untuk akses pantas.';
+
+  @override
+  String get spotlightMapRefreshTitle => 'Muat semula cuaca peta';
+
+  @override
+  String get spotlightMapRefreshBody =>
+      'Muat semula maklumat cuaca dari semua stesen penanda bandar.';
+
+  @override
+  String get spotlightMapWeatherTitle => 'Togol lapisan cuaca';
+
+  @override
+  String get spotlightMapWeatherBody =>
+      'Tunjuk atau sembunyikan penanda cuaca untuk fokus pada pemerhatian atau konteks ramalan.';
+
+  @override
+  String get spotlightMapFocusTitle => 'Fokus tempat liputan hidupan liar';
+
+  @override
+  String get spotlightMapFocusBody =>
+      'Lompat kamera untuk memuatkan liputan tempat liputan hidupan liar dan fotografi.';
+
+  @override
+  String get spotlightMapMyLocTitle => 'Pergi ke lokasi saya';
+
+  @override
+  String get spotlightMapMyLocBody =>
+      'Pusatkan peta kembali ke kedudukan semasa anda dengan pantas.';
+
+  @override
+  String get spotlightMapZoomInTitle => 'Zum masuk';
+
+  @override
+  String get spotlightMapZoomInBody =>
+      'Tingkatkan zum peta untuk butiran penanda dan kawasan dekat.';
+
+  @override
+  String get spotlightMapZoomOutTitle => 'Zum keluar';
+
+  @override
+  String get spotlightMapZoomOutBody =>
+      'Kurangkan zum peta untuk melihat konteks kawasan lebih luas.';
+
+  @override
+  String get spotlightMapWeatherMarkerTitle => 'Penanda cuaca';
+
+  @override
+  String get spotlightMapWeatherMarkerBody =>
+      'Cuaca bandar menunjukkan keadaan semasa dan ramalan pendek untuk merancang penggambaran.';
+
+  @override
+  String get spotlightMapAnimalMarkerTitle => 'Penanda haiwan';
+
+  @override
+  String get spotlightMapAnimalMarkerBody =>
+      'Ketik penanda haiwan untuk melihat maklumat spesies, foto, dan cuaca berdekatan.';
+
+  @override
+  String get spotlightDetailAlertTitle => 'Dayakan makluman';
+
+  @override
+  String get spotlightDetailAlertBody =>
+      'Selepas menyimpan, ketik ikon ini untuk dayakan notifikasi spesies bagi pemerhatian berkebarangkalian tinggi.';
+
+  @override
+  String get spotlightDetailPredictionTitle => 'Ramalan semasa';
+
+  @override
+  String get spotlightDetailPredictionBody =>
+      'Kad ini menunjukkan tapak terbaik dan kebarangkalian berdasarkan cuaca semasa untuk melihat spesies ini.';
+
+  @override
+  String get spotlightDetailObservationTitle => 'Pemerhatian tercatat';
+
+  @override
+  String get spotlightDetailObservationBody =>
+      'Baris pemerhatian tercatat pertama ini termasuk pemerhatian terkini dan koordinat.';
+
+  @override
+  String get spotlightDetailMapTitle => 'Buka di peta';
+
+  @override
+  String get spotlightDetailMapBody =>
+      'Ketik butang peta ini untuk lihat kejadian terakhir haiwan terus di peta.';
+
+  @override
+  String get chatTitle => 'Pembantu Foto';
+
+  @override
+  String get chatSubtitle => 'Tetapan kamera & tips';
+
+  @override
+  String get chatWelcome => 'Apa yang boleh saya bantu?';
+
+  @override
+  String get chatHint => 'Tanya apa sahaja tentang fotografi hidupan liar...';
+
+  @override
+  String get chatDisclaimer =>
+      'Sembang AI fotografi mungkin membuat kesilapan. Sila semak semula jawapan.';
+
+  @override
+  String get chatCopied => 'Mesej disalin';
+
+  @override
+  String get chatIrrelevant =>
+      'Ini tidak berkaitan dengan fotografi hidupan liar. Sila cuba soalan lain.';
+
+  @override
+  String get chatSuggestion1 =>
+      'Tetapan kamera apa yang patut saya gunakan untuk burung terbang?';
+
+  @override
+  String get chatSuggestion2 =>
+      'Cadangkan peralatan untuk memfoto haiwan nokturnal';
+
+  @override
+  String get chatSuggestion3 =>
+      'Tetapan terbaik untuk fotografi makro serangga';
+
+  @override
+  String get chatSuggestion4 =>
+      'Apa yang patut saya bawa untuk penggambaran hutan hujan?';
+
+  @override
+  String get chatClarifyGear =>
+      'Sila kongsikan kamera dan kanta anda supaya saya boleh sesuaikan tetapan.';
+
+  @override
+  String get chatClarifyAnimal =>
+      'Sila nyatakan haiwan sasaran anda dahulu supaya saya boleh sediakan senarai semak yang betul.';
 }

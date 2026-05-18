@@ -7,8 +7,11 @@ import 'package:http/http.dart' as http;
 
 import '../config/map_keys.dart';
 import '../data/species_data.dart';
+import '../l10n/app_localizations.dart';
+import '../providers/locale_controller.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
+import 'package:provider/provider.dart';
 
 class AssistantPanel extends StatefulWidget {
   const AssistantPanel({
@@ -147,8 +150,9 @@ class _AssistantPanelState extends State<AssistantPanel> {
     }
 
     if (!_isWildlifePhotographyRelevant(question)) {
+      final l = AppLocalizations.of(context);
       setState(() {
-        _messages.add(_ChatMessage.assistant(_irrelevantMessage));
+        _messages.add(_ChatMessage.assistant(l?.chatIrrelevant ?? _irrelevantMessage));
       });
       _scrollToBottom();
       return;
@@ -159,16 +163,18 @@ class _AssistantPanelState extends State<AssistantPanel> {
 
   /// Handles tap on starter suggestions and asks follow-up clarification.
   void _onSuggestionTap(String suggestion) {
+    final l = AppLocalizations.of(context);
+    final locSuggestions = _localizedSuggestions(l);
     setState(() {
       _messages.add(_ChatMessage.user(suggestion));
-      if (suggestion == _suggestions.last) {
+      if (suggestion == locSuggestions.last) {
         _pendingRequest = _PendingRequest(
           originalQuestion: suggestion,
           type: _PendingType.targetAnimal,
         );
         _messages.add(
           _ChatMessage.assistant(
-            'Please clarify your target animal first so I can prepare the right checklist.',
+            l?.chatClarifyAnimal ?? 'Please clarify your target animal first so I can prepare the right checklist.',
           ),
         );
       } else {
@@ -178,7 +184,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
         );
         _messages.add(
           _ChatMessage.assistant(
-            'Please share your camera and lens so I can tailor the settings.',
+            l?.chatClarifyGear ?? 'Please share your camera and lens so I can tailor the settings.',
           ),
         );
       }
@@ -209,13 +215,31 @@ class _AssistantPanelState extends State<AssistantPanel> {
   }
 
   /// Builds Gemini request with model fallback and concise formatting rules.
+  String _langLabel() {
+    try {
+      final locale = context.read<LocaleController>().locale;
+      switch (locale.languageCode) {
+        case 'ms':
+          return 'Malay (Bahasa Melayu)';
+        case 'zh':
+          return 'Simplified Chinese (简体中文)';
+        default:
+          return 'English';
+      }
+    } catch (_) {
+      return 'English';
+    }
+  }
+
   Future<String> _fetchGeminiReply(String userPrompt) async {
     if (geminiApiKey.isEmpty) {
       return 'Gemini API key is missing. Please run with --dart-define=GEMINI_API_KEY=...';
     }
 
-    const systemInstruction = '''
+    final lang = _langLabel();
+    final systemInstruction = '''
 You are KaChak assistant for beginner wildlife photographers in Malaysia.
+IMPORTANT: Always reply in $lang. All section headers, tips, and explanations must be in $lang.
 Give practical, concise advice with clear sections.
 Only answer questions relevant to this app context:
 - wildlife photography guidance
@@ -499,8 +523,18 @@ Please answer using the preparation checklist template.
     _scrollToBottom();
   }
 
+  List<String> _localizedSuggestions(AppLocalizations? l) {
+    return [
+      l?.chatSuggestion1 ?? _suggestions[0],
+      l?.chatSuggestion2 ?? _suggestions[1],
+      l?.chatSuggestion3 ?? _suggestions[2],
+      l?.chatSuggestion4 ?? _suggestions[3],
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final s = Adaptive.scale(context);
     final media = MediaQuery.of(context);
     final isKeyboardVisible = media.viewInsets.bottom > 0;
@@ -552,14 +586,14 @@ Please answer using the preparation checklist template.
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Photo Assistant',
+                      l?.chatTitle ?? 'Photo Assistant',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: AppColors.accent,
                       ),
                     ),
                     Text(
-                      'Camera settings & tips',
+                      l?.chatSubtitle ?? 'Camera settings & tips',
                       style: TextStyle(
                         color: Colors.grey.shade500,
                         fontSize: 12,
@@ -631,7 +665,7 @@ Please answer using the preparation checklist template.
                         onTap: _scrollToBottom,
                         onSubmitted: (_) => _submitQuestion(),
                         decoration: InputDecoration(
-                          hintText: 'Ask anything about wildlife photography...',
+                          hintText: l?.chatHint ?? 'Ask anything about wildlife photography...',
                           hintStyle: TextStyle(
                             fontSize: baseFontSize,
                             color: Colors.grey.shade600,
@@ -660,7 +694,7 @@ Please answer using the preparation checklist template.
                 ),
                 SizedBox(height: 6 * s),
                 Text(
-                  'Photography AI chat can make mistakes. Please double check responses.',
+                  l?.chatDisclaimer ?? 'Photography AI chat can make mistakes. Please double check responses.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.grey.shade500,
@@ -692,8 +726,8 @@ Please answer using the preparation checklist template.
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
                   ),
-                  child: const Text(
-                    'Message copied',
+                  child: Text(
+                    l?.chatCopied ?? 'Message copied',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 13,
@@ -710,13 +744,15 @@ Please answer using the preparation checklist template.
   }
 
   Widget _emptyStateLayout(double s) {
+    final l = AppLocalizations.of(context);
+    final locSuggestions = _localizedSuggestions(l);
     return Padding(
       padding: EdgeInsets.fromLTRB(10 * s, 0, 10 * s, 8 * s),
       child: Column(
         children: [
           const Spacer(flex: 2),
           Text(
-            'What can I help with?',
+            l?.chatWelcome ?? 'What can I help with?',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: Adaptive.clamp(context, 30, min: 22, max: 36),
@@ -730,10 +766,10 @@ Please answer using the preparation checklist template.
             height: 76 * s,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              itemCount: _suggestions.length,
+              itemCount: locSuggestions.length,
               padding: EdgeInsets.symmetric(horizontal: 2 * s),
               separatorBuilder: (_, i) => SizedBox(width: 8 * s),
-              itemBuilder: (context, index) => _starterChip(_suggestions[index]),
+              itemBuilder: (context, index) => _starterChip(locSuggestions[index]),
             ),
           ),
           SizedBox(height: 8 * s),

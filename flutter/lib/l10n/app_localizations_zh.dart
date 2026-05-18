@@ -769,4 +769,184 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get missionAmphibians => '两栖动物';
+
+  @override
+  String get detailRecordedObservation => '记录的观察';
+
+  @override
+  String get detailLastSeen => '最近目击';
+
+  @override
+  String get detailTapRowHint => '点击行以在该标记处打开地图。';
+
+  @override
+  String get detailShowMore => '显示更多';
+
+  @override
+  String get detailShowLess => '显示更少';
+
+  @override
+  String get detailNationalPark => '国家公园';
+
+  @override
+  String get detailDifficult => '困难';
+
+  @override
+  String get spotlightFilterTitle => '筛选野生动物列表';
+
+  @override
+  String get spotlightFilterBody => '使用筛选按位置和物种属性缩小范围。';
+
+  @override
+  String get spotlightFilterTabsTitle => '位置和物种筛选器';
+
+  @override
+  String get spotlightFilterTabsBody => '使用位置标签按城市或地点筛选。切换到物种以设置类别、保护状态和难度。';
+
+  @override
+  String get spotlightLayoutTitle => '切换布局';
+
+  @override
+  String get spotlightLayoutBody => '点击在卡片网格和紧凑列表之间切换。';
+
+  @override
+  String get spotlightAiChatTitle => 'AI 助手';
+
+  @override
+  String get spotlightAiChatBody => '询问野生动物摄影规划、准备和实地技巧。';
+
+  @override
+  String get spotlightMapPageTitle => '地图页面';
+
+  @override
+  String get spotlightMapPageBody => '地图帮助您查看野生动物位置并按地点探索区域。';
+
+  @override
+  String get spotlightIdentifyPageTitle => '识别页面';
+
+  @override
+  String get spotlightIdentifyPageBody => '识别功能让您从拍摄的照片中识别野生动物。';
+
+  @override
+  String get spotlightMissionPageTitle => '任务页面';
+
+  @override
+  String get spotlightMissionPageBody => '任务在探索过程中提供引导任务和学习挑战。';
+
+  @override
+  String get spotlightSavedPageTitle => '收藏页面';
+
+  @override
+  String get spotlightSavedPageBody => '收藏保存您标记的物种以便快速访问。';
+
+  @override
+  String get spotlightMapRefreshTitle => '刷新地图天气';
+
+  @override
+  String get spotlightMapRefreshBody => '从所有城市标记站重新加载天气信息。';
+
+  @override
+  String get spotlightMapWeatherTitle => '切换天气图层';
+
+  @override
+  String get spotlightMapWeatherBody => '显示或隐藏天气标记以专注于目击或预报背景。';
+
+  @override
+  String get spotlightMapFocusTitle => '聚焦野生动物热点';
+
+  @override
+  String get spotlightMapFocusBody => '跳转相机以覆盖已知野生动物和摄影热点。';
+
+  @override
+  String get spotlightMapMyLocTitle => '转到我的位置';
+
+  @override
+  String get spotlightMapMyLocBody => '快速将地图中心移回您的当前位置。';
+
+  @override
+  String get spotlightMapZoomInTitle => '放大';
+
+  @override
+  String get spotlightMapZoomInBody => '增加地图缩放以查看标记和区域细节。';
+
+  @override
+  String get spotlightMapZoomOutTitle => '缩小';
+
+  @override
+  String get spotlightMapZoomOutBody => '减少地图缩放以查看更广区域背景。';
+
+  @override
+  String get spotlightMapWeatherMarkerTitle => '天气标记';
+
+  @override
+  String get spotlightMapWeatherMarkerBody => '城市天气显示当前条件和短期预报以便规划拍摄。';
+
+  @override
+  String get spotlightMapAnimalMarkerTitle => '动物标记';
+
+  @override
+  String get spotlightMapAnimalMarkerBody => '点击动物标记查看物种信息、照片和附近天气。';
+
+  @override
+  String get spotlightDetailAlertTitle => '启用提醒';
+
+  @override
+  String get spotlightDetailAlertBody => '保存后，点击此图标启用物种通知以获取高概率目击提醒。';
+
+  @override
+  String get spotlightDetailPredictionTitle => '当前预测';
+
+  @override
+  String get spotlightDetailPredictionBody => '此卡片显示最佳地点和基于天气的当前目击概率。';
+
+  @override
+  String get spotlightDetailObservationTitle => '记录的观察';
+
+  @override
+  String get spotlightDetailObservationBody => '第一个记录观察行包含最近的目击和坐标。';
+
+  @override
+  String get spotlightDetailMapTitle => '在地图上打开';
+
+  @override
+  String get spotlightDetailMapBody => '点击此地图按钮直接在地图上查看动物最后出现的位置。';
+
+  @override
+  String get chatTitle => '摄影助手';
+
+  @override
+  String get chatSubtitle => '相机设置与技巧';
+
+  @override
+  String get chatWelcome => '有什么可以帮您？';
+
+  @override
+  String get chatHint => '询问任何关于野生动物摄影的问题...';
+
+  @override
+  String get chatDisclaimer => '摄影AI聊天可能会出错。请仔细核实回复。';
+
+  @override
+  String get chatCopied => '消息已复制';
+
+  @override
+  String get chatIrrelevant => '这与野生动物摄影无关。请尝试其他问题。';
+
+  @override
+  String get chatSuggestion1 => '拍摄飞行中的鸟类应该用什么相机设置？';
+
+  @override
+  String get chatSuggestion2 => '推荐拍摄夜行动物的器材';
+
+  @override
+  String get chatSuggestion3 => '昆虫微距摄影的最佳设置';
+
+  @override
+  String get chatSuggestion4 => '热带雨林拍摄应该带什么？';
+
+  @override
+  String get chatClarifyGear => '请分享您的相机和镜头，以便我为您调整设置。';
+
+  @override
+  String get chatClarifyAnimal => '请先说明您的目标动物，以便我准备合适的清单。';
 }

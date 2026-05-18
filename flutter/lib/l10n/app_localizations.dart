@@ -1611,6 +1611,366 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Amphibians'**
   String get missionAmphibians;
+
+  /// No description provided for @detailRecordedObservation.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded observation'**
+  String get detailRecordedObservation;
+
+  /// No description provided for @detailLastSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'Last seen'**
+  String get detailLastSeen;
+
+  /// No description provided for @detailTapRowHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a row to open the map centered on that pin.'**
+  String get detailTapRowHint;
+
+  /// No description provided for @detailShowMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Show more'**
+  String get detailShowMore;
+
+  /// No description provided for @detailShowLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get detailShowLess;
+
+  /// No description provided for @detailNationalPark.
+  ///
+  /// In en, this message translates to:
+  /// **'National Park'**
+  String get detailNationalPark;
+
+  /// No description provided for @detailDifficult.
+  ///
+  /// In en, this message translates to:
+  /// **'Difficult'**
+  String get detailDifficult;
+
+  /// No description provided for @spotlightFilterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter wildlife list'**
+  String get spotlightFilterTitle;
+
+  /// No description provided for @spotlightFilterBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Filter to narrow by location and species attributes.'**
+  String get spotlightFilterBody;
+
+  /// No description provided for @spotlightFilterTabsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location and species filters'**
+  String get spotlightFilterTabsTitle;
+
+  /// No description provided for @spotlightFilterTabsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the Location tab to filter by city or site. Switch to Species to set category, conservation status, and difficulty.'**
+  String get spotlightFilterTabsBody;
+
+  /// No description provided for @spotlightLayoutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch layouts'**
+  String get spotlightLayoutTitle;
+
+  /// No description provided for @spotlightLayoutBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to toggle between card grid and compact list.'**
+  String get spotlightLayoutBody;
+
+  /// No description provided for @spotlightAiChatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI assistant'**
+  String get spotlightAiChatTitle;
+
+  /// No description provided for @spotlightAiChatBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about wildlife photography planning, preparation, and field tips.'**
+  String get spotlightAiChatBody;
+
+  /// No description provided for @spotlightMapPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Map page'**
+  String get spotlightMapPageTitle;
+
+  /// No description provided for @spotlightMapPageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Map helps you view wildlife locations and explore areas by place.'**
+  String get spotlightMapPageBody;
+
+  /// No description provided for @spotlightIdentifyPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Identify page'**
+  String get spotlightIdentifyPageTitle;
+
+  /// No description provided for @spotlightIdentifyPageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Identify lets you identify wildlife from your captured photo.'**
+  String get spotlightIdentifyPageBody;
+
+  /// No description provided for @spotlightMissionPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mission page'**
+  String get spotlightMissionPageTitle;
+
+  /// No description provided for @spotlightMissionPageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Mission gives guided tasks and learning challenges while exploring.'**
+  String get spotlightMissionPageBody;
+
+  /// No description provided for @spotlightSavedPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved page'**
+  String get spotlightSavedPageTitle;
+
+  /// No description provided for @spotlightSavedPageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved keeps your bookmarked species for quick access.'**
+  String get spotlightSavedPageBody;
+
+  /// No description provided for @spotlightMapRefreshTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh map weather'**
+  String get spotlightMapRefreshTitle;
+
+  /// No description provided for @spotlightMapRefreshBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload weather information from all city marker stations.'**
+  String get spotlightMapRefreshBody;
+
+  /// No description provided for @spotlightMapWeatherTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle weather layer'**
+  String get spotlightMapWeatherTitle;
+
+  /// No description provided for @spotlightMapWeatherBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Show or hide weather markers to focus on sightings or forecast context.'**
+  String get spotlightMapWeatherBody;
+
+  /// No description provided for @spotlightMapFocusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus wildlife hotspots'**
+  String get spotlightMapFocusTitle;
+
+  /// No description provided for @spotlightMapFocusBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump the camera to fit known wildlife and photography hotspot coverage.'**
+  String get spotlightMapFocusBody;
+
+  /// No description provided for @spotlightMapMyLocTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to my location'**
+  String get spotlightMapMyLocTitle;
+
+  /// No description provided for @spotlightMapMyLocBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Center the map back to your current position quickly.'**
+  String get spotlightMapMyLocBody;
+
+  /// No description provided for @spotlightMapZoomInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom in'**
+  String get spotlightMapZoomInTitle;
+
+  /// No description provided for @spotlightMapZoomInBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase map zoom for close-up marker and area details.'**
+  String get spotlightMapZoomInBody;
+
+  /// No description provided for @spotlightMapZoomOutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom out'**
+  String get spotlightMapZoomOutTitle;
+
+  /// No description provided for @spotlightMapZoomOutBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce map zoom to see wider region context.'**
+  String get spotlightMapZoomOutBody;
+
+  /// No description provided for @spotlightMapWeatherMarkerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather marker'**
+  String get spotlightMapWeatherMarkerTitle;
+
+  /// No description provided for @spotlightMapWeatherMarkerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'City weather shows current conditions and short forecast for planning shoots.'**
+  String get spotlightMapWeatherMarkerBody;
+
+  /// No description provided for @spotlightMapAnimalMarkerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Animal marker'**
+  String get spotlightMapAnimalMarkerTitle;
+
+  /// No description provided for @spotlightMapAnimalMarkerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap an animal marker to see species information, photos, and nearby weather.'**
+  String get spotlightMapAnimalMarkerBody;
+
+  /// No description provided for @spotlightDetailAlertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable alerts'**
+  String get spotlightDetailAlertTitle;
+
+  /// No description provided for @spotlightDetailAlertBody.
+  ///
+  /// In en, this message translates to:
+  /// **'After saving, tap this icon to enable species notifications for higher-probability sightings.'**
+  String get spotlightDetailAlertBody;
+
+  /// No description provided for @spotlightDetailPredictionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Current prediction'**
+  String get spotlightDetailPredictionTitle;
+
+  /// No description provided for @spotlightDetailPredictionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This card shows the best site and current weather-based probability for spotting this species.'**
+  String get spotlightDetailPredictionBody;
+
+  /// No description provided for @spotlightDetailObservationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded observation'**
+  String get spotlightDetailObservationTitle;
+
+  /// No description provided for @spotlightDetailObservationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This first recorded observation row includes the latest sighting and coordinates.'**
+  String get spotlightDetailObservationBody;
+
+  /// No description provided for @spotlightDetailMapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open on map'**
+  String get spotlightDetailMapTitle;
+
+  /// No description provided for @spotlightDetailMapBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap this map button to view the animal last occurrence directly on the map.'**
+  String get spotlightDetailMapBody;
+
+  /// No description provided for @chatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo Assistant'**
+  String get chatTitle;
+
+  /// No description provided for @chatSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera settings & tips'**
+  String get chatSubtitle;
+
+  /// No description provided for @chatWelcome.
+  ///
+  /// In en, this message translates to:
+  /// **'What can I help with?'**
+  String get chatWelcome;
+
+  /// No description provided for @chatHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask anything about wildlife photography...'**
+  String get chatHint;
+
+  /// No description provided for @chatDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Photography AI chat can make mistakes. Please double check responses.'**
+  String get chatDisclaimer;
+
+  /// No description provided for @chatCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Message copied'**
+  String get chatCopied;
+
+  /// No description provided for @chatIrrelevant.
+  ///
+  /// In en, this message translates to:
+  /// **'This is unrelated to wildlife photography. Please try another question.'**
+  String get chatIrrelevant;
+
+  /// No description provided for @chatSuggestion1.
+  ///
+  /// In en, this message translates to:
+  /// **'What camera settings should I use for birds in flight?'**
+  String get chatSuggestion1;
+
+  /// No description provided for @chatSuggestion2.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommend equipment for photographing nocturnal animals'**
+  String get chatSuggestion2;
+
+  /// No description provided for @chatSuggestion3.
+  ///
+  /// In en, this message translates to:
+  /// **'Best settings for macro photography of insects'**
+  String get chatSuggestion3;
+
+  /// No description provided for @chatSuggestion4.
+  ///
+  /// In en, this message translates to:
+  /// **'What should I bring for a rainforest shoot?'**
+  String get chatSuggestion4;
+
+  /// No description provided for @chatClarifyGear.
+  ///
+  /// In en, this message translates to:
+  /// **'Please share your camera and lens so I can tailor the settings.'**
+  String get chatClarifyGear;
+
+  /// No description provided for @chatClarifyAnimal.
+  ///
+  /// In en, this message translates to:
+  /// **'Please clarify your target animal first so I can prepare the right checklist.'**
+  String get chatClarifyAnimal;
 }
 
 class _AppLocalizationsDelegate
