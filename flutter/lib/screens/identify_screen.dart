@@ -17,6 +17,12 @@ import '../utils/adaptive.dart';
 import '../utils/image_validator.dart';
 import 'species_detail_screen.dart';
 
+/// Unified identification screen for species recognition and photo quality.
+///
+/// This screen supports two tools in one flow:
+/// - species recognition via Gemini
+/// - image quality analysis with actionable guidance
+/// It also supports mission-proof return mode when launched by missions.
 enum _RecognitionTool { species, quality }
 
 class IdentifyScreen extends StatefulWidget {
@@ -562,7 +568,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppColors.surface.withValues(alpha: 0.95),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: AppColors.border),
       ),
@@ -665,8 +671,9 @@ class _IdentifyScreenState extends State<IdentifyScreen>
     required String label,
     required VoidCallback onTap,
   }) {
+    final selectedBg = AppColors.lightSage.withValues(alpha: 0.66);
     return Material(
-      color: selected ? AppColors.surface : Colors.transparent,
+      color: selected ? selectedBg : Colors.transparent,
       borderRadius: BorderRadius.circular(999),
       child: InkWell(
         onTap: _isLoading ? null : onTap,
@@ -675,6 +682,12 @@ class _IdentifyScreenState extends State<IdentifyScreen>
           padding: const EdgeInsets.symmetric(vertical: 11),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: selected
+                  ? AppColors.primary.withValues(alpha: 0.35)
+                  : Colors.transparent,
+              width: 1.2,
+            ),
             boxShadow: selected
                 ? [
                     BoxShadow(

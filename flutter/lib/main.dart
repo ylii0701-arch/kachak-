@@ -17,10 +17,21 @@ import 'utils/adaptive.dart';
 import 'services/onnx_prediction_service.dart';
 import 'services/prediction_manager.dart';
 
-// Global keys and instances for notifications
+/// App entrypoint and root composition for Kachak.
+///
+/// Responsibilities:
+/// - bootstraps shared services and providers
+/// - configures localization and theme
+/// - initializes local notifications on native platforms
+/// - defers heavy prediction startup on mobile web for stability
+
+/// Root navigator key used by notification deep-link handling.
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+/// Singleton notification plugin instance for native local alerts.
 final FlutterLocalNotificationsPlugin localNotifs = FlutterLocalNotificationsPlugin();
 
+/// Initializes app services, providers, and launches the widget tree.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final isMobileWeb =
@@ -71,7 +82,7 @@ Future<void> main() async {
   // overwhelming the browser. The full engine starts lazily if ever needed.
 }
 
-// Shows a dialog when a notification is tapped
+/// Opens species detail when a notification payload is tapped.
 void _showNotificationDetails(String payload) {
   final context = navigatorKey.currentContext;
   if (context == null) return;
@@ -86,6 +97,7 @@ void _showNotificationDetails(String payload) {
 class KachakApp extends StatelessWidget {
   const KachakApp({super.key});
 
+  /// Builds the localized [MaterialApp] with adaptive text scaling.
   @override
   Widget build(BuildContext context) {
     final localeCtrl = context.watch<LocaleController>();
