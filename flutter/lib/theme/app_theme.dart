@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/// Centralized color tokens used across the app theme.
 class AppColors {
   static const primary = Color(0xFF5C8A57);
   static const accent = Color(0xFF1F4B36);
@@ -21,6 +22,7 @@ class AppColors {
   static const calmShadow = Color(0x14604628);
 }
 
+/// Builds the global Material 3 theme for the Kachak app.
 ThemeData buildKachakTheme() {
   const seed = AppColors.primary;
   final scheme = ColorScheme.fromSeed(

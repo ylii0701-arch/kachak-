@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../utils/adaptive.dart';
 
+/// Team showcase page with member profiles and hero image.
 class MeetTeamPage extends StatelessWidget {
   const MeetTeamPage({super.key});
 

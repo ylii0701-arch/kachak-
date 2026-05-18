@@ -2,6 +2,7 @@
 
 import 'dart:html' as html;
 
+/// Requests browser camera permission using `getUserMedia`.
 Future<bool> requestWebCameraPermission() async {
   if (html.window.isSecureContext != true) return false;
   final mediaDevices = html.window.navigator.mediaDevices;
@@ -19,12 +20,14 @@ Future<bool> requestWebCameraPermission() async {
   }
 }
 
+/// Requests browser notification permission.
 Future<bool> requestWebNotificationPermission() async {
   if (!html.Notification.supported) return false;
   final permission = await html.Notification.requestPermission();
   return permission == 'granted';
 }
 
+/// Shows a foreground browser notification when permission is granted.
 Future<bool> showWebNotification({
   required String title,
   required String body,

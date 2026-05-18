@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import 'tour_anchor.dart';
 
+/// Known spotlight anchor ids used across in-app guided tours.
 class TourTargetIds {
   TourTargetIds._();
 
@@ -44,6 +45,7 @@ class TourTargetIds {
       'tour.detail.first.observation.map.button';
 }
 
+/// Simple command bus for triggering runtime actions during tour steps.
 class TourRuntimeCommand {
   TourRuntimeCommand._();
 
@@ -58,6 +60,7 @@ class TourRuntimeCommand {
   }
 }
 
+/// Immutable definition for a single spotlight tour step.
 class SpotlightStep {
   const SpotlightStep({
     required this.targetId,
@@ -76,6 +79,7 @@ class SpotlightStep {
 
 enum SpotlightCardPlacement { auto, above, below }
 
+/// Overlay entry helper that launches a full spotlight walkthrough.
 class SpotlightTour {
   SpotlightTour._();
 

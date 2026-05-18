@@ -999,7 +999,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 label: Text(c == 'All' ? (l?.homeAll ?? 'All') : localizedStatus(l, c)),
                                 selected: sel,
                                 onSelected: (_) => setState(() => _tempStatus = c),
-                                selectedColor: AppColors.accent,
+                                selectedColor: AppColors.primary,
                                 labelStyle: TextStyle(color: sel ? Colors.white : null),
                               );
                             }).toList(),
@@ -1020,7 +1020,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 label: Text(label),
                                 selected: sel,
                                 onSelected: (_) => setState(() => _tempDifficulty = d),
-                                selectedColor: AppColors.accent,
+                                selectedColor: AppColors.primary,
                                 labelStyle: TextStyle(color: sel ? Colors.white : null),
                               );
                             }).toList(),
@@ -1145,7 +1145,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     selected: _tempSortOrder == _SortOrder.ascending,
                     onSelected: (_) =>
                         setState(() => _tempSortOrder = _SortOrder.ascending),
-                    selectedColor: AppColors.accent,
+                    selectedColor: AppColors.primary,
                     labelStyle: TextStyle(
                       color: _tempSortOrder == _SortOrder.ascending
                           ? Colors.white
@@ -1161,7 +1161,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     selected: _tempSortOrder == _SortOrder.descending,
                     onSelected: (_) =>
                         setState(() => _tempSortOrder = _SortOrder.descending),
-                    selectedColor: AppColors.accent,
+                    selectedColor: AppColors.primary,
                     labelStyle: TextStyle(
                       color: _tempSortOrder == _SortOrder.descending
                           ? Colors.white
@@ -1209,7 +1209,7 @@ class _HomeScreenState extends State<HomeScreen> {
       label: Text(label),
       selected: sel,
       onSelected: (_) => setState(() => _tempSortBy = value),
-      selectedColor: AppColors.accent,
+      selectedColor: AppColors.primary,
       labelStyle: TextStyle(color: sel ? Colors.white : null),
     );
   }

@@ -14,6 +14,13 @@ import '../widgets/glass.dart';
 import '../widgets/species_network_image.dart';
 import 'species_detail_screen.dart';
 
+/// Full prediction dashboard for a selected species at a selected site.
+///
+/// Displays:
+/// - 7-day probability forecast and weather signals
+/// - best time recommendations
+/// - alert toggle integration for favorites
+/// - quick navigation into species detail
 const _predictionHeroShadows = <Shadow>[
   Shadow(blurRadius: 14, offset: Offset(0, 1), color: Color(0x8C000000)),
   Shadow(blurRadius: 4, offset: Offset(0, 2), color: Color(0xB3000000)),
