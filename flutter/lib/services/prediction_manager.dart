@@ -88,6 +88,7 @@ class PredictionManager extends ChangeNotifier {
 
     try {
       var processedSpecies = 0;
+      var inferenceCount = 0;
       for (final city in kMalaysianCities) {
         CityWeatherBundle? weatherBundle;
 
@@ -99,6 +100,11 @@ class PredictionManager extends ChangeNotifier {
           );
         } catch (e) {
           debugPrint('⚠️ Weather unavailable for ${city.name}. Using FallbackWeather.');
+        }
+
+        // Yield after each network call on mobile web to prevent thread starvation
+        if (_isMobileWeb) {
+          await Future<void>.delayed(const Duration(milliseconds: 20));
         }
 
         final citySites = siteData.where((s) => s.cityName == city.name);
@@ -126,6 +132,7 @@ class PredictionManager extends ChangeNotifier {
             double currentProb = await _runInference(
                 site, targetCategory, currentTemp, currentRain, currentHumid, currentWind
             ) ?? 0.0;
+            inferenceCount++;
 
             latestPredictions[site.id]![speciesId] = currentProb;
 
@@ -143,12 +150,17 @@ class PredictionManager extends ChangeNotifier {
             ));
 
             // Add the 3-hourly forecasts from OpenWeather
+            // On mobile web, limit to 16 entries (~2 days) to reduce WASM pressure
             if (weatherBundle != null) {
-              for (final entry in weatherBundle.forecast) {
+              final forecastEntries = _isMobileWeb
+                  ? weatherBundle.forecast.take(16)
+                  : weatherBundle.forecast;
+              for (final entry in forecastEntries) {
                 double? prob = await _runInference(
                     site, targetCategory, entry.temperature, entry.rainfall,
                     entry.humidity.toDouble(), entry.windSpeed
                 );
+                inferenceCount++;
 
                 if (prob != null) {
                   timeSeries.add(TimeSeriesPrediction(
@@ -160,19 +172,27 @@ class PredictionManager extends ChangeNotifier {
                     iconCode: entry.iconCode,
                   ));
                 }
+
+                // Yield every 2 inferences on mobile web (one full frame ~16ms)
+                if (_isMobileWeb && inferenceCount % 2 == 0) {
+                  await Future<void>.delayed(const Duration(milliseconds: 16));
+                }
               }
             }
             forecastPredictions[site.id]![speciesId] = timeSeries;
             processedSpecies += 1;
-            if (_isMobileWeb && processedSpecies % 3 == 0) {
-              await Future<void>.delayed(const Duration(milliseconds: 1));
-            } else if (kIsWeb && processedSpecies % 8 == 0) {
+
+            // Mobile web: yield a full animation frame after every species
+            if (_isMobileWeb) {
+              await Future<void>.delayed(const Duration(milliseconds: 16));
+            } else if (kIsWeb && processedSpecies % 5 == 0) {
               await Future<void>.delayed(Duration.zero);
             }
           }
         }
+        // Between cities: longer pause on mobile web to let GC and rendering catch up
         if (_isMobileWeb) {
-          await Future<void>.delayed(const Duration(milliseconds: 2));
+          await Future<void>.delayed(const Duration(milliseconds: 50));
         } else if (kIsWeb) {
           await Future<void>.delayed(Duration.zero);
         }
@@ -336,11 +356,13 @@ class PredictionManager extends ChangeNotifier {
       ];
 
       if (weatherBundle != null) {
+        var fcIdx = 0;
         for (final entry in weatherBundle.forecast) {
           double? prob = await _runInference(
             site, targetCategory, entry.temperature, entry.rainfall,
             entry.humidity.toDouble(), entry.windSpeed,
           );
+          fcIdx++;
           if (prob != null) {
             timeSeries.add(TimeSeriesPrediction(
               timestamp: entry.timestamp.toLocal(),
@@ -351,15 +373,19 @@ class PredictionManager extends ChangeNotifier {
               iconCode: entry.iconCode,
             ));
           }
+          // Yield every 3 forecast entries on mobile web
+          if (_isMobileWeb && fcIdx % 3 == 0) {
+            await Future<void>.delayed(const Duration(milliseconds: 8));
+          }
         }
       }
 
       forecastPredictions[site.id]![speciesId] = timeSeries;
       _computedSpeciesSites.add(key);
 
-      // Yield for mobile web
+      // Yield a full frame for mobile web between sites
       if (_isMobileWeb) {
-        await Future<void>.delayed(const Duration(milliseconds: 1));
+        await Future<void>.delayed(const Duration(milliseconds: 16));
       }
     }
 
