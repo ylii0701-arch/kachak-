@@ -10,6 +10,7 @@ import 'providers/app_shell_controller.dart';
 import 'providers/locale_controller.dart';
 import 'providers/saved_species_provider.dart';
 import 'screens/splash_screen.dart';
+import 'screens/species_detail_screen.dart';
 import 'services/onboarding_service.dart';
 import 'theme/app_theme.dart';
 import 'utils/adaptive.dart';
@@ -24,12 +25,15 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final isMobileWeb =
       kIsWeb &&
-      (defaultTargetPlatform == TargetPlatform.iOS ||
-          defaultTargetPlatform == TargetPlatform.android);
+          (defaultTargetPlatform == TargetPlatform.iOS ||
+              defaultTargetPlatform == TargetPlatform.android);
 
+  final prefs = await SharedPreferences.getInstance();
+  final savedSpeciesProvider = SavedSpeciesProvider(prefs);
   // Heavy inference bootstrap can crash mobile browsers. Defer there.
   if (!isMobileWeb) {
     await OnnxPredictionService.initModel();
+    PredictionManager.instance.setAlertProvider(savedSpeciesProvider);
     PredictionManager.instance.startEngine();
   } else {
     debugPrint('⚠️ Mobile web detected: deferred ONNX/prediction startup.');
@@ -51,11 +55,10 @@ Future<void> main() async {
     );
   }
 
-  final prefs = await SharedPreferences.getInstance();
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => SavedSpeciesProvider(prefs)),
+        ChangeNotifierProvider.value(value: savedSpeciesProvider),
         ChangeNotifierProvider(create: (_) => AppShellController()),
         ChangeNotifierProvider(create: (_) => OnboardingService(prefs)),
         ChangeNotifierProvider(create: (_) => LocaleController(prefs)),
@@ -73,17 +76,9 @@ void _showNotificationDetails(String payload) {
   final context = navigatorKey.currentContext;
   if (context == null) return;
 
-  showDialog(
-    context: context,
-    builder: (_) => AlertDialog(
-      title: const Text('High Probability Alert!'),
-      content: Text(payload), // Displays the conditions
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Got it!'),
-        ),
-      ],
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (context) => SpeciesDetailScreen(speciesId: payload),
     ),
   );
 }

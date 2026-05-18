@@ -949,4 +949,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get chatClarifyAnimal => '请先说明您的目标动物，以便我准备合适的清单。';
+
+  @override
+  String get notificationHighProbTitle => '检测到最佳条件！';
+
+  @override
+  String notificationHighProbBody(int count) {
+    return '您收藏的动物中有 $count 只今天有 >=80% 的出现几率！';
+  }
 }

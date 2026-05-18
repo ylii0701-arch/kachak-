@@ -354,5 +354,13 @@
   "chatSuggestion3": "Tetapan terbaik untuk fotografi makro serangga",
   "chatSuggestion4": "Apa yang patut saya bawa untuk penggambaran hutan hujan?",
   "chatClarifyGear": "Sila kongsikan kamera dan kanta anda supaya saya boleh sesuaikan tetapan.",
-  "chatClarifyAnimal": "Sila nyatakan haiwan sasaran anda dahulu supaya saya boleh sediakan senarai semak yang betul."
+  "chatClarifyAnimal": "Sila nyatakan haiwan sasaran anda dahulu supaya saya boleh sediakan senarai semak yang betul.",
+
+  "notificationHighProbTitle": "Keadaan Optimum Dikesan!",
+  "notificationHighProbBody": "{count} daripada haiwan tersimpan anda mempunyai >=80% peluang untuk muncul hari ini!",
+  "@notificationHighProbBody": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  }
 }
