@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'providers/app_shell_controller.dart';
+import 'providers/locale_controller.dart';
 import 'providers/saved_species_provider.dart';
 import 'screens/splash_screen.dart';
 import 'services/onboarding_service.dart';
@@ -55,6 +58,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => SavedSpeciesProvider(prefs)),
         ChangeNotifierProvider(create: (_) => AppShellController()),
         ChangeNotifierProvider(create: (_) => OnboardingService(prefs)),
+        ChangeNotifierProvider(create: (_) => LocaleController(prefs)),
       ],
       child: const KachakApp(),
     ),
@@ -89,11 +93,20 @@ class KachakApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localeCtrl = context.watch<LocaleController>();
     return MaterialApp(
       title: 'KACHAK',
-      navigatorKey: navigatorKey, // Required for showing the dialog from background
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: buildKachakTheme(),
+      locale: localeCtrl.locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       builder: (context, child) {
         final base = Theme.of(context);
         final textScale = Adaptive.clamp(context, 1, min: 0.9, max: 1.12);

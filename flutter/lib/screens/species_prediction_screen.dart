@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../data/predictions_data.dart'; // Restored to extract biological habits
 import '../data/species_data.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/saved_species_provider.dart';
 import '../services/prediction_manager.dart';
 import '../theme/app_theme.dart';
@@ -89,12 +90,12 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
   }
 
   // Formats the timestamp into a readable daily format (e.g., Today, Tomorrow)
-  String _formatDate(DateTime date) {
+  String _formatDate(DateTime date, AppLocalizations? l) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final d = DateTime(date.year, date.month, date.day);
-    if (d == today) return 'Today';
-    if (d == today.add(const Duration(days: 1))) return 'Tomorrow';
+    if (d == today) return l?.predictionToday ?? 'Today';
+    if (d == today.add(const Duration(days: 1))) return l?.predictionTomorrow ?? 'Tomorrow';
     return '${_weekday(date.weekday)}, ${date.month}/${date.day}';
   }
 
@@ -143,6 +144,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final s = Adaptive.scale(context);
     final species = speciesById(widget.speciesId);
     final saved = context.watch<SavedSpeciesProvider>();
@@ -164,10 +166,10 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
               children: [
                 const CircularProgressIndicator(),
                 const SizedBox(height: 16),
-                const Text('Calculating predictions...'),
+                Text(l?.predictionCalculating ?? 'Calculating predictions...'),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Back'),
+                  child: Text(l?.predictionBack ?? 'Back'),
                 ),
               ],
             ),
@@ -405,7 +407,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                       CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          '🌿 Key Factors',
+                                          '🌿 ${l?.predictionKeyFactors ?? 'Key Factors'}',
                                           style: GoogleFonts.plusJakartaSans(
                                             fontWeight: FontWeight.w800,
                                             fontSize: Adaptive.clamp(
@@ -546,7 +548,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                         ),
                                       ),
                                       Text(
-                                        isNotified ? 'Alert On' : 'Alert Off',
+                                        isNotified ? (l?.predictionAlertOn ?? 'Alert On') : (l?.predictionAlertOff ?? 'Alert Off'),
                                         style: GoogleFonts.plusJakartaSans(
                                           fontSize: Adaptive.clamp(
                                             context,
@@ -586,7 +588,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                             ),
                             SizedBox(width: 8 * s),
                             Text(
-                              '7-Day Occurrence Forecast',
+                              l?.predictionTitle ?? '7-Day Occurrence Forecast',
                               style: GoogleFonts.plusJakartaSans(
                                 fontWeight: FontWeight.w800,
                                 fontSize: Adaptive.clamp(
@@ -608,6 +610,11 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                           final first = e.key == 0;
                           final probLabel = _getProbLabel(day.probability);
                           final probPercent = (day.probability * 100).round();
+                          final displayProbLabel = probLabel == 'High'
+                              ? (l?.identifyHigh ?? 'High')
+                              : probLabel == 'Medium'
+                                  ? (l?.identifyMedium ?? 'Medium')
+                                  : (l?.identifyLow ?? 'Low');
 
                           return Padding(
                             padding: EdgeInsets.only(bottom: 8 * s),
@@ -644,7 +651,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                       MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          _formatDate(day.timestamp),
+                                          _formatDate(day.timestamp, l),
                                           style: GoogleFonts.plusJakartaSans(
                                             fontWeight: FontWeight.w800,
                                             fontSize: Adaptive.clamp(
@@ -672,7 +679,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                             ),
                                           ),
                                           child: Text(
-                                            '$probPercent% $probLabel',
+                                            '$probPercent% $displayProbLabel',
                                             style: GoogleFonts.plusJakartaSans(
                                               fontSize: Adaptive.clamp(
                                                 context,
@@ -700,15 +707,15 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                             Expanded(
                                               child: _forecastCell(
                                                 icon: Icons.schedule,
-                                                label: 'Best Time',
-                                                value: fixedBestTime, // Uses pre-configured habits
+                                                label: l?.predictionBestTime ?? 'Best Time',
+                                                value: fixedBestTime,
                                                 iconColor: AppColors.primary,
                                               ),
                                             ),
                                             const SizedBox(width: 10),
                                             Expanded(
                                               child: _forecastCell(
-                                                label: 'Weather',
+                                                label: l?.predictionWeather ?? 'Weather',
                                                 value: day.weatherDescription,
                                                 emoji: _weatherEmoji(
                                                   day.weatherDescription,
@@ -725,7 +732,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                             Expanded(
                                               child: _forecastCell(
                                                 icon: Icons.thermostat,
-                                                label: 'Temperature',
+                                                label: l?.predictionTemperature ?? 'Temperature',
                                                 value: '${day.temperature.round()}°C',
                                                 iconColor:
                                                 Colors.orange.shade700,
@@ -735,7 +742,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                                             Expanded(
                                               child: _forecastCell(
                                                 icon: Icons.water_drop,
-                                                label: 'Humidity',
+                                                label: l?.predictionHumidity ?? 'Humidity',
                                                 value: '${day.humidity.round()}%',
                                                 iconColor: Colors.cyan.shade700,
                                               ),
@@ -771,7 +778,7 @@ class _SpeciesPredictionScreenState extends State<SpeciesPredictionScreen> {
                               elevation: 0,
                               shadowColor: Colors.transparent,
                             ),
-                            child: const Text('View Full Species Details'),
+                            child: Text(l?.predictionViewFullSpecies ?? 'View Full Species Details'),
                           ),
                         ),
                         SizedBox(height: bottomPad),

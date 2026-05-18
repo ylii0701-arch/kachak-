@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -22,6 +23,7 @@ class SavedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scale = Adaptive.scale(context);
+    final l = AppLocalizations.of(context);
     final saved = context.watch<SavedSpeciesProvider>();
     // Build saved list from provider state + static species catalog.
     final list = speciesData.where((sp) => saved.isSaved(sp.id)).toList();
@@ -89,7 +91,7 @@ class SavedScreen extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                '${list.length} species',
+                                l?.savedSpeciesCount(list.length) ?? '${list.length} species',
                                 style: TextStyle(color: Colors.grey.shade700),
                               ),
                             ],
@@ -131,7 +133,7 @@ class SavedScreen extends StatelessWidget {
                               ),
                               SizedBox(height: 20 * scale),
                               Text(
-                                'No favorite species yet',
+                                l?.savedEmptyTitle ?? 'No favorite species yet',
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context).textTheme.titleLarge
                                     ?.copyWith(
@@ -141,7 +143,7 @@ class SavedScreen extends StatelessWidget {
                               ),
                               SizedBox(height: 12 * scale),
                               Text(
-                                'Start exploring and save species you want to photograph.',
+                                l?.savedEmptyBody ?? 'Start exploring and save species you want to photograph.',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: const Color(0xFF3D4D45),
@@ -159,7 +161,7 @@ class SavedScreen extends StatelessWidget {
                                     horizontal: 28 * scale,
                                   ),
                                 ),
-                                child: const Text('Explore species'),
+                                child: Text(l?.savedExploreButton ?? 'Explore species'),
                               ),
                             ],
                           ),

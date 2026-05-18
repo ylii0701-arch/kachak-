@@ -5,6 +5,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
 import '../config/map_keys.dart';
+import '../l10n/app_localizations.dart';
 import '../data/malaysia_cities.dart';
 import '../data/map_data.dart';
 import '../data/species_data.dart';
@@ -388,8 +389,9 @@ class _MapScreenState extends State<MapScreen> {
       if (perm == LocationPermission.denied ||
           perm == LocationPermission.deniedForever) {
         if (mounted) {
+          final l = AppLocalizations.of(context);
           setState(() {
-            _locationToast = 'Location permission denied. Using Kuala Lumpur.';
+            _locationToast = l?.mapLocationDenied ?? 'Location permission denied. Using Kuala Lumpur.';
             _loadingLocation = false;
           });
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -414,9 +416,10 @@ class _MapScreenState extends State<MapScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final l = AppLocalizations.of(context);
         setState(() {
           _locationToast =
-              'Unable to detect your location. Using Kuala Lumpur.';
+              l?.mapLocationError ?? 'Unable to detect your location. Using Kuala Lumpur.';
           _loadingLocation = false;
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -459,10 +462,11 @@ class _MapScreenState extends State<MapScreen> {
       }
     } catch (_) {
       if (!mounted) return;
+      final l = AppLocalizations.of(context);
       setState(() {
         _loadingCityWeather = false;
         _locationToast =
-            'Weather data could not be loaded right now. Map is still available.';
+            l?.mapWeatherLoadError ?? 'Weather data could not be loaded right now. Map is still available.';
       });
       Future.delayed(const Duration(seconds: 5), () {
         if (mounted) setState(() => _locationToast = null);
@@ -472,6 +476,7 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     _anchoredWeatherMarker = false;
     _anchoredPhotoMarker = false;
     _anchoredAnimalMarker = false;
@@ -751,7 +756,7 @@ class _MapScreenState extends State<MapScreen> {
                                   fontSize: Adaptive.clamp(context, 15, min: 13, max: 18),
                                 ),
                                 decoration: InputDecoration(
-                                  hintText: 'Search species',
+                                  hintText: l?.mapSearchHint ?? 'Search species',
                                   hintStyle: TextStyle(
                                     color: AppColors.accent.withValues(alpha: 0.84),
                                     fontWeight: FontWeight.w700,
@@ -784,7 +789,7 @@ class _MapScreenState extends State<MapScreen> {
                     width: Adaptive.clamp(context, 46, min: 42, max: 52),
                     height: Adaptive.clamp(context, 52, min: 46, max: 58),
                     child: IconButton(
-                      tooltip: 'Clear search',
+                      tooltip: l?.mapClearSearch ?? 'Clear search',
                       onPressed: q.isEmpty ? null : _clearSpeciesSearch,
                       icon: Icon(
                         Icons.cleaning_services_outlined,
@@ -930,7 +935,7 @@ class _MapScreenState extends State<MapScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                tooltip: 'Refresh weather',
+                                tooltip: l?.mapRefreshWeather ?? 'Refresh weather',
                                 onPressed: _loadCityWeather,
                                 icon: TourAnchor(
                                   id: TourTargetIds.mapToolRefresh,
@@ -944,8 +949,8 @@ class _MapScreenState extends State<MapScreen> {
                               Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
                               IconButton(
                                 tooltip: _showCityWeatherMarkers
-                                    ? 'Hide city weather'
-                                    : 'Show city weather',
+                                    ? l?.mapHideCityWeather ?? 'Hide city weather'
+                                    : l?.mapShowCityWeather ?? 'Show city weather',
                                 onPressed: () {
                                   setState(() {
                                     _showCityWeatherMarkers = !_showCityWeatherMarkers;
@@ -964,7 +969,7 @@ class _MapScreenState extends State<MapScreen> {
                               ),
                               Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
                               IconButton(
-                                tooltip: 'Show species & photo spots',
+                                tooltip: l?.mapShowSpeciesPhotoSpots ?? 'Show species & photo spots',
                                 onPressed: _fitWildlifeHotspots,
                                 icon: const TourAnchor(
                                   id: TourTargetIds.mapToolFocus,
@@ -977,7 +982,7 @@ class _MapScreenState extends State<MapScreen> {
                               ),
                               if (_user != null)
                                 IconButton(
-                                  tooltip: 'My location',
+                                  tooltip: l?.mapMyLocation ?? 'My location',
                                   onPressed: _goToMyLocation,
                                   icon: const TourAnchor(
                                     id: TourTargetIds.mapToolMyLocation,
@@ -987,7 +992,7 @@ class _MapScreenState extends State<MapScreen> {
                                 ),
                               Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
                               IconButton(
-                                tooltip: 'Zoom in',
+                                tooltip: l?.mapZoomIn ?? 'Zoom in',
                                 onPressed: () => _zoomBy(1),
                                 icon: const TourAnchor(
                                   id: TourTargetIds.mapToolZoomIn,
@@ -997,7 +1002,7 @@ class _MapScreenState extends State<MapScreen> {
                               ),
                               Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
                               IconButton(
-                                tooltip: 'Zoom out',
+                                tooltip: l?.mapZoomOut ?? 'Zoom out',
                                 onPressed: () => _zoomBy(-1),
                                 icon: const TourAnchor(
                                   id: TourTargetIds.mapToolZoomOut,
@@ -1025,6 +1030,7 @@ class _MapScreenState extends State<MapScreen> {
     PhotographySpot place, {
     bool isTourPreview = false,
   }) {
+    final l = AppLocalizations.of(context);
     final bottomSheet = showModalBottomSheet<void>(
       context: context,
       useRootNavigator: true,
@@ -1062,7 +1068,7 @@ class _MapScreenState extends State<MapScreen> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  '${place.habitatType} · ${place.accessibility}${place.publicAccess ? '' : ' · Restricted'}',
+                  '${place.habitatType} · ${place.accessibility}${place.publicAccess ? '' : ' · ${l?.mapRestricted ?? 'Restricted'}'}',
                   style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
                 ),
                 const SizedBox(height: 12),
@@ -1073,7 +1079,7 @@ class _MapScreenState extends State<MapScreen> {
                 const SizedBox(height: 18),
                 FilledButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Close'),
+                  child: Text(l?.mapClose ?? 'Close'),
                 ),
               ],
             ),
@@ -1101,6 +1107,7 @@ class _MapScreenState extends State<MapScreen> {
     bool isTourPreview = false,
   }
   ) {
+    final l = AppLocalizations.of(context);
     final bottomSheet = showModalBottomSheet<void>(
       context: context,
       useRootNavigator: true,
@@ -1150,7 +1157,7 @@ class _MapScreenState extends State<MapScreen> {
                   ),
                 ),
                 Text(
-                  'Last seen: ${loc.lastSeen}',
+                  '${l?.mapLastSeen ?? 'Last seen'}: ${loc.lastSeen}',
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                 ),
                 const SizedBox(height: 12),
@@ -1171,7 +1178,7 @@ class _MapScreenState extends State<MapScreen> {
                   ListTile(
                     leading: Icon(Icons.warning, color: Colors.red.shade700),
                     title: Text(
-                      'Danger Zone - Not Recommended',
+                      l?.mapDangerZone ?? 'Danger Zone - Not Recommended',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: Colors.red.shade800,
@@ -1187,7 +1194,7 @@ class _MapScreenState extends State<MapScreen> {
                       color: Colors.amber.shade800,
                     ),
                     title: Text(
-                      'Outside Protected Area',
+                      l?.mapOutsideProtected ?? 'Outside Protected Area',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: Colors.amber.shade900,
@@ -1231,7 +1238,7 @@ class _MapScreenState extends State<MapScreen> {
                       );
                     }
                   },
-                  child: const Text('View More Details'),
+                  child: Text(l?.mapViewMoreDetails ?? 'View More Details'),
                 ),
               ],
             );
@@ -1255,6 +1262,7 @@ class _MapScreenState extends State<MapScreen> {
     bool isTourPreview = false,
   }
   ) {
+    final l = AppLocalizations.of(context);
     final bottomSheet = showModalBottomSheet<void>(
       context: context,
       useRootNavigator: true,
@@ -1341,7 +1349,7 @@ class _MapScreenState extends State<MapScreen> {
                   ),
                   SizedBox(height: Adaptive.of(context, 8)),
                   Text(
-                    'Humidity ${weather.humidity}% · Wind ${weather.windSpeed.toStringAsFixed(1)} m/s',
+                    '${l?.mapHumidity ?? 'Humidity'} ${weather.humidity}% · ${l?.mapWind ?? 'Wind'} ${weather.windSpeed.toStringAsFixed(1)} m/s',
                     style: TextStyle(
                       color: Colors.black87,
                       fontSize: Adaptive.clamp(context, 13, min: 11, max: 16),
@@ -1349,7 +1357,7 @@ class _MapScreenState extends State<MapScreen> {
                   ),
                   SizedBox(height: Adaptive.of(context, 8)),
                   Text(
-                    'Prediction region: ${predictionRegionForCityName(city.name)}',
+                    '${l?.mapPredictionRegion ?? 'Prediction region'}: ${predictionRegionForCityName(city.name)}',
                     style: TextStyle(
                       color: Colors.black54,
                       fontSize: Adaptive.clamp(context, 13, min: 11, max: 16),
@@ -1357,7 +1365,7 @@ class _MapScreenState extends State<MapScreen> {
                   ),
                   SizedBox(height: Adaptive.of(context, 14)),
                   Text(
-                    'Next 3-hour forecast',
+                    l?.mapNextForecast ?? 'Next 3-hour forecast',
                     style: TextStyle(
                       fontSize: Adaptive.clamp(context, 14, min: 12, max: 17),
                       fontWeight: FontWeight.w700,
@@ -1367,7 +1375,7 @@ class _MapScreenState extends State<MapScreen> {
                   SizedBox(height: Adaptive.of(context, 8)),
                   if (weather.forecast.isEmpty)
                     Text(
-                      'Forecast is not available right now.',
+                      l?.mapForecastUnavailable ?? 'Forecast is not available right now.',
                       style: TextStyle(
                         color: Colors.black54,
                         fontSize: Adaptive.clamp(context, 12, min: 11, max: 14),
@@ -1410,6 +1418,7 @@ class _ForecastMiniCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Container(
       width: Adaptive.clamp(context, 112, min: 98, max: 130),
       padding: EdgeInsets.all(Adaptive.of(context, 8)),
@@ -1481,7 +1490,7 @@ class _ForecastMiniCard extends StatelessWidget {
             ),
           ),
           Text(
-            'H ${slot.humidity}% · W ${slot.windSpeed.toStringAsFixed(1)}',
+            '${l?.mapHumidityShort ?? 'H'} ${slot.humidity}% · ${l?.mapWindShort ?? 'W'} ${slot.windSpeed.toStringAsFixed(1)}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,

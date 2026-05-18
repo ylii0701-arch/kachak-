@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import 'tour_anchor.dart';
 
 class TourTargetIds {
@@ -323,6 +324,7 @@ class _TooltipCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final isLast = index == total - 1;
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
@@ -364,7 +366,7 @@ class _TooltipCard extends StatelessWidget {
             children: [
               TextButton(
                 onPressed: onSkip,
-                child: const Text('Skip'),
+                child: Text(l?.onboardingSkip ?? 'Skip'),
               ),
               const SizedBox(width: 4),
               Expanded(
@@ -395,7 +397,7 @@ class _TooltipCard extends StatelessWidget {
               const SizedBox(width: 4),
               FilledButton(
                 onPressed: onNext,
-                child: Text(isLast ? 'Done' : 'Next'),
+                child: Text(isLast ? 'Done' : (l?.onboardingNext ?? 'Next')),
               ),
             ],
           ),

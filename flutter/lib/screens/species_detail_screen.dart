@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
+import '../utils/l10n_helpers.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
@@ -154,32 +156,33 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
     await Future<void>.delayed(const Duration(milliseconds: 320));
     if (!mounted) return;
 
+    final dl = AppLocalizations.of(context);
     final steps = <SpotlightStep>[
-      const SpotlightStep(
+      SpotlightStep(
         targetId: TourTargetIds.detailNotification,
-        title: 'Enable alerts',
-        body:
+        title: dl?.spotlightDetailAlertTitle ?? 'Enable alerts',
+        body: dl?.spotlightDetailAlertBody ??
             'After saving, tap this icon to enable species notifications for higher-probability sightings.',
         onEnterCommand: 'speciesDetail.focusAlert',
       ),
-      const SpotlightStep(
+      SpotlightStep(
         targetId: TourTargetIds.detailPredictionCard,
-        title: 'Current prediction',
-        body:
+        title: dl?.spotlightDetailPredictionTitle ?? 'Current prediction',
+        body: dl?.spotlightDetailPredictionBody ??
             'This card shows the best site and current weather-based probability for spotting this species.',
         onEnterCommand: 'speciesDetail.scrollPrediction',
       ),
-      const SpotlightStep(
+      SpotlightStep(
         targetId: TourTargetIds.detailHabitatLocations,
-        title: 'Recorded observation',
-        body:
+        title: dl?.spotlightDetailObservationTitle ?? 'Recorded observation',
+        body: dl?.spotlightDetailObservationBody ??
             'This first recorded observation row includes the latest sighting and coordinates.',
         onEnterCommand: 'speciesDetail.scrollHabitat',
       ),
-      const SpotlightStep(
+      SpotlightStep(
         targetId: TourTargetIds.detailFirstObservation,
-        title: 'Open on map',
-        body:
+        title: dl?.spotlightDetailMapTitle ?? 'Open on map',
+        body: dl?.spotlightDetailMapBody ??
             'Tap this map button to view the animal last occurrence directly on the map.',
         onEnterCommand: 'speciesDetail.scrollMapButton',
       ),
@@ -249,6 +252,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
         body: ListenableBuilder(
             listenable: PredictionManager.instance,
             builder: (context, _) {
+              final l = AppLocalizations.of(context);
 
               // 🟢 Using variables passed from HomeScreen directly
               final String cleanCity = (widget.selectedCity ?? 'All').trim().toLowerCase();
@@ -478,7 +482,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                       children: [
                                         Chip(
                                           label: Text(
-                                            species.category,
+                                            localizedCategory(l, species.category),
                                             style: GoogleFonts.plusJakartaSans(
                                               color: AppColors.textBodyOnFrost,
                                               fontWeight: FontWeight.w700,
@@ -546,7 +550,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                             ),
                                           ),
                                           child: Text(
-                                            species.conservationStatus,
+                                            localizedStatus(l, species.conservationStatus),
                                             style: TextStyle(
                                               color: statusForegroundColor(
                                                 species.conservationStatus,
@@ -561,7 +565,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                     Row(
                                       children: [
                                         Text(
-                                          'Shooting difficulty',
+                                          l?.shootingDifficulty ?? 'Shooting difficulty',
                                           style: GoogleFonts.plusJakartaSans(
                                             color: AppColors.textSubtitleOnFrost,
                                             fontWeight: FontWeight.w700,
@@ -613,7 +617,9 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                     color: AppColors.accent,
                                   ),
                                   label: Text(
-                                    isFav ? 'Saved to Favorites' : 'Save to Favorites',
+                                    isFav
+                                        ? (l?.speciesDetailSavedToFav ?? 'Saved to Favorites')
+                                        : (l?.speciesDetailSaveToFav ?? 'Save to Favorites'),
                                     style: const TextStyle(fontWeight: FontWeight.w700),
                                   ),
                                   style: OutlinedButton.styleFrom(
@@ -635,7 +641,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                             SizedBox(height: 12 * s),
                             _sectionCard(
                               context,
-                              title: 'About',
+                              title: l?.speciesDetailAbout ?? 'About',
                               icon: Icons.info_outline,
                               child: Text(species.description),
                             ),
@@ -654,7 +660,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
 
                             _sectionCard(
                               context,
-                              title: 'Habitat',
+                              title: l?.speciesDetailHabitat ?? 'Habitat',
                               icon: Icons.place_outlined,
                               child: Text(species.habitat),
                             ),
@@ -665,7 +671,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                             // 🟢 RESTORED FULL BEHAVIOR & HABITS
                             _sectionCard(
                               context,
-                              title: 'Behavior & Habits',
+                              title: l?.speciesDetailBehavior ?? 'Behavior & Habits',
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -686,7 +692,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                           CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              'Best Seasons:',
+                                              l?.speciesDetailBestSeasons ?? 'Best Seasons:',
                                               style: GoogleFonts.plusJakartaSans(
                                                 color: AppColors.textSubtitleOnFrost,
                                                 fontSize: 13,
@@ -744,7 +750,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                             // 🟢 RESTORED FULL DIET
                             _sectionCard(
                               context,
-                              title: 'Diet',
+                              title: l?.speciesDetailDiet ?? 'Diet',
                               icon: Icons.restaurant_menu_outlined,
                               child: Text(
                                 speciesDietData[species.id] ??
@@ -755,7 +761,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                             // 🟢 RESTORED FULL PHOTOGRAPHY TIPS
                             _sectionCard(
                               context,
-                              title: 'Photography Tips',
+                              title: l?.speciesDetailPhotography ?? 'Photography Tips',
                               icon: Icons.camera_alt_outlined,
                               child: Text(species.photographyConditions),
                             ),
@@ -763,7 +769,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                             // 🟢 RESTORED FULL RECOMMENDED GEAR
                             _sectionCard(
                               context,
-                              title: 'Recommended Gear',
+                              title: l?.speciesDetailGear ?? 'Recommended Gear',
                               icon: Icons.inventory_2_outlined,
                               child: Column(
                                 children: species.recommendedGear.asMap().entries.map(
@@ -820,6 +826,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
 
   // 🟢 RESTORED HABITAT LOCATIONS FUNCTION
   Widget _habitatLocationsSection(BuildContext context, Species species) {
+    final l = AppLocalizations.of(context);
     final locs = speciesLocationsForSpecies(species.id);
     final spots = photographySpotsForSpeciesId(species.id);
     if (locs.isEmpty && spots.isEmpty) return const SizedBox.shrink();
@@ -832,9 +839,9 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
         _locationMapRow(
           context,
           index: n,
-          title: 'Recorded observation',
+          title: l?.detailRecordedObservation ?? 'Recorded observation',
           subtitle:
-          'Last seen ${loc.lastSeen} · ${loc.lat.toStringAsFixed(4)}°, ${loc.lng.toStringAsFixed(4)}°',
+          '${l?.detailLastSeen ?? 'Last seen'} ${loc.lastSeen} · ${loc.lat.toStringAsFixed(4)}°, ${loc.lng.toStringAsFixed(4)}°',
           point: LatLng(loc.lat, loc.lng),
           speciesId: species.id,
           tourAnchorId: n == 1 ? TourTargetIds.detailFirstObservation : null,
@@ -885,7 +892,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Habitat & Locations',
+                      l?.speciesDetailHabitatLocations ?? 'Habitat & Locations',
                       style: GoogleFonts.plusJakartaSans(
                         fontWeight: FontWeight.w800,
                         fontSize: 17,
@@ -897,7 +904,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Tap a row to open the map centered on that pin.',
+                  l?.detailTapRowHint ?? 'Tap a row to open the map centered on that pin.',
                   style: GoogleFonts.plusJakartaSans(
                     color: AppColors.textSubtitleOnFrost,
                     fontSize: 13,
@@ -925,7 +932,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                             : Icons.keyboard_arrow_down_rounded,
                         color: AppColors.primary,
                       ),
-                      label: Text(_showAllLocationRows ? 'Show less' : 'Show more'),
+                      label: Text(_showAllLocationRows ? (l?.detailShowLess ?? 'Show less') : (l?.detailShowMore ?? 'Show more')),
                     ),
                   ),
                 ],
@@ -1113,6 +1120,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
 
   Widget _predictionPendingCard(BuildContext context) {
     final s = Adaptive.scale(context);
+    final l = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: GlassPanel(
@@ -1135,7 +1143,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                   SizedBox(width: 8 * s),
                   Expanded(
                     child: Text(
-                      'Current Prediction',
+                      l?.speciesDetailPrediction ?? 'Current Prediction',
                       style: GoogleFonts.plusJakartaSans(
                         fontWeight: FontWeight.w800,
                         fontSize: Adaptive.clamp(context, 17, min: 14, max: 21),
@@ -1170,6 +1178,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
         required List<TimeSeriesPrediction> forecasts,
       }) {
     final s = Adaptive.scale(context);
+    final l = AppLocalizations.of(context);
     final currentForecast = forecasts.isNotEmpty ? forecasts.first : null;
     if (currentForecast == null) return const SizedBox.shrink();
 
@@ -1178,6 +1187,14 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
       probLabel = 'High';
     } else if (currentForecast.probability >= 0.4) {
       probLabel = 'Medium';
+    }
+    final String localizedProbLabel;
+    if (probLabel == 'High') {
+      localizedProbLabel = l?.identifyHigh ?? 'High';
+    } else if (probLabel == 'Medium') {
+      localizedProbLabel = l?.identifyMedium ?? 'Medium';
+    } else {
+      localizedProbLabel = l?.identifyLow ?? 'Low';
     }
     final probPercent = (currentForecast.probability * 100).round();
 
@@ -1206,35 +1223,35 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                           children: [
                             Icon(Icons.trending_up_rounded, size: 22 * s, color: AppColors.iconSectionOnFrost),
                             SizedBox(width: 8 * s),
-                            Expanded(child: Text('Current Prediction', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: Adaptive.clamp(context, 17, min: 14, max: 21), color: AppColors.textBodyOnFrost, letterSpacing: -0.1))),
+                            Expanded(child: Text(l?.speciesDetailPrediction ?? 'Current Prediction', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: Adaptive.clamp(context, 17, min: 14, max: 21), color: AppColors.textBodyOnFrost, letterSpacing: -0.1))),
                           ],
                         ),
                         SizedBox(height: 6 * s),
-                        Text('Best Site: ${site.name}', style: GoogleFonts.plusJakartaSans(color: AppColors.textSubtitleOnFrost, fontSize: Adaptive.clamp(context, 13, min: 11, max: 15), fontWeight: FontWeight.w600, letterSpacing: 0.05)),
+                        Text(l?.predictionBestSite(site.name) ?? 'Best Site: ${site.name}', style: GoogleFonts.plusJakartaSans(color: AppColors.textSubtitleOnFrost, fontSize: Adaptive.clamp(context, 13, min: 11, max: 15), fontWeight: FontWeight.w600, letterSpacing: 0.05)),
                       ],
                     ),
                   ),
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 10 * s, vertical: 6 * s),
                     decoration: BoxDecoration(color: _probabilityBg(probLabel), borderRadius: BorderRadius.circular(20 * s), border: Border.all(color: Colors.grey.shade400)),
-                    child: Text('$probPercent% $probLabel', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: Adaptive.clamp(context, 12, min: 10, max: 14), color: _probabilityFg(probLabel), letterSpacing: 0.05)),
+                    child: Text('$probPercent% $localizedProbLabel', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: Adaptive.clamp(context, 12, min: 10, max: 14), color: _probabilityFg(probLabel), letterSpacing: 0.05)),
                   ),
                 ],
               ),
               SizedBox(height: 12 * s),
               Row(
                 children: [
-                  Expanded(child: _predictionMiniFact(context, icon: Icons.schedule_rounded, iconColor: AppColors.primary, label: 'Best Time', value: fixedBestTime)),
+                  Expanded(child: _predictionMiniFact(context, icon: Icons.schedule_rounded, iconColor: AppColors.primary, label: l?.speciesDetailBestTime ?? 'Best Time', value: fixedBestTime)),
                   SizedBox(width: 8 * s),
-                  Expanded(child: _predictionMiniFact(context, icon: _weatherIcon(currentForecast.weatherDescription), iconColor: Colors.orange.shade700, label: 'Weather', value: currentForecast.weatherDescription)),
+                  Expanded(child: _predictionMiniFact(context, icon: _weatherIcon(currentForecast.weatherDescription), iconColor: Colors.orange.shade700, label: l?.speciesDetailWeather ?? 'Weather', value: currentForecast.weatherDescription == 'Unknown' ? (l?.predictionUnknown ?? 'Unknown') : currentForecast.weatherDescription)),
                 ],
               ),
               SizedBox(height: 8 * s),
               Row(
                 children: [
-                  Expanded(child: _predictionMiniFact(context, icon: Icons.thermostat_rounded, iconColor: Colors.deepOrange.shade700, label: 'Temp', value: '${currentForecast.temperature.round()}°C')),
+                  Expanded(child: _predictionMiniFact(context, icon: Icons.thermostat_rounded, iconColor: Colors.deepOrange.shade700, label: l?.speciesDetailTemp ?? 'Temp', value: '${currentForecast.temperature.round()}°C')),
                   SizedBox(width: 8 * s),
-                  Expanded(child: _predictionMiniFact(context, icon: Icons.water_drop_rounded, iconColor: Colors.cyan.shade700, label: 'Humidity', value: '${currentForecast.humidity.round()}%')),
+                  Expanded(child: _predictionMiniFact(context, icon: Icons.water_drop_rounded, iconColor: Colors.cyan.shade700, label: l?.speciesDetailHumidity ?? 'Humidity', value: '${currentForecast.humidity.round()}%')),
                 ],
               ),
               SizedBox(height: 12 * s),
@@ -1249,7 +1266,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                     );
                   },
                   style: FilledButton.styleFrom(backgroundColor: AppColors.primary.withValues(alpha: 0.88), foregroundColor: Colors.white, minimumSize: Size.fromHeight(46 * s), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24 * s)), elevation: 0, shadowColor: Colors.transparent),
-                  child: const Text('See more prediction details'),
+                  child: Text(l?.speciesDetailSeeMorePrediction ?? 'See more prediction details'),
                 ),
               ),
             ],

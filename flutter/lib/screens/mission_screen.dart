@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../l10n/app_localizations.dart';
 import '../data/photography_assistant_data.dart';
 import '../data/species_data.dart';
 import '../models/species.dart';
@@ -136,22 +137,23 @@ class _MissionScreenState extends State<MissionScreen> {
 
   /// Confirms destructive reset from the task list screen.
   Future<void> _confirmResetFromTaskList() async {
+    final l = AppLocalizations.of(context);
     final shouldReset = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Reset choices?'),
-          content: const Text(
-            'This will clear your current mission setup and uploaded proof.',
+          title: Text(l?.missionResetChoices ?? 'Reset choices?'),
+          content: Text(
+            l?.missionResetConfirm ?? 'This will clear your current mission setup and uploaded proof.',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: Text(l?.commonCancel ?? 'Cancel'),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Reset'),
+              child: Text(l?.missionReset ?? 'Reset'),
             ),
           ],
         );
@@ -221,6 +223,7 @@ class _MissionScreenState extends State<MissionScreen> {
   }
 
   Widget _headerCard(BuildContext context, double s) {
+    final l = AppLocalizations.of(context);
     return Container(
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(4 * s, 2 * s, 4 * s, 2 * s),
@@ -231,7 +234,7 @@ class _MissionScreenState extends State<MissionScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Photo Mission',
+                l?.missionTitle ?? 'Photo Mission',
                 style: GoogleFonts.libreBaskerville(
                   fontSize: Adaptive.clamp(context, 34, min: 26, max: 40),
                   fontWeight: FontWeight.w700,
@@ -241,7 +244,7 @@ class _MissionScreenState extends State<MissionScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Malaysian Wildlife Explorer',
+                l?.missionSubtitle ?? 'Malaysian Wildlife Explorer',
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -275,6 +278,7 @@ class _MissionScreenState extends State<MissionScreen> {
   }
 
   Widget _contentByStep() {
+    final l = AppLocalizations.of(context);
     // Step router for intro, quiz screens, recommendation, and task list.
     if (!_started) {
       return _landingContent();
@@ -282,8 +286,8 @@ class _MissionScreenState extends State<MissionScreen> {
 
     if (_step == 0) {
       return _quizBlock(
-        questionTitle: 'What gear do you have?',
-        questionSubtitle: 'Select your camera setup',
+        questionTitle: l?.missionGearQuestion ?? 'What gear do you have?',
+        questionSubtitle: l?.missionGearSubtitle ?? 'Select your camera setup',
         choices: const [
           _QuizChoice(
             label: 'Smartphone',
@@ -306,19 +310,22 @@ class _MissionScreenState extends State<MissionScreen> {
     }
     if (_step == 1) {
       return _quizBlock(
-        questionTitle: 'Choose your challenge level',
-        questionSubtitle: 'How difficult should this mission be?',
-        choices: const [
+        questionTitle: l?.missionDifficultyQuestion ?? 'Choose your challenge level',
+        questionSubtitle: l?.missionDifficultySubtitle ?? 'How difficult should this mission be?',
+        choices: [
           _QuizChoice(
-            label: 'Casual',
+            label: l?.missionCasual ?? 'Casual',
+            value: 'Casual',
             subtitle: 'Relaxed pace, beginner-friendly mission',
           ),
           _QuizChoice(
-            label: 'Standard',
+            label: l?.missionStandard ?? 'Standard',
+            value: 'Standard',
             subtitle: 'Moderate challenge with mixed situations',
           ),
           _QuizChoice(
-            label: 'Challenging',
+            label: l?.missionChallenging ?? 'Challenging',
+            value: 'Challenging',
             subtitle: 'Advanced mission with tougher conditions',
           ),
         ],
@@ -326,27 +333,32 @@ class _MissionScreenState extends State<MissionScreen> {
     }
     if (_step == 2) {
       return _quizBlock(
-        questionTitle: 'What subject do you prefer?',
-        questionSubtitle: 'Select wildlife category',
-        choices: const [
+        questionTitle: l?.missionSubjectQuestion ?? 'What subject do you prefer?',
+        questionSubtitle: l?.missionSubjectSubtitle ?? 'Select wildlife category',
+        choices: [
           _QuizChoice(
-            label: 'Birds',
+            label: l?.missionBirds ?? 'Birds',
+            value: 'Birds',
             subtitle: 'Examples: hornbills, kingfishers, broadbills',
           ),
           _QuizChoice(
-            label: 'Mammals',
+            label: l?.missionMammals ?? 'Mammals',
+            value: 'Mammals',
             subtitle: 'Examples: sun bears, tapirs, macaques',
           ),
           _QuizChoice(
-            label: 'Insects',
+            label: l?.missionInsects ?? 'Insects',
+            value: 'Insects',
             subtitle: 'Examples: butterflies, mantis, dragonflies',
           ),
           _QuizChoice(
-            label: 'Reptiles',
+            label: l?.missionReptiles ?? 'Reptiles',
+            value: 'Reptiles',
             subtitle: 'Examples: pythons, monitor lizards, geckos',
           ),
           _QuizChoice(
-            label: 'Amphibians',
+            label: l?.missionAmphibians ?? 'Amphibians',
+            value: 'Amphibians',
             subtitle: 'Examples: tree frogs and forest toads',
           ),
         ],
@@ -355,28 +367,33 @@ class _MissionScreenState extends State<MissionScreen> {
     if (_step == 3) {
       final includeMidnight = (_difficulty ?? 'Casual') == 'Challenging';
       return _quizBlock(
-        questionTitle: 'Preferred shoot time?',
-        questionSubtitle: 'Pick your ideal session window',
+        questionTitle: l?.missionTimeQuestion ?? 'Preferred shoot time?',
+        questionSubtitle: l?.missionTimeSubtitle ?? 'Pick your ideal session window',
         choices: [
-          const _QuizChoice(
-            label: 'Morning',
+          _QuizChoice(
+            label: l?.missionMorning ?? 'Morning',
+            value: 'Morning',
             subtitle: 'Soft light, active birds, easier visibility',
           ),
-          const _QuizChoice(
-            label: 'Afternoon',
+          _QuizChoice(
+            label: l?.missionAfternoon ?? 'Afternoon',
+            value: 'Afternoon',
             subtitle: 'Brighter conditions, best for clear habitat shots',
           ),
-          const _QuizChoice(
-            label: 'Evening',
+          _QuizChoice(
+            label: l?.missionEvening ?? 'Evening',
+            value: 'Evening',
             subtitle: 'Golden-hour tones and calm wildlife movement',
           ),
-          const _QuizChoice(
-            label: 'Night',
+          _QuizChoice(
+            label: l?.missionNight ?? 'Night',
+            value: 'Night',
             subtitle: 'Useful for nocturnal species with proper light',
           ),
           if (includeMidnight)
-            const _QuizChoice(
-              label: 'Midnight',
+            _QuizChoice(
+              label: l?.missionMidnight ?? 'Midnight',
+              value: 'Midnight',
               subtitle:
                   'More challenging: low visibility, safety and access limits',
               caution: true,
@@ -400,6 +417,7 @@ class _MissionScreenState extends State<MissionScreen> {
   }
 
   Widget _landingContent() {
+    final l = AppLocalizations.of(context);
     final s = Adaptive.scale(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -431,7 +449,7 @@ class _MissionScreenState extends State<MissionScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Personalise and find\nyour perfect challenge\ntoday!',
+                              l?.missionPersonalise ?? 'Personalise and find your perfect challenge today!',
                               style: GoogleFonts.libreBaskerville(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w700,
@@ -441,7 +459,7 @@ class _MissionScreenState extends State<MissionScreen> {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              'Choose your preferences and\nwe\'ll create missions just for you.',
+                              l?.missionChoosePrefs ?? 'Choose your preferences and we\'ll create missions just for you.',
                               style: GoogleFonts.inter(
                                 color: Colors.grey.shade700,
                                 fontSize: 13.5,
@@ -471,7 +489,7 @@ class _MissionScreenState extends State<MissionScreen> {
                         backgroundColor: AppColors.primary,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      label: const Text('Let\'s Begin!'),
+                      label: Text(l?.missionLetsBegin ?? "Let's Begin!"),
                     ),
                   ),
                 ],
@@ -487,7 +505,7 @@ class _MissionScreenState extends State<MissionScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Mission Ideas for You',
+                    l?.missionIdeasTitle ?? 'Mission Ideas for You',
                     style: GoogleFonts.libreBaskerville(
                       fontSize: 34 / 1.5,
                       fontWeight: FontWeight.w700,
@@ -495,7 +513,7 @@ class _MissionScreenState extends State<MissionScreen> {
                     ),
                   ),
                   Text(
-                    'Quick inspiration to get started',
+                    l?.missionIdeasSubtitle ?? 'Quick inspiration to get started',
                     style: TextStyle(color: Colors.grey.shade700, fontSize: 15),
                   ),
                 ],
@@ -616,6 +634,7 @@ class _MissionScreenState extends State<MissionScreen> {
   }
 
   Widget _missionSummaryCard(MissionRecommendation mission) {
+    final l = AppLocalizations.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -627,9 +646,9 @@ class _MissionScreenState extends State<MissionScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Your Photography Mission',
-            style: TextStyle(fontWeight: FontWeight.w700),
+          Text(
+            l?.missionYourMission ?? 'Your Photography Mission',
+            style: const TextStyle(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 10),
           Text(
@@ -641,7 +660,7 @@ class _MissionScreenState extends State<MissionScreen> {
             ),
           ),
           const SizedBox(height: 10),
-          Text('Location hint: ${mission.locationHint}'),
+          Text(l?.missionLocationHint(mission.locationHint) ?? 'Location hint: ${mission.locationHint}'),
           const SizedBox(height: 8),
           if (_timePeriod != null) ...[
             Text('Preferred time: $_timePeriod'),
@@ -659,7 +678,7 @@ class _MissionScreenState extends State<MissionScreen> {
             width: double.infinity,
             child: FilledButton(
               onPressed: () => setState(() => _step = 5),
-              child: const Text('Move on to Task List'),
+              child: Text(l?.missionMoveOn ?? 'Move on to Task List'),
             ),
           ),
           const SizedBox(height: 8),
@@ -668,7 +687,7 @@ class _MissionScreenState extends State<MissionScreen> {
             child: TextButton.icon(
               onPressed: _startOver,
               icon: const Icon(Icons.replay_rounded, size: 18),
-              label: const Text('Reset Choices'),
+              label: Text(l?.missionResetChoices ?? 'Reset Choices'),
               style: TextButton.styleFrom(
                 foregroundColor: Colors.grey.shade600,
               ),
@@ -680,7 +699,7 @@ class _MissionScreenState extends State<MissionScreen> {
   }
 
   Widget _taskListCard() {
-    // Weekly task panel keeps fixed rounded shape; inner content scrolls.
+    final l = AppLocalizations.of(context);
     final s = Adaptive.scale(context);
     final panelHeight = (MediaQuery.sizeOf(context).height * 0.72).clamp(
       440.0,
@@ -712,9 +731,9 @@ class _MissionScreenState extends State<MissionScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Weekly Task',
-                    style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.accent),
+                  Text(
+                    l?.missionWeeklyTask ?? 'Weekly Task',
+                    style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.accent),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -832,7 +851,7 @@ class _MissionScreenState extends State<MissionScreen> {
                         icon: const Icon(Icons.upload_rounded),
                         label: Text(
                           _proofSpecies == null
-                              ? 'Upload proof photo'
+                              ? (l?.missionSubmitProof ?? 'Upload Proof Photo')
                               : 'Upload another proof photo',
                         ),
                       ),
@@ -843,7 +862,7 @@ class _MissionScreenState extends State<MissionScreen> {
                       child: TextButton.icon(
                         onPressed: _confirmResetFromTaskList,
                         icon: const Icon(Icons.replay_rounded, size: 18),
-                        label: const Text('Reset Choices'),
+                        label: Text(l?.missionStartOver ?? 'Start Over'),
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.grey.shade600,
                         ),
@@ -1430,7 +1449,7 @@ class _MissionScreenState extends State<MissionScreen> {
                 borderRadius: BorderRadius.circular(12),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
-                  onTap: () => _selectAnswer(choice.label),
+                  onTap: () => _selectAnswer(choice.value ?? choice.label),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -1513,9 +1532,10 @@ class _MissionScreenState extends State<MissionScreen> {
 }
 
 class _QuizChoice {
-  const _QuizChoice({required this.label, this.subtitle, this.caution = false});
+  const _QuizChoice({required this.label, this.value, this.subtitle, this.caution = false});
 
   final String label;
+  final String? value;
   final String? subtitle;
   final bool caution;
 }
