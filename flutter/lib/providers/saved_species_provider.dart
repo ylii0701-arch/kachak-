@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../main.dart';
-import '../services/prediction_manager.dart'; // NEW: Import PredictionManager
+import '../services/prediction_manager.dart';
+import '../services/web_permission_bridge.dart' as web_notif;
 
 /// Stores favorite species and local alert preferences in SharedPreferences.
 class SavedSpeciesProvider extends ChangeNotifier {
@@ -104,7 +104,12 @@ class SavedSpeciesProvider extends ChangeNotifier {
     final wasNotified = _notifiedIds.contains(speciesId);
 
     if (!wasNotified) {
-      if (!kIsWeb) {
+      if (kIsWeb) {
+        final granted = await web_notif.requestWebNotificationPermission();
+        if (!granted) {
+          debugPrint('⚠️ Web notification permission denied or unsupported.');
+        }
+      } else {
         final status = await Permission.notification.request();
         if (status.isDenied || status.isPermanentlyDenied) {
           return false;
@@ -114,9 +119,7 @@ class SavedSpeciesProvider extends ChangeNotifier {
       _notifiedIds.add(speciesId);
 
       // Trigger the prediction manager to check alerts after 5 seconds
-      if (!kIsWeb) {
-        PredictionManager.instance.triggerDelayedAlertCheck();
-      }
+      PredictionManager.instance.triggerDelayedAlertCheck();
 
     } else {
       _notifiedIds.remove(speciesId);

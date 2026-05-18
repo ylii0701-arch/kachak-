@@ -16,6 +16,7 @@ import '../providers/saved_species_provider.dart';
 import '../l10n/app_localizations.dart'; // NEW: Required for translated push notifications
 import 'openweather_service.dart';
 import 'onnx_prediction_service.dart';
+import 'web_permission_bridge.dart' as web_notif;
 
 /// Represents a prediction result and environmental data for a specific point in time
 class TimeSeriesPrediction {
@@ -81,7 +82,7 @@ class PredictionManager extends ChangeNotifier {
 
   /// Triggers a 5-second delayed evaluation of alerts (called when user toggles a bell)
   void triggerDelayedAlertCheck() {
-    if (_savedSpeciesProvider == null || _isMobileWeb) return;
+    if (_savedSpeciesProvider == null) return;
 
     Future.delayed(const Duration(seconds: 5), () async {
       debugPrint('⏱️ 5-second delay finished. Evaluating alerts...');
@@ -229,7 +230,7 @@ class PredictionManager extends ChangeNotifier {
       debugPrint('✅ Prediction Engine: Time-series updated successfully at $_lastCalculationTime');
 
       // The Notification block runs at the BOTTOM so it has the freshly downloaded data
-      if (_savedSpeciesProvider != null && !kIsWeb) {
+      if (_savedSpeciesProvider != null) {
         await _evaluateAndTriggerDailyAlert(_savedSpeciesProvider!, ignoreDailyLimit: isInitialLoad);
       }
 
@@ -489,23 +490,27 @@ class PredictionManager extends ChangeNotifier {
 
     final topCandidate = candidates.first;
 
-    const androidDetails = AndroidNotificationDetails(
-      'high_prob_channel', 'High Probability Alerts',
-      importance: Importance.max, priority: Priority.high,
-    );
-
     // --- LOAD DYNAMIC LANGUAGE FOR NOTIFICATIONS ---
-    // Reads current language selected in LocaleController
     final localeStr = prefs.getString('app_locale') ?? 'en';
     final l10n = await AppLocalizations.delegate.load(Locale(localeStr));
 
-    await localNotifs.show(
-      0,
-      l10n.notificationHighProbTitle, // Fully localized title
-      l10n.notificationHighProbBody(animalsMeetingCriteria.length), // Fully localized body with dynamic count
-      const NotificationDetails(android: androidDetails),
-      payload: topCandidate.speciesId,
-    );
+    final title = l10n.notificationHighProbTitle;
+    final body = l10n.notificationHighProbBody(animalsMeetingCriteria.length);
+
+    if (kIsWeb) {
+      // Use browser Notification API on web
+      await web_notif.showWebNotification(title: title, body: body);
+    } else {
+      const androidDetails = AndroidNotificationDetails(
+        'high_prob_channel', 'High Probability Alerts',
+        importance: Importance.max, priority: Priority.high,
+      );
+      await localNotifs.show(
+        0, title, body,
+        const NotificationDetails(android: androidDetails),
+        payload: topCandidate.speciesId,
+      );
+    }
 
     // Update SharedPreferences to log that we fired the alert today
     await prefs.setString('last_daily_alert_date', todayStr);

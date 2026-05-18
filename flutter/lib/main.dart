@@ -30,10 +30,10 @@ Future<void> main() async {
 
   final prefs = await SharedPreferences.getInstance();
   final savedSpeciesProvider = SavedSpeciesProvider(prefs);
+  PredictionManager.instance.setAlertProvider(savedSpeciesProvider);
   // Heavy inference bootstrap can crash mobile browsers. Defer there.
   if (!isMobileWeb) {
     await OnnxPredictionService.initModel();
-    PredictionManager.instance.setAlertProvider(savedSpeciesProvider);
     PredictionManager.instance.startEngine();
   } else {
     debugPrint('⚠️ Mobile web detected: deferred ONNX/prediction startup.');
