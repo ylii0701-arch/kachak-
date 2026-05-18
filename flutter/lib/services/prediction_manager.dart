@@ -1,5 +1,9 @@
 import 'dart:async';
+import 'dart:ui'; // NEW: Required for Locale
 import 'package:flutter/foundation.dart'; // Required for ChangeNotifier and debugPrint
+import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../config/map_keys.dart';
 import '../data/malaysia_cities.dart';
@@ -7,6 +11,9 @@ import '../data/site_data.dart';
 import '../data/species_data.dart';
 import '../config/site_weather_defaults.dart';
 import '../models/species.dart';
+import '../main.dart';
+import '../providers/saved_species_provider.dart';
+import '../l10n/app_localizations.dart'; // NEW: Required for translated push notifications
 import 'openweather_service.dart';
 import 'onnx_prediction_service.dart';
 
@@ -29,6 +36,20 @@ class TimeSeriesPrediction {
   });
 }
 
+class AlertCandidate {
+  final String speciesId;
+  final String siteId;
+  final double probability;
+  final double distanceToUser;
+
+  AlertCandidate({
+    required this.speciesId,
+    required this.siteId,
+    required this.probability,
+    required this.distanceToUser,
+  });
+}
+
 class PredictionManager extends ChangeNotifier {
   // Singleton pattern for global access
   static final PredictionManager instance = PredictionManager._internal();
@@ -37,13 +58,12 @@ class PredictionManager extends ChangeNotifier {
   final OpenWeatherService _weatherService = const OpenWeatherService(apiKey: openWeatherApiKey);
 
   /// Stores full time-series predictions (for the 7-Day Forecast UI).
-  /// Structure: { 'siteId': { 'speciesId': [TimeSeriesPrediction, ...] } }
   final Map<String, Map<String, List<TimeSeriesPrediction>>> forecastPredictions = {};
 
   /// Stores ONLY the latest prediction (for quick access by Map Markers).
-  /// Structure: { 'siteId': { 'speciesId': 0.85 } }
   final Map<String, Map<String, double>> latestPredictions = {};
 
+  SavedSpeciesProvider? _savedSpeciesProvider;
   Timer? _hourlyTimer;
   bool isCalculating = false;
   DateTime? _lastCalculationTime;
@@ -51,8 +71,23 @@ class PredictionManager extends ChangeNotifier {
   bool _engineStarting = false;
   final bool _isMobileWeb =
       kIsWeb &&
-      (defaultTargetPlatform == TargetPlatform.iOS ||
-          defaultTargetPlatform == TargetPlatform.android);
+          (defaultTargetPlatform == TargetPlatform.iOS ||
+              defaultTargetPlatform == TargetPlatform.android);
+
+  // Setter to pass the provider without breaking existing startEngine calls
+  void setAlertProvider(SavedSpeciesProvider provider) {
+    _savedSpeciesProvider = provider;
+  }
+
+  /// Triggers a 5-second delayed evaluation of alerts (called when user toggles a bell)
+  void triggerDelayedAlertCheck() {
+    if (_savedSpeciesProvider == null || _isMobileWeb) return;
+
+    Future.delayed(const Duration(seconds: 5), () async {
+      debugPrint('⏱️ 5-second delay finished. Evaluating alerts...');
+      await _evaluateAndTriggerDailyAlert(_savedSpeciesProvider!, ignoreDailyLimit: false);
+    });
+  }
 
   /// 1. Start the background engine
   Future<void> startEngine() async {
@@ -60,7 +95,8 @@ class PredictionManager extends ChangeNotifier {
     _engineStarting = true;
     try {
       await OnnxPredictionService.initModel();
-      await fetchAndCalculate();
+      // App Boot: Pass isInitialLoad to bypass cooldown AND daily limit
+      await fetchAndCalculate(isInitialLoad: true);
       _scheduleNextHourlyFetch();
       _engineStarted = true;
     } finally {
@@ -68,12 +104,12 @@ class PredictionManager extends ChangeNotifier {
     }
   }
 
-  /// 2. Core calculation logic (with 10-minute cooldown)
-  Future<void> fetchAndCalculate() async {
+  /// 2. Core calculation logic
+  Future<void> fetchAndCalculate({bool isInitialLoad = false}) async {
     if (isCalculating) return;
 
-    // --- Cooldown Check ---
-    if (_lastCalculationTime != null) {
+    // --- Cooldown Check (Bypassed if this is the initial load) ---
+    if (!isInitialLoad && _lastCalculationTime != null) {
       final difference = DateTime.now().difference(_lastCalculationTime!);
       if (difference.inMinutes < 10) {
         debugPrint('⏳ Prediction Engine: Cooldown active. Last updated ${difference.inMinutes} mins ago.');
@@ -102,7 +138,6 @@ class PredictionManager extends ChangeNotifier {
           debugPrint('⚠️ Weather unavailable for ${city.name}. Using FallbackWeather.');
         }
 
-        // Yield after each network call on mobile web to prevent thread starvation
         if (_isMobileWeb) {
           await Future<void>.delayed(const Duration(milliseconds: 20));
         }
@@ -123,7 +158,6 @@ class PredictionManager extends ChangeNotifier {
               targetCategory = Species.amphibians;
             }
 
-            // --- A. Calculate CURRENT prediction for the Map ---
             double currentTemp = weatherBundle?.temperature ?? fallback.temp;
             double currentRain = weatherBundle?.rainfall ?? fallback.rainfall;
             double currentHumid = weatherBundle?.humidity.toDouble() ?? fallback.humidity;
@@ -136,10 +170,8 @@ class PredictionManager extends ChangeNotifier {
 
             latestPredictions[site.id]![speciesId] = currentProb;
 
-            // --- B. Calculate FORECAST predictions (Time-Series) ---
             List<TimeSeriesPrediction> timeSeries = [];
 
-            // Add "Right Now" as the first entry
             timeSeries.add(TimeSeriesPrediction(
               timestamp: DateTime.now().toLocal(),
               probability: currentProb,
@@ -149,8 +181,6 @@ class PredictionManager extends ChangeNotifier {
               iconCode: weatherBundle?.iconCode ?? '01d',
             ));
 
-            // Add the 3-hourly forecasts from OpenWeather
-            // On mobile web, limit to 16 entries (~2 days) to reduce WASM pressure
             if (weatherBundle != null) {
               final forecastEntries = _isMobileWeb
                   ? weatherBundle.forecast.take(16)
@@ -173,7 +203,6 @@ class PredictionManager extends ChangeNotifier {
                   ));
                 }
 
-                // Yield every 2 inferences on mobile web (one full frame ~16ms)
                 if (_isMobileWeb && inferenceCount % 2 == 0) {
                   await Future<void>.delayed(const Duration(milliseconds: 16));
                 }
@@ -182,7 +211,6 @@ class PredictionManager extends ChangeNotifier {
             forecastPredictions[site.id]![speciesId] = timeSeries;
             processedSpecies += 1;
 
-            // Mobile web: yield a full animation frame after every species
             if (_isMobileWeb) {
               await Future<void>.delayed(const Duration(milliseconds: 16));
             } else if (kIsWeb && processedSpecies % 5 == 0) {
@@ -190,7 +218,6 @@ class PredictionManager extends ChangeNotifier {
             }
           }
         }
-        // Between cities: longer pause on mobile web to let GC and rendering catch up
         if (_isMobileWeb) {
           await Future<void>.delayed(const Duration(milliseconds: 50));
         } else if (kIsWeb) {
@@ -201,6 +228,11 @@ class PredictionManager extends ChangeNotifier {
       _lastCalculationTime = DateTime.now();
       debugPrint('✅ Prediction Engine: Time-series updated successfully at $_lastCalculationTime');
 
+      // The Notification block runs at the BOTTOM so it has the freshly downloaded data
+      if (_savedSpeciesProvider != null && !kIsWeb) {
+        await _evaluateAndTriggerDailyAlert(_savedSpeciesProvider!, ignoreDailyLimit: isInitialLoad);
+      }
+
     } finally {
       isCalculating = false;
       notifyListeners();
@@ -209,7 +241,7 @@ class PredictionManager extends ChangeNotifier {
 
   /// Helper method for ONNX Inference
   Future<double?> _runInference(dynamic site, String category, double temp, double rain, double humid, double wind) async {
-    const int mockOcc30d = 3; // Placeholder until occurrence data source is integrated.
+    const int mockOcc30d = 3;
     return await OnnxPredictionService.getPrediction(
       lat: site.lat, lon: site.lng, temperature: temp, rainfall: rain,
       humidity: humid, windSpeed: wind, occ30d: mockOcc30d, animalClass: category,
@@ -221,10 +253,8 @@ class PredictionManager extends ChangeNotifier {
     final rawList = forecastPredictions[siteId]?[speciesId];
     if (rawList == null || rawList.isEmpty) return [];
 
-    // Group by Local Date (YYYY-MM-DD) and keep the highest probability entry for each day
     Map<String, TimeSeriesPrediction> dailyBest = {};
     for (var entry in rawList) {
-      // Ensure we use the local timezone to avoid matching errors across midnight
       final localTime = entry.timestamp.toLocal();
       String dateKey = "${localTime.year}-${localTime.month.toString().padLeft(2, '0')}-${localTime.day.toString().padLeft(2, '0')}";
       if (!dailyBest.containsKey(dateKey) || entry.probability > dailyBest[dateKey]!.probability) {
@@ -235,14 +265,12 @@ class PredictionManager extends ChangeNotifier {
     List<TimeSeriesPrediction> sortedDaily = dailyBest.values.toList()
       ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
-    // Ensure we return exactly 7 days
     List<TimeSeriesPrediction> sevenDayList = [];
     DateTime baseDate = DateTime.now().toLocal();
 
     for (int i = 0; i < 7; i++) {
       DateTime targetDate = baseDate.add(Duration(days: i));
 
-      // Accurately match Year, Month, and Day
       var match = sortedDaily.where((e) {
         final eLocal = e.timestamp.toLocal();
         return eLocal.year == targetDate.year &&
@@ -253,11 +281,10 @@ class PredictionManager extends ChangeNotifier {
       if (match != null) {
         sevenDayList.add(match);
       } else {
-        // If API data runs out (e.g., Day 6 & 7), clone the last available day's environment data
         var lastValid = sevenDayList.isNotEmpty ? sevenDayList.last : sortedDaily.last;
         sevenDayList.add(
             TimeSeriesPrediction(
-              timestamp: targetDate, // Update to the correct future date
+              timestamp: targetDate,
               probability: lastValid.probability,
               temperature: lastValid.temperature,
               humidity: lastValid.humidity,
@@ -277,7 +304,7 @@ class PredictionManager extends ChangeNotifier {
     final nextHour = DateTime(now.year, now.month, now.day, now.hour + 1);
 
     _hourlyTimer = Timer(nextHour.difference(now), () async {
-      await fetchAndCalculate();
+      await fetchAndCalculate(isInitialLoad: false);
       _scheduleNextHourlyFetch();
     });
   }
@@ -285,28 +312,23 @@ class PredictionManager extends ChangeNotifier {
   /// 5. Manual refresh
   Future<void> refreshManually() async {
     debugPrint('👆 Prediction Engine: Manual refresh triggered.');
-    await fetchAndCalculate();
+    await fetchAndCalculate(isInitialLoad: false);
   }
 
   // ------------------------------------------------------------------
-  // On-demand per-species prediction (used on mobile web to avoid
-  // computing ALL species at boot which crashes mobile Safari).
+  // On-demand per-species prediction
   // ------------------------------------------------------------------
 
   final Set<String> _computedSpeciesSites = {};
 
-  /// Computes predictions for a single species across its relevant sites.
-  /// Returns immediately if already computed. Safe to call multiple times.
   Future<void> fetchForSpecies(String speciesId) async {
     final species = speciesById(speciesId);
     if (species == null) return;
 
-    // Find all sites that support this species
     final sites = siteData.where(
-      (s) => s.supportedSpeciesIds.contains(speciesId),
+          (s) => s.supportedSpeciesIds.contains(speciesId),
     );
 
-    // Determine the ONNX animal class
     String targetCategory = species.category;
     if (targetCategory == Species.insects || targetCategory == Species.reptiles) {
       targetCategory = Species.amphibians;
@@ -319,7 +341,6 @@ class PredictionManager extends ChangeNotifier {
       forecastPredictions[site.id] ??= {};
       latestPredictions[site.id] ??= {};
 
-      // Fetch weather for the city (use cache if available from a prior call)
       CityWeatherBundle? weatherBundle;
       final city = kMalaysianCities.where((c) => c.name == site.cityName).firstOrNull;
       if (city != null) {
@@ -343,7 +364,6 @@ class PredictionManager extends ChangeNotifier {
 
       latestPredictions[site.id]![speciesId] = currentProb;
 
-      // Build forecast time-series
       List<TimeSeriesPrediction> timeSeries = [
         TimeSeriesPrediction(
           timestamp: DateTime.now().toLocal(),
@@ -373,7 +393,6 @@ class PredictionManager extends ChangeNotifier {
               iconCode: entry.iconCode,
             ));
           }
-          // Yield every 3 forecast entries on mobile web
           if (_isMobileWeb && fcIdx % 3 == 0) {
             await Future<void>.delayed(const Duration(milliseconds: 8));
           }
@@ -383,12 +402,112 @@ class PredictionManager extends ChangeNotifier {
       forecastPredictions[site.id]![speciesId] = timeSeries;
       _computedSpeciesSites.add(key);
 
-      // Yield a full frame for mobile web between sites
       if (_isMobileWeb) {
         await Future<void>.delayed(const Duration(milliseconds: 16));
       }
     }
 
     notifyListeners();
+  }
+
+  /// The Daily Alert Notification Algorithm (Now with Dynamic Localization)
+  Future<void> _evaluateAndTriggerDailyAlert(SavedSpeciesProvider savedProvider, {bool ignoreDailyLimit = false}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now();
+    final todayStr = "${now.year}-${now.month}-${now.day}";
+    final lastAlertDateStr = prefs.getString('last_daily_alert_date');
+
+    if (!ignoreDailyLimit && lastAlertDateStr == todayStr) {
+      debugPrint('🚫 Daily alert already sent today. Skipping.');
+      return;
+    }
+
+    final savedIds = savedProvider.savedIds;
+    if (savedIds.isEmpty) return;
+
+    Position userLocation;
+    try {
+      userLocation = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.medium,
+          timeLimit: Duration(seconds: 5),
+        ),
+      );
+    } catch (e) {
+      userLocation = Position(
+        latitude: 3.1390, longitude: 101.6869, timestamp: now,
+        accuracy: 0, altitude: 0, altitudeAccuracy: 0, heading: 0, headingAccuracy: 0, speed: 0, speedAccuracy: 0,
+      );
+    }
+
+    List<AlertCandidate> candidates = [];
+    Set<String> animalsMeetingCriteria = {};
+
+    for (final siteId in forecastPredictions.keys) {
+      final site = siteData.firstWhere((s) => s.id == siteId);
+      final distance = Geolocator.distanceBetween(
+        userLocation.latitude, userLocation.longitude, site.lat, site.lng,
+      );
+      final sitePredictions = forecastPredictions[siteId]!;
+
+      for (final speciesId in sitePredictions.keys) {
+        if (!savedIds.contains(speciesId)) continue;
+        if (!savedProvider.isNotified(speciesId)) continue;
+
+        final timeSeries = sitePredictions[speciesId]!;
+        double maxProbToday = 0.0;
+
+        for (final pred in timeSeries) {
+          if (pred.timestamp.day == now.day && pred.timestamp.month == now.month && pred.timestamp.year == now.year) {
+            if (pred.probability > maxProbToday) {
+              maxProbToday = pred.probability;
+            }
+          }
+        }
+
+        if (maxProbToday >= 0.8) {
+          animalsMeetingCriteria.add(speciesId);
+          candidates.add(AlertCandidate(
+            speciesId: speciesId, siteId: siteId,
+            probability: maxProbToday, distanceToUser: distance,
+          ));
+        }
+      }
+    }
+
+    if (candidates.isEmpty) return;
+
+    candidates.sort((a, b) {
+      int probComparison = b.probability.compareTo(a.probability);
+      if (probComparison != 0) return probComparison;
+
+      int distanceComparison = a.distanceToUser.compareTo(b.distanceToUser);
+      if (distanceComparison != 0) return distanceComparison;
+
+      return a.speciesId.compareTo(b.speciesId);
+    });
+
+    final topCandidate = candidates.first;
+
+    const androidDetails = AndroidNotificationDetails(
+      'high_prob_channel', 'High Probability Alerts',
+      importance: Importance.max, priority: Priority.high,
+    );
+
+    // --- LOAD DYNAMIC LANGUAGE FOR NOTIFICATIONS ---
+    // Reads current language selected in LocaleController
+    final localeStr = prefs.getString('app_locale') ?? 'en';
+    final l10n = await AppLocalizations.delegate.load(Locale(localeStr));
+
+    await localNotifs.show(
+      0,
+      l10n.notificationHighProbTitle, // Fully localized title
+      l10n.notificationHighProbBody(animalsMeetingCriteria.length), // Fully localized body with dynamic count
+      const NotificationDetails(android: androidDetails),
+      payload: topCandidate.speciesId,
+    );
+
+    // Update SharedPreferences to log that we fired the alert today
+    await prefs.setString('last_daily_alert_date', todayStr);
   }
 } ///end

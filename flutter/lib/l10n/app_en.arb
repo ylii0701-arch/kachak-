@@ -354,5 +354,13 @@
   "chatSuggestion3": "Best settings for macro photography of insects",
   "chatSuggestion4": "What should I bring for a rainforest shoot?",
   "chatClarifyGear": "Please share your camera and lens so I can tailor the settings.",
-  "chatClarifyAnimal": "Please clarify your target animal first so I can prepare the right checklist."
+  "chatClarifyAnimal": "Please clarify your target animal first so I can prepare the right checklist.",
+
+  "notificationHighProbTitle": "Optimal Conditions Detected!",
+  "notificationHighProbBody": "{count} of your saved animals have >=80% chance of appearing today!",
+  "@notificationHighProbBody": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  }
 }

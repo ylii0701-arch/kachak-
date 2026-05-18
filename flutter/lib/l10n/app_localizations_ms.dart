@@ -1013,4 +1013,12 @@ class AppLocalizationsMs extends AppLocalizations {
   @override
   String get chatClarifyAnimal =>
       'Sila nyatakan haiwan sasaran anda dahulu supaya saya boleh sediakan senarai semak yang betul.';
+
+  @override
+  String get notificationHighProbTitle => 'Keadaan Optimum Dikesan!';
+
+  @override
+  String notificationHighProbBody(int count) {
+    return '$count daripada haiwan tersimpan anda mempunyai >=80% peluang untuk muncul hari ini!';
+  }
 }

@@ -354,5 +354,13 @@
   "chatSuggestion3": "昆虫微距摄影的最佳设置",
   "chatSuggestion4": "热带雨林拍摄应该带什么？",
   "chatClarifyGear": "请分享您的相机和镜头，以便我为您调整设置。",
-  "chatClarifyAnimal": "请先说明您的目标动物，以便我准备合适的清单。"
+  "chatClarifyAnimal": "请先说明您的目标动物，以便我准备合适的清单。",
+
+  "notificationHighProbTitle": "检测到最佳条件！",
+  "notificationHighProbBody": "您收藏的动物中有 {count} 只今天有 >=80% 的出现几率！",
+  "@notificationHighProbBody": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  }
 }

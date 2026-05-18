@@ -1971,6 +1971,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please clarify your target animal first so I can prepare the right checklist.'**
   String get chatClarifyAnimal;
+
+  /// No description provided for @notificationHighProbTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Optimal Conditions Detected!'**
+  String get notificationHighProbTitle;
+
+  /// No description provided for @notificationHighProbBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of your saved animals have >=80% chance of appearing today!'**
+  String notificationHighProbBody(int count);
 }
 
 class _AppLocalizationsDelegate

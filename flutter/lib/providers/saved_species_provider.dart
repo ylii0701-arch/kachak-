@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../main.dart';
+import '../services/prediction_manager.dart'; // NEW: Import PredictionManager
 
 /// Stores favorite species and local alert preferences in SharedPreferences.
 class SavedSpeciesProvider extends ChangeNotifier {
@@ -111,9 +112,12 @@ class SavedSpeciesProvider extends ChangeNotifier {
       }
 
       _notifiedIds.add(speciesId);
+
+      // Trigger the prediction manager to check alerts after 5 seconds
       if (!kIsWeb) {
-        await _scheduleNativeAlert(speciesId);
+        PredictionManager.instance.triggerDelayedAlertCheck();
       }
+
     } else {
       _notifiedIds.remove(speciesId);
       if (!kIsWeb) {
@@ -124,29 +128,5 @@ class SavedSpeciesProvider extends ChangeNotifier {
     notifyListeners();
     await _prefs.setString(_notifKey, jsonEncode(_notifiedIds.toList()));
     return true;
-  }
-
-  /// Native-only: schedules a demo alert via flutter_local_notifications.
-  Future<void> _scheduleNativeAlert(String speciesId) async {
-    Future.delayed(const Duration(seconds: 10), () async {
-      if (_notifiedIds.contains(speciesId)) {
-        const androidDetails = AndroidNotificationDetails(
-          'high_prob_channel',
-          'High Probability Alerts',
-          channelDescription: 'Alerts for optimal photography conditions',
-          importance: Importance.max,
-          priority: Priority.high,
-        );
-        const notifDetails = NotificationDetails(android: androidDetails);
-        await localNotifs.show(
-          speciesId.hashCode,
-          'Optimal Conditions Detected!',
-          'High activity expected tomorrow morning in your area.',
-          notifDetails,
-          payload:
-              'Clear skies tomorrow morning. Best time: 06:00 AM. Location: Selangor, Malaysia',
-        );
-      }
-    });
   }
 }
